@@ -1,0 +1,22 @@
+{
+    "name": "NZ.VisualTest.Runtime",
+    "rootNamespace": "NZ.VisualTest.Runtime",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.Recorder",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.Recorder.Editor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
