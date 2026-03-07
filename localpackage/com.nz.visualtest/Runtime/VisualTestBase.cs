@@ -120,7 +120,11 @@ namespace NZ.VisualTest.Runtime
                 var movieSettings = ScriptableObject.CreateInstance<MovieRecorderSettings>();
                 movieSettings.Enabled = true;
                 movieSettings.OutputFormat = MovieRecorderSettings.VideoRecorderOutputFormat.MP4;
-                movieSettings.ImageInputSettings = new GameViewInputSettings();
+                movieSettings.ImageInputSettings = new GameViewInputSettings
+                {
+                    OutputWidth = 1920,
+                    OutputHeight = 1080
+                };
                 // 测试环境音频系统被禁用，关闭音轨录制避免 "Zero sample rate" 错误
                 movieSettings.AudioInputSettings.PreserveAudio = false;
 

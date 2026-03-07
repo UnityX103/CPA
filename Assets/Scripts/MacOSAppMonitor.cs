@@ -104,7 +104,7 @@ namespace CPA.Monitoring
 
             if (resultCode == AppMonitorResultCode.AccessibilityDenied)
             {
-                throw new PermissionDeniedException(
+                return CreateFallbackAppInfo(
                     "无法获取应用信息：请在系统偏好设置 > 安全性与隐私 > 辅助功能中授予本应用权限。");
             }
 
@@ -179,6 +179,55 @@ namespace CPA.Monitoring
                 AppMonitorResultCode.IconAllocationFailed => "图标内存分配失败",
                 _ => $"未知错误 (错误码: {(int)code})"
             };
+        }
+
+        private static AppInfo CreateFallbackAppInfo(string reason)
+        {
+            string processName = null;
+
+            try
+            {
+                processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            }
+            catch
+            {
+            }
+
+            if (string.IsNullOrWhiteSpace(processName))
+            {
+                processName = Application.isEditor ? "Unity Editor" : Application.productName;
+            }
+
+            return new AppInfo
+            {
+                AppName = processName,
+                WindowTitle = string.Empty,
+                Icon = CreateFallbackIcon(),
+                IsSuccess = true,
+                ErrorCode = AppMonitorResultCode.AccessibilityDenied,
+                ErrorMessage = reason
+            };
+        }
+
+        private static Texture2D CreateFallbackIcon()
+        {
+            const int size = 32;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                name = "FallbackAppIcon"
+            };
+
+            var pixels = new Color[size * size];
+            Color fallbackColor = new Color(0.24f, 0.56f, 0.96f, 1f);
+
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = fallbackColor;
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return texture;
         }
     }
 }
