@@ -1,0 +1,75 @@
+.app-monitor-section {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    border-width: 1px;
+    border-radius: 6px;
+    background-color: var(--app-monitor-surface-bg);
+    border-color: var(--app-monitor-border-color);
+}
+
+.app-icon {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    margin-right: 10px;
+    border-width: 1px;
+    border-radius: 8px;
+    border-color: var(--app-monitor-border-color);
+    background-color: var(--app-monitor-icon-bg);
+    background-repeat: no-repeat;
+    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.app-meta {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.app-name {
+    margin-bottom: 2px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--app-monitor-primary-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.window-title {
+    font-size: 11px;
+    color: var(--app-monitor-secondary-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.unity-theme-light .app-monitor-section {
+    --app-monitor-surface-bg: var(--unity-colors-help-box-background, transparent);
+    --app-monitor-border-color: var(--unity-colors-default-border, transparent);
+    --app-monitor-icon-bg: var(--unity-colors-default-background, transparent);
+    --app-monitor-primary-text-color: var(--unity-colors-default-text, currentColor);
+    --app-monitor-secondary-text-color: var(--unity-colors-default-text, currentColor);
+}
+
+.unity-theme-dark .app-monitor-section {
+    --app-monitor-surface-bg: var(--unity-colors-default-background, transparent);
+    --app-monitor-border-color: var(--unity-colors-default-border, transparent);
+    --app-monitor-icon-bg: var(--unity-colors-help-box-background, transparent);
+    --app-monitor-primary-text-color: var(--unity-colors-default-text, currentColor);
+    --app-monitor-secondary-text-color: var(--unity-colors-default-text, currentColor);
+}
+
+.unity-theme-light .window-title {
+    opacity: 0.72;
+}
+
+.unity-theme-dark .window-title {
+    opacity: 0.8;
+}

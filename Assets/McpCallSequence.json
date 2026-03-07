@@ -1,0 +1,114 @@
+{
+    "description": "AppMonitorTestScene MCP 调用序列 - 配置 MCP 测试场景",
+    "version": "1.0",
+    "scene_name": "AppMonitorTestScene",
+    "uxml_path": "Packages/com.nz.visualtest/Editor/Windows/Components/AppMonitor/AppMonitorSection.uxml",
+    "steps": [
+        {
+            "step": 1,
+            "description": "创建场景",
+            "tool": "manage_scene",
+            "action": "create",
+            "params": {
+                "name": "AppMonitorTestScene",
+                "path": "Assets/Scenes/AppMonitorTestScene.unity"
+            }
+        },
+        {
+            "step": 2,
+            "description": "创建 AppMonitorUI GameObject",
+            "tool": "manage_gameobject",
+            "action": "create",
+            "params": {
+                "name": "AppMonitorUI",
+                "position": [0, 0, 0],
+                "rotation": [0, 0, 0, 1],
+                "scale": [1, 1, 1]
+            }
+        },
+        {
+            "step": 3,
+            "description": "添加 UIDocument 组件",
+            "tool": "manage_components",
+            "action": "add_component",
+            "params": {
+                "target": "AppMonitorUI",
+                "component_type": "UnityEngine.UIElements.UIDocument"
+            }
+        },
+        {
+            "step": 4,
+            "description": "设置 UIDocument 的 UXML 引用",
+            "tool": "manage_components",
+            "action": "set_property",
+            "params": {
+                "target": "AppMonitorUI",
+                "component_type": "UIDocument",
+                "property": "visualTreeAsset",
+                "value": "Packages/com.nz.visualtest/Editor/Windows/Components/AppMonitor/AppMonitorSection.uxml"
+            }
+        },
+        {
+            "step": 5,
+            "description": "配置主相机位置",
+            "tool": "manage_gameobject",
+            "action": "modify",
+            "params": {
+                "target": "Main Camera",
+                "position": [0, 0, -10],
+                "rotation": [0, 0, 0, 1]
+            }
+        },
+        {
+            "step": 6,
+            "description": "设置相机 ClearFlags 为 SolidColor",
+            "tool": "manage_components",
+            "action": "set_property",
+            "params": {
+                "target": "Main Camera",
+                "component_type": "Camera",
+                "property": "clearFlags",
+                "value": 2
+            }
+        },
+        {
+            "step": 7,
+            "description": "设置相机背景色为深灰色",
+            "tool": "manage_components",
+            "action": "set_property",
+            "params": {
+                "target": "Main Camera",
+                "component_type": "Camera",
+                "property": "backgroundColor",
+                "value": [0.15, 0.15, 0.15, 1.0]
+            }
+        },
+        {
+            "step": 8,
+            "description": "创建预制体",
+            "tool": "manage_asset",
+            "action": "create_prefab",
+            "params": {
+                "source": "AppMonitorUI",
+                "path": "Assets/Prefabs/AppMonitorUI.prefab"
+            }
+        },
+        {
+            "step": 9,
+            "description": "保存场景",
+            "tool": "manage_scene",
+            "action": "save"
+        }
+    ],
+    "camera_settings": {
+        "position": [0, 0, -10],
+        "rotation": [0, 0, 0],
+        "clear_flags": "SolidColor",
+        "background_color": [0.15, 0.15, 0.15, 1.0]
+    },
+    "ui_settings": {
+        "root_name": "AppMonitorUI",
+        "uxml_path": "Packages/com.nz.visualtest/Editor/Windows/Components/AppMonitor/AppMonitorSection.uxml",
+        "uss_path": "Packages/com.nz.visualtest/Editor/Windows/Components/AppMonitor/AppMonitorSection.uss"
+    }
+}

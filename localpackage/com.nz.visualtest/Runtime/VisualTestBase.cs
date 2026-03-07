@@ -124,10 +124,9 @@ namespace NZ.VisualTest.Runtime
                 // 测试环境音频系统被禁用，关闭音轨录制避免 "Zero sample rate" 错误
                 movieSettings.AudioInputSettings.PreserveAudio = false;
 
-                // 输出路径：桌面/Unity视频输出/TestName_时间戳
-                string outputDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                    "Unity视频输出");
+                // 输出路径：项目根目录/TestVideo/TestName_时间戳
+                string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                string outputDir = Path.Combine(projectRoot, "TestVideo");
                 Directory.CreateDirectory(outputDir);
 
                 // 设置输出绝对路径
