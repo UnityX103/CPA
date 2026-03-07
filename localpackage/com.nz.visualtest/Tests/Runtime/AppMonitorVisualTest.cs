@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
-using NZ.VisualTest.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;

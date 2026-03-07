@@ -4,6 +4,8 @@
 
 Unity 2022.3+ LTS 项目，包含自定义本地包、可视化测试框架和 MCP 集成。
 
+## 回答语言
+所有的回答内容都需要使用中文
 
 ### 单测试执行
 ```bash
@@ -163,6 +165,7 @@ public class VisualTestExample : VisualTestBase
 ```
 DevTemplate/
 ├── Assets/                    # 主游戏资源（模板中为空）
+├── ├── Scripts                 # 核心代码
 ├── localpackage/             # 自定义包
 │   ├── com.unity.mcp/       # Unity 版 MCP 集成
 │   └── com.nz.visualtest/   # 可视化测试框架
@@ -175,8 +178,6 @@ DevTemplate/
 
 项目包含 MCP for Unity（com.coplaydev.unity-mcp），用于 AI 助手集成：
 
-- 通过 `Window > MCP for Unity` 访问
-- 自动设置配置 Cursor/VSCode/Claude Code
 - 可通过 MCP 工具运行测试：`run_tests`、`get_test_job`
 - 可通过 `get_console_errors` 访问控制台错误
 
