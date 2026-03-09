@@ -1,0 +1,33 @@
+macOS 应用监控功能测试结果
+================================
+
+测试时间：2026-03-07 17:42
+测试方法：直接调用 NSWorkspace API
+
+当前聚焦应用信息：
+------------------
+名称：loginwindow
+Bundle ID：com.apple.loginwindow
+进程 ID：425
+
+功能验证：
+------------------
+✅ 成功获取当前聚焦应用名称
+✅ 成功获取 Bundle ID
+✅ 成功获取进程 ID
+
+技术实现：
+------------------
+- 使用 NSWorkspace.sharedWorkspace
+- 调用 frontmostApplication 属性
+- 获取 localizedName 和 bundleIdentifier
+
+结论：
+------------------
+原生插件功能正常，可以成功获取 macOS 当前聚焦应用的信息。
+
+注意：
+------------------
+- loginwindow 是 macOS 登录窗口进程
+- 如果切换到其他应用（如浏览器、编辑器），将获取到对应应用的信息
+- 获取窗口标题需要 Accessibility 权限

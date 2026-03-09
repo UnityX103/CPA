@@ -2,16 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using CPA.Monitoring;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
+namespace NZ.VisualTest.Runtime
 {
-    public sealed class AppMonitorSection : EditorWindow
+    public sealed class AppMonitorPanel : MonoBehaviour
     {
-        private const string UxmlPath = "Assets/UI/AppMonitorSection.uxml";
-        private const string UssPath = "Assets/UI/AppMonitorSection.uss";
+        [SerializeField] private UIDocument _uiDocument;
+        [SerializeField] private float _refreshInterval = 1f;
 
         private const string DefaultAppName = "未检测到应用";
         private const string DefaultWindowTitle = "等待窗口信息…";
@@ -24,130 +23,79 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
         private Label _windowTitleLabel;
         private Label _statusLabel;
 
-        private IEnumerator _refreshLoop;
+        private Coroutine _refreshCoroutine;
         private readonly IconCache _iconCache = new IconCache();
-        private bool _isGuiInitialized;
-        private bool _isRefreshLoopRunning;
-        private double _nextRefreshTickTime;
 
-        [MenuItem("NZ VisualTest/App Monitor")]
-        public static void ShowWindow()
+        private void Awake()
         {
-            AppMonitorSection window = GetWindow<AppMonitorSection>("App Monitor");
-            window.minSize = new Vector2(320f, 100f);
-        }
-
-        public void CreateGUI()
-        {
-            rootVisualElement.Clear();
-
-            VisualTreeAsset visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UxmlPath);
-            if (visualTree == null)
+            if (_uiDocument == null)
             {
-                Debug.LogError($"[AppMonitorSection] 无法加载 UXML：{UxmlPath}");
-                return;
+                _uiDocument = GetComponent<UIDocument>();
             }
 
-            visualTree.CloneTree(rootVisualElement);
-
-            StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UssPath);
-            if (styleSheet != null)
+            if (_uiDocument == null)
             {
-                if (!rootVisualElement.styleSheets.Contains(styleSheet))
-                {
-                    rootVisualElement.styleSheets.Add(styleSheet);
-                }
+                Debug.LogError("[AppMonitorPanel] UIDocument 组件未找到");
+                enabled = false;
             }
-            else
-            {
-                Debug.LogWarning($"[AppMonitorSection] 无法加载 USS：{UssPath}");
-            }
-
-            _appIconElement = rootVisualElement.Q<VisualElement>("app-icon");
-            _appNameLabel = rootVisualElement.Q<Label>("app-name");
-            _windowTitleLabel = rootVisualElement.Q<Label>("window-title");
-            _statusLabel = rootVisualElement.Q<Label>("status-label") ?? _windowTitleLabel;
-
-            if (_appIconElement == null || _appNameLabel == null || _windowTitleLabel == null || _statusLabel == null)
-            {
-                Debug.LogError("[AppMonitorSection] UXML 缺少必要元素：app-icon / app-name / window-title");
-                return;
-            }
-
-            ShowUnknownState();
-            _isGuiInitialized = true;
-            StartRefreshLoop();
         }
 
         private void OnEnable()
         {
-            if (_isGuiInitialized)
+            if (_uiDocument == null)
             {
-                StartRefreshLoop();
+                return;
             }
+
+            var root = _uiDocument.rootVisualElement;
+            _appIconElement = root.Q<VisualElement>("app-icon");
+            _appNameLabel = root.Q<Label>("app-name");
+            _windowTitleLabel = root.Q<Label>("window-title");
+            _statusLabel = root.Q<Label>("status-label") ?? _windowTitleLabel;
+
+            if (_appIconElement == null || _appNameLabel == null || _windowTitleLabel == null)
+            {
+                Debug.LogError("[AppMonitorPanel] UXML 缺少必要元素：app-icon / app-name / window-title");
+                return;
+            }
+
+            ShowUnknownState();
+            StartRefresh();
         }
 
         private void OnDisable()
         {
-            StopRefreshLoop();
+            StopRefresh();
             _iconCache.Clear();
-            _isGuiInitialized = false;
         }
 
-        private void StartRefreshLoop()
+        private void StartRefresh()
         {
-            if (_isRefreshLoopRunning || !_isGuiInitialized)
+            if (_refreshCoroutine != null)
             {
-                return;
+                StopCoroutine(_refreshCoroutine);
             }
 
-            _isRefreshLoopRunning = true;
-            _refreshLoop = RefreshLoop();
-            _nextRefreshTickTime = 0d;
-            EditorApplication.update += OnEditorUpdate;
+            _refreshCoroutine = StartCoroutine(RefreshLoop());
         }
 
-        private void StopRefreshLoop()
+        private void StopRefresh()
         {
-            if (!_isRefreshLoopRunning)
+            if (_refreshCoroutine != null)
             {
-                return;
+                StopCoroutine(_refreshCoroutine);
+                _refreshCoroutine = null;
             }
-
-            _isRefreshLoopRunning = false;
-            _refreshLoop = null;
-            EditorApplication.update -= OnEditorUpdate;
-        }
-
-        private void OnEditorUpdate()
-        {
-            if (!_isRefreshLoopRunning || _refreshLoop == null)
-            {
-                return;
-            }
-
-            if (EditorApplication.timeSinceStartup < _nextRefreshTickTime)
-            {
-                return;
-            }
-
-            if (!_refreshLoop.MoveNext())
-            {
-                StopRefreshLoop();
-                return;
-            }
-
-            _nextRefreshTickTime = EditorApplication.timeSinceStartup + 1d;
         }
 
         private IEnumerator RefreshLoop()
         {
-            while (_isRefreshLoopRunning)
+            while (true)
             {
                 if (!CanCallNativeMonitor())
                 {
                     ShowUnsupportedState();
-                    yield return new WaitForSeconds(1f);
+                    yield return new WaitForSeconds(_refreshInterval);
                     continue;
                 }
 
@@ -165,13 +113,13 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
                     ShowQueryFailedState(exception.Message);
                 }
 
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(_refreshInterval);
             }
         }
 
         private void UpdateUI(AppInfo info)
         {
-            if (!_isGuiInitialized || info == null)
+            if (info == null)
             {
                 ShowUnknownState();
                 return;
@@ -181,7 +129,7 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
             {
                 if (info.Icon != null)
                 {
-                    UnityEngine.Object.Destroy(info.Icon);
+                    Destroy(info.Icon);
                 }
 
                 ShowQueryFailedState(info.ErrorMessage);
@@ -204,7 +152,7 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
             Texture2D cachedIcon = _iconCache.GetOrAdd(cacheKey, () => incomingIcon);
             if (!ReferenceEquals(cachedIcon, incomingIcon) && incomingIcon != null)
             {
-                UnityEngine.Object.Destroy(incomingIcon);
+                Destroy(incomingIcon);
             }
 
             return cachedIcon;
@@ -227,11 +175,6 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
 
         private void ShowUnknownState()
         {
-            if (!_isGuiInitialized && (_appNameLabel == null || _windowTitleLabel == null || _appIconElement == null))
-            {
-                return;
-            }
-
             _statusLabel?.RemoveFromClassList("error-state");
 
             if (_appNameLabel != null)
@@ -252,11 +195,6 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
 
         private void ShowUnsupportedState()
         {
-            if (!_isGuiInitialized)
-            {
-                return;
-            }
-
             _statusLabel?.RemoveFromClassList("error-state");
 
             if (_appNameLabel != null)
@@ -277,11 +215,6 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
 
         private void ShowPermissionDeniedState()
         {
-            if (!_isGuiInitialized)
-            {
-                return;
-            }
-
             if (_appNameLabel != null)
             {
                 _appNameLabel.text = "权限不足";
@@ -301,11 +234,6 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
 
         private void ShowQueryFailedState(string message)
         {
-            if (!_isGuiInitialized)
-            {
-                return;
-            }
-
             _statusLabel?.AddToClassList("error-state");
 
             if (_appNameLabel != null)
@@ -328,20 +256,6 @@ namespace NZ.VisualTest.Editor.Windows.Components.AppMonitor
         private static bool CanCallNativeMonitor()
         {
             return !Application.isEditor && Application.platform == RuntimePlatform.OSXPlayer;
-        }
-
-        private static string GetVisualTestPackageRootPath()
-        {
-            const string packageRootPath = "Packages/com.nz.visualtest";
-            UnityEditor.PackageManager.PackageInfo packageInfo =
-                UnityEditor.PackageManager.PackageInfo.FindForAssetPath(packageRootPath);
-
-            if (packageInfo != null && !string.IsNullOrWhiteSpace(packageInfo.assetPath))
-            {
-                return packageInfo.assetPath;
-            }
-
-            return packageRootPath;
         }
 
         private sealed class IconCache
