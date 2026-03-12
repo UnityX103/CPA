@@ -2,16 +2,13 @@
 
 ## 项目概述
 
-Unity 2022.3+ LTS 项目，包含自定义本地包、可视化测试框架和 MCP 集成。
+Unity 6  项目，包含自定义本地包、可视化测试框架和 MCP 集成。
 
 ## 回答语言
 所有的回答内容都需要使用中文
 
 ### 单测试执行
 ```bash
-# 按测试名称过滤
-unity -runTests -testPlatform EditMode -testFilter "Namespace.TestClass.TestMethod"
-
 # 通过 MCP：使用 run_tests 工具，testNames 参数为：["Full.Test.Name"]
 ```
 
@@ -118,31 +115,6 @@ namespace MCPForUnity.Editor.Services { }
 namespace NZ.VisualTest.Runtime { }
 ```
 
-### 测试模式
-```csharp
-[TestFixture]
-public class VisualTestExample : VisualTestBase
-{
-    [UnityTest]
-    public IEnumerator Test_RotatingSquare()
-    {
-        // 准备
-        _square = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        
-        // 执行
-        yield return new WaitForSeconds(2f);
-        
-        // 断言
-        LogInputAction("测试完成");
-    }
-    
-    [UnitySetUp]
-    public IEnumerator SetUp() { yield return null; }
-    
-    [UnityTearDown]
-    public IEnumerator TearDown() { yield return null; }
-}
-```
 
 ### 特性（Attributes）
 ```csharp

@@ -1,0 +1,11 @@
+{
+  "MonoBehaviour": {
+    "EnableBurstCompilation": true,
+    "EnableOptimisations": true,
+    "EnableDebugInAllBuilds": false,
+    "UsePlatformSDKLinker": false,
+    "CpuTargetsX64": 0,
+    "CpuTargetsArm64": 512,
+    "Version": 3
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(rm\t*)",
+      "Bash(rmdir *)",
+      "Bash(* rm *)",
+      "Bash(* rm\t*)",
+      "Bash(unlink *)"
+    ]
+  }
+}
