@@ -1,0 +1,202 @@
+/* ═══════════════════════════════════════════════════════════
+   PomodoroPanel.uss  —  番茄钟悬浮面板样式
+   透明背景 + 毛玻璃卡片，贴合 UniWindowController 透明窗口风格
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── CSS 变量（主题色） ── */
+.pomodoro-root {
+    --color-focus-accent:     rgba(255, 95, 87, 0.90);
+    --color-break-accent:     rgba(40, 200, 120, 0.90);
+    --color-completed-accent: rgba(90, 160, 255, 0.90);
+    --color-card-bg:          rgba(20, 20, 30, 0.72);
+    --color-card-border:      rgba(255, 255, 255, 0.12);
+    --color-text-primary:     rgba(255, 255, 255, 0.95);
+    --color-text-secondary:   rgba(255, 255, 255, 0.60);
+    --color-btn-primary-bg:   rgba(255, 95, 87, 0.85);
+    --color-btn-secondary-bg: rgba(255, 255, 255, 0.12);
+    --color-btn-hover-blend:  rgba(255, 255, 255, 0.10);
+}
+
+/* ── 根容器：全屏，内容靠顶排列 ── */
+.pomodoro-root {
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+    justify-content: flex-start;
+    background-color: transparent;
+}
+
+/* ── 主面板卡片 ── */
+.main-panel {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 28px 16px 28px;
+    background-color: var(--color-card-bg);
+    border-width: 1px;
+    border-color: var(--color-card-border);
+    border-radius: 0px;         /* 贴屏边缘无圆角 */
+}
+
+/* ── 阶段文字 ── */
+.label-phase {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    letter-spacing: 3px;
+    -unity-text-align: upper-center;
+}
+
+/* 阶段主题色变化 */
+.phase-focus .label-phase    { color: var(--color-focus-accent); }
+.phase-break .label-phase    { color: var(--color-break-accent); }
+.phase-completed .label-phase { color: var(--color-completed-accent); }
+
+/* ── 计时器大数字 ── */
+.label-timer {
+    font-size: 64px;
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+    -unity-text-align: upper-center;
+}
+
+.phase-focus .label-timer     { color: var(--color-focus-accent); }
+.phase-break .label-timer     { color: var(--color-break-accent); }
+.phase-completed .label-timer { color: var(--color-completed-accent); }
+
+/* ── 轮次 ── */
+.label-round {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    margin-bottom: 14px;
+    -unity-text-align: upper-center;
+}
+
+/* ── 按钮行 ── */
+.button-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+/* ── 通用按钮基类 ── */
+.btn {
+    border-radius: 8px;
+    border-width: 0px;
+    padding: 8px 18px;
+    margin: 0px 4px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    cursor: link;
+    transition-duration: 0.1s;
+    transition-property: background-color;
+}
+
+.btn:hover {
+    background-color: var(--color-btn-hover-blend);
+}
+
+.btn-primary {
+    background-color: var(--color-btn-primary-bg);
+    color: white;
+}
+
+.phase-break     .btn-primary { background-color: var(--color-break-accent); }
+.phase-completed .btn-primary { background-color: var(--color-completed-accent); }
+
+.btn-secondary {
+    background-color: var(--color-btn-secondary-bg);
+    color: var(--color-text-primary);
+}
+
+.btn-icon {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    padding: 8px 12px;
+    font-size: 18px;
+}
+
+/* ── 完成横幅 ── */
+.completion-banner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: rgba(90, 160, 255, 0.20);
+    border-width: 1px;
+    border-color: var(--color-completed-accent);
+}
+
+.completion-text {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--color-completed-accent);
+}
+
+/* ── 设置面板 ── */
+.settings-panel {
+    flex-direction: column;
+    padding: 20px 24px;
+    background-color: var(--color-card-bg);
+    border-top-width: 1px;
+    border-color: var(--color-card-border);
+}
+
+.settings-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+}
+
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.settings-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    flex-grow: 1;
+}
+
+.settings-field {
+    width: 70px;
+    flex-shrink: 0;
+    color: var(--color-text-primary);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: var(--color-card-border);
+}
+
+.settings-toggle {
+    flex-shrink: 0;
+}
+
+.settings-dropdown {
+    width: 120px;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: var(--color-card-border);
+    color: var(--color-text-primary);
+}
+
+.settings-button-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+/* ── 工具类 ── */
+.hidden {
+    display: none;
+}

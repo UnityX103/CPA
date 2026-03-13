@@ -1,0 +1,83 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="PomodoroPanel.uss" />
+
+    <!-- 根容器：全屏锚定，内容贴边 -->
+    <ui:VisualElement name="pomodoro-root" class="pomodoro-root phase-focus">
+
+        <!-- ───────────────── 主面板 ───────────────── -->
+        <ui:VisualElement name="main-panel" class="main-panel">
+
+            <!-- 阶段标签 -->
+            <ui:Label name="label-phase" text="专注" class="label-phase" />
+
+            <!-- 倒计时 -->
+            <ui:Label name="label-timer" text="25:00" class="label-timer" />
+
+            <!-- 轮次 -->
+            <ui:Label name="label-round" text="1 / 4" class="label-round" />
+
+            <!-- 控制按钮行 -->
+            <ui:VisualElement class="button-row">
+                <ui:Button name="btn-start-pause" text="开始" class="btn btn-primary" />
+                <ui:Button name="btn-reset" text="重置" class="btn btn-secondary" />
+                <ui:Button name="btn-settings" text="⚙" class="btn btn-icon" />
+            </ui:VisualElement>
+
+            <!-- 完成横幅（默认隐藏） -->
+            <ui:VisualElement name="completion-banner" class="completion-banner hidden">
+                <ui:Label text="🎉 全部完成！" class="completion-text" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ───────────────── 设置面板（默认隐藏） ───────────────── -->
+        <ui:VisualElement name="settings-panel" class="settings-panel hidden">
+
+            <ui:Label text="番茄钟设置" class="settings-title" />
+
+            <!-- 专注时长 -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="专注时长（分钟）" class="settings-label" />
+                <ui:IntegerField name="field-focus-minutes" value="25" class="settings-field" />
+            </ui:VisualElement>
+
+            <!-- 休息时长 -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="休息时长（分钟）" class="settings-label" />
+                <ui:IntegerField name="field-break-minutes" value="5" class="settings-field" />
+            </ui:VisualElement>
+
+            <!-- 轮次 -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="轮次数" class="settings-label" />
+                <ui:IntegerField name="field-rounds" value="4" class="settings-field" />
+            </ui:VisualElement>
+
+            <!-- 位置 Toggle -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="显示在顶端" class="settings-label" />
+                <ui:Toggle name="toggle-anchor-top" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <!-- 自动跳顶 Toggle -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="完成时跳到顶端提示" class="settings-label" />
+                <ui:Toggle name="toggle-auto-jump" value="true" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <!-- 完成音效 -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="完成音效" class="settings-label" />
+                <ui:DropdownField name="dropdown-sound" class="settings-dropdown" />
+            </ui:VisualElement>
+
+            <!-- 按钮行 -->
+            <ui:VisualElement class="settings-button-row">
+                <ui:Button name="btn-apply-settings" text="应用并重置" class="btn btn-primary" />
+                <ui:Button name="btn-close-settings" text="关闭" class="btn btn-secondary" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
