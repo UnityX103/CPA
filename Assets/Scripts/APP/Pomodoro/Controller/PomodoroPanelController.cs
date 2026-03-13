@@ -109,6 +109,14 @@ namespace APP.Pomodoro.Controller
             this.SendCommand(new Cmd_PomodoroTick(Time.deltaTime));
         }
 
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                this.SendCommand(new Cmd_PomodoroRevertTopmost());
+            }
+        }
+
         // ─── UI 绑定 ─────────────────────────────────────────────
 
         private void BindUI()
@@ -303,7 +311,7 @@ namespace APP.Pomodoro.Controller
 
             if (_model.AutoJumpToTopOnComplete.Value)
             {
-                this.SendCommand(new Cmd_PomodoroSetTopmost(true ));
+                this.SendCommand(new Cmd_PomodoroJumpToScreenTop());
             }
         }
 

@@ -11,6 +11,7 @@ using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 public static class BuildScript
 {
     private const string BuildPath = "Builds/macOS/AppMonitor.app";
+    private const string ProfilerBuildPath = "Builds/macOS/AppMonitor_Profiler.app";
     /// <summary>运行验证等待秒数（等应用写出日志再读取）</summary>
     private const int VerifyRunSeconds = 8;
 
@@ -21,6 +22,13 @@ public static class BuildScript
     public static void BuildRunAndVerifyMacOS()
     {
         DoBuild();
+    }
+
+    /// <summary>构建 Development Build，启用 Profiler 自动连接，用于内存/性能分析</summary>
+    [MenuItem("Build/Build macOS Development (Profiler)")]
+    public static void BuildMacOSDevelopmentProfiler()
+    {
+        DoDevelopmentProfilerBuild();
     }
 
     // ─── 核心构建逻辑 ────────────────────────────────────────────
@@ -65,6 +73,100 @@ public static class BuildScript
         SignApplication(BuildPath);
         VerifyBuild(BuildPath);
         RunAndCaptureLogs(BuildPath);
+    }
+
+    /// <summary>
+    /// 构建 Development Player 并启用 Profiler 自动连接。
+    /// 构建完成后自动启动，Unity Profiler 会自动连接到该进程。
+    /// </summary>
+    private static void DoDevelopmentProfilerBuild()
+    {
+        string[] scenes = GetBuildScenes();
+        if (scenes.Length == 0)
+        {
+            Debug.LogError("[BuildScript] ✗ 没有可用的场景，请在 Build Settings 中至少启用一个场景。");
+            return;
+        }
+
+        Debug.Log("[BuildScript] ════ 开始 Development Build（Profiler）════");
+        foreach (string s in scenes)
+        {
+            Debug.Log($"[BuildScript]   场景: {s}");
+        }
+
+        BuildOptions devOptions =
+            BuildOptions.Development |
+            BuildOptions.ConnectWithProfiler |
+            BuildOptions.AllowDebugging;
+
+        BuildPlayerOptions options = new BuildPlayerOptions
+        {
+            scenes = scenes,
+            locationPathName = ProfilerBuildPath,
+            target = BuildTarget.StandaloneOSX,
+            targetGroup = BuildTargetGroup.Standalone,
+            options = devOptions,
+        };
+
+        BuildReport report = BuildPipeline.BuildPlayer(options);
+        BuildSummary summary = report.summary;
+
+        if (summary.result != BuildResult.Succeeded)
+        {
+            Debug.LogError($"[BuildScript] ✗ Development Build 失败: {summary.result}");
+            Debug.LogError($"[BuildScript]   错误数: {summary.totalErrors}，警告数: {summary.totalWarnings}");
+            return;
+        }
+
+        Debug.Log($"[BuildScript] ✓ Development Build 成功: {summary.totalSize / 1024 / 1024} MB");
+        Debug.Log($"[BuildScript] ✓ 输出路径: {Path.GetFullPath(ProfilerBuildPath)}");
+
+        SignApplication(ProfilerBuildPath);
+        LaunchProfilerBuild(ProfilerBuildPath);
+    }
+
+    /// <summary>启动 Profiler 构建并提示用户连接</summary>
+    private static void LaunchProfilerBuild(string appPath)
+    {
+        string fullAppPath = Path.GetFullPath(appPath);
+        string appName = Path.GetFileNameWithoutExtension(appPath);
+        string executablePath = Path.Combine(fullAppPath, "Contents", "MacOS", appName);
+
+        if (!File.Exists(executablePath))
+        {
+            Debug.LogWarning($"[BuildScript] ⚠ 找不到可执行文件：{executablePath}");
+            return;
+        }
+
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            FileName = executablePath,
+            UseShellExecute = false,
+            CreateNoWindow = false,
+        };
+
+        try
+        {
+            Process proc = Process.Start(startInfo);
+            if (proc == null)
+            {
+                Debug.LogError("[BuildScript] ✗ 无法启动 Development Build。");
+                return;
+            }
+
+            Debug.Log($"[BuildScript] ▶ Development Build 已启动 (PID: {proc.Id})");
+            Debug.Log("[BuildScript] ════ Profiler 使用指南 ════");
+            Debug.Log("[BuildScript] 1. 打开 Window → Analysis → Profiler");
+            Debug.Log("[BuildScript] 2. Profiler 应已自动连接到该进程");
+            Debug.Log("[BuildScript] 3. 切换到 Memory 模块，点击 [Take Sample] 拍摄内存快照");
+            Debug.Log("[BuildScript] 4. 查看 Simple / Detailed 视图中各类资源占用");
+            Debug.Log("[BuildScript] 5. 重点关注：Texture2D、GC Alloc、Native Memory");
+            Debug.Log("[BuildScript] ════════════════════════════");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[BuildScript] ✗ 启动失败: {ex.Message}");
+        }
     }
 
     /// <summary>

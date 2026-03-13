@@ -33,16 +33,16 @@ namespace APP.Pomodoro.System
             }
 
             int safeIndex = Mathf.Clamp(monitorIndex, 0, monitorCount - 1);
+            int previousIndex = model.TargetMonitorIndex.Value;
             model.TargetMonitorIndex.Value = safeIndex;
 
-            if (_uwc == null)
+            // 仅在显示器实际切换时重新定位窗口
+            if (safeIndex == previousIndex || _uwc == null)
             {
-                Debug.LogWarning("[WindowPositionSystem] UniWindowController 未初始化，跳过显示器切换。");
                 return;
             }
 
-            // 切换显示器后，按当前锚点重新定位
-            Debug.Log($"[WindowPositionSystem] MoveToMonitor({safeIndex})");
+            Debug.Log($"[WindowPositionSystem] MoveToMonitor({previousIndex} → {safeIndex})");
             MoveTo(model.WindowAnchor.Value);
         }
 
@@ -97,39 +97,34 @@ namespace APP.Pomodoro.System
         }
 
         /// <summary>
-        /// 仅物理移动窗口到屏幕顶端，不改变 Model 的 WindowAnchor（CSS 布局不变）。
-        /// 用于阶段切换时的提示跳顶。
+        /// 临时置顶窗口（不改变 Model.IsTopmost 偏好）。
+        /// 用于阶段切换时吸引用户注意。
         /// </summary>
         public void JumpToScreenTop()
         {
             if (_uwc == null)
             {
-                Debug.LogWarning("[WindowPositionSystem] UniWindowController 未初始化，跳过物理定位。");
                 return;
             }
 
-            IPomodoroModel model = this.GetModel<IPomodoroModel>();
-            int monitorIndex = model.TargetMonitorIndex.Value;
-            int monitorCount = UniWindowController.GetMonitorCount();
-            if (monitorCount <= 0)
+            _uwc.isTopmost = true;
+            Debug.Log("[WindowPositionSystem] JumpToScreenTop: 临时置顶窗口");
+        }
+
+        /// <summary>
+        /// 将 isTopmost 恢复为 Model 中用户的偏好值。
+        /// 用于用户聚焦窗口后取消临时置顶。
+        /// </summary>
+        public void RevertTopmost()
+        {
+            if (_uwc == null)
             {
                 return;
             }
 
-            int safeIndex = Mathf.Clamp(monitorIndex, 0, monitorCount - 1);
-            Rect monitorRect = UniWindowController.GetMonitorRect(safeIndex);
-            if (monitorRect.width <= 0f || monitorRect.height <= 0f)
-            {
-                return;
-            }
-
-            float x = monitorRect.x;
-            float y = monitorRect.y + _verticalMargin;
-
-            _uwc.windowPosition = new Vector2(x, y);
-            _uwc.windowSize = new Vector2(monitorRect.width, _windowHeight);
-
-            Debug.Log($"[WindowPositionSystem] JumpToScreenTop: position=({x}, {y})");
+            bool preferred = this.GetModel<IPomodoroModel>().IsTopmost.Value;
+            _uwc.isTopmost = preferred;
+            Debug.Log($"[WindowPositionSystem] RevertTopmost: 恢复置顶={preferred}");
         }
     }
 }
