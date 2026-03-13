@@ -106,11 +106,13 @@ namespace APP.Pomodoro.System
 
                 if (round < model.TotalRounds.Value)
                 {
-                    // 休息结束 → 下一轮专注
+                    // 休息结束 → 下一轮专注（暂停，等待手动开始）
                     round++;
                     model.CurrentRound.Value = round;
                     model.CurrentPhase.Value = PomodoroPhase.Focus;
                     model.RemainingSeconds.Value = model.FocusDurationSeconds.Value;
+                    model.IsRunning.Value = false;
+                    _accumulator = 0f;
                     this.SendEvent(new E_PomodoroPhaseChanged(
                         PomodoroPhase.Focus, round, model.TotalRounds.Value));
                 }

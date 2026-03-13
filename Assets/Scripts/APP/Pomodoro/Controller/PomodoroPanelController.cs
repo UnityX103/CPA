@@ -32,6 +32,7 @@ namespace APP.Pomodoro.Controller
         private Button _btnStartPause;
         private Button _btnReset;
         private Button _btnSettings;
+        private Button _btnCloseApp;
 
         // 设置面板元素
         private VisualElement _settingsPanel;
@@ -121,6 +122,7 @@ namespace APP.Pomodoro.Controller
             _btnStartPause = root.Q<Button>("btn-start-pause");
             _btnReset = root.Q<Button>("btn-reset");
             _btnSettings = root.Q<Button>("btn-settings");
+            _btnCloseApp = root.Q<Button>("btn-close-app");
             _completionBanner = root.Q<VisualElement>("completion-banner");
 
             // 设置面板
@@ -143,6 +145,7 @@ namespace APP.Pomodoro.Controller
             _btnStartPause?.RegisterCallback<ClickEvent>(_ => OnStartPauseClicked());
             _btnReset?.RegisterCallback<ClickEvent>(_ => this.SendCommand(new Cmd_PomodoroReset()));
             _btnSettings?.RegisterCallback<ClickEvent>(_ => ToggleSettings());
+            _btnCloseApp?.RegisterCallback<ClickEvent>(_ => OnCloseAppClicked());
 
             // 设置面板按钮事件
             _btnApplySettings?.RegisterCallback<ClickEvent>(_ => OnApplySettings());
@@ -174,6 +177,15 @@ namespace APP.Pomodoro.Controller
             {
                 this.SendCommand(new Cmd_PomodoroStart());
             }
+        }
+
+        private void OnCloseAppClicked()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         private void OnApplySettings()

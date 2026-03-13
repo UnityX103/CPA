@@ -7,6 +7,9 @@
         <!-- ───────────────── 主面板 ───────────────── -->
         <ui:VisualElement name="main-panel" class="main-panel">
 
+            <!-- 关闭按钮 -->
+            <ui:Button name="btn-close-app" text="×" class="btn btn-icon btn-close-app" />
+
             <!-- 阶段标签 -->
             <ui:Label name="label-phase" text="专注" class="label-phase" />
 
