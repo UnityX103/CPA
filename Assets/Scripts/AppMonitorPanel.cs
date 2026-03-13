@@ -28,37 +28,54 @@ namespace NZ.VisualTest.Runtime
 
         private void Awake()
         {
+            Debug.Log("[AppMonitorPanel] Awake 开始");
             if (_uiDocument == null)
             {
                 _uiDocument = GetComponent<UIDocument>();
+                Debug.Log($"[AppMonitorPanel] 自动获取 UIDocument: {(_uiDocument != null ? "成功" : "失败")}");
+            }
+            else
+            {
+                Debug.Log("[AppMonitorPanel] UIDocument 已通过 Inspector 赋值");
             }
 
             if (_uiDocument == null)
             {
-                Debug.LogError("[AppMonitorPanel] UIDocument 组件未找到");
+                Debug.LogError("[AppMonitorPanel] UIDocument 组件未找到，脚本禁用");
                 enabled = false;
+            }
+            else
+            {
+                Debug.Log("[AppMonitorPanel] Awake 完成，UIDocument 就绪");
             }
         }
 
         private void OnEnable()
         {
+            Debug.Log("[AppMonitorPanel] OnEnable 开始");
             if (_uiDocument == null)
             {
+                Debug.LogError("[AppMonitorPanel] OnEnable: UIDocument 为 null，跳过");
                 return;
             }
 
             var root = _uiDocument.rootVisualElement;
+            Debug.Log($"[AppMonitorPanel] rootVisualElement: {(root != null ? "存在" : "为 null")}");
+
             _appIconElement = root.Q<VisualElement>("app-icon");
             _appNameLabel = root.Q<Label>("app-name");
             _windowTitleLabel = root.Q<Label>("window-title");
             _statusLabel = root.Q<Label>("status-label") ?? _windowTitleLabel;
 
+            Debug.Log($"[AppMonitorPanel] UI 元素查找结果: app-icon={(_appIconElement != null ? "√" : "×")}, app-name={(_appNameLabel != null ? "√" : "×")}, window-title={(_windowTitleLabel != null ? "√" : "×")}, status-label={(_statusLabel != null ? "√" : "×")}");
+
             if (_appIconElement == null || _appNameLabel == null || _windowTitleLabel == null)
             {
-                Debug.LogError("[AppMonitorPanel] UXML 缺少必要元素：app-icon / app-name / window-title");
+                Debug.LogError("[AppMonitorPanel] UXML 缺少必要元素：app-icon / app-name / window-title，停止刷新");
                 return;
             }
 
+            Debug.Log("[AppMonitorPanel] 所有 UI 元素就绪，开始刷新循环");
             ShowUnknownState();
             StartRefresh();
         }
@@ -90,10 +107,15 @@ namespace NZ.VisualTest.Runtime
 
         private IEnumerator RefreshLoop()
         {
+            Debug.Log("[AppMonitorPanel] RefreshLoop 开始");
+            int loopCount = 0;
             while (true)
             {
+                loopCount++;
+                Debug.Log($"[AppMonitorPanel] 第 {loopCount} 次刷新, CanCallNativeMonitor={CanCallNativeMonitor()}, platform={Application.platform}, isEditor={Application.isEditor}, IsPermissionGranted={AppMonitor.Instance.IsPermissionGranted}");
                 if (!CanCallNativeMonitor())
                 {
+                    Debug.LogWarning("[AppMonitorPanel] 不支持原生监控，显示不支持状态");
                     ShowUnsupportedState();
                     yield return new WaitForSeconds(_refreshInterval);
                     continue;
@@ -101,15 +123,19 @@ namespace NZ.VisualTest.Runtime
 
                 try
                 {
-                    AppInfo info = MacOSAppMonitor.Instance.GetCurrentApp();
+                    Debug.Log("[AppMonitorPanel] 调用 AppMonitor.Instance.GetCurrentApp()");
+                    AppInfo info = AppMonitor.Instance.GetCurrentApp();
+                    Debug.Log($"[AppMonitorPanel] GetCurrentApp 返回: IsSuccess={info?.IsSuccess}, AppName='{info?.AppName}', ErrorCode={info?.ErrorCode}, ErrorMessage='{info?.ErrorMessage}'");
                     UpdateUI(info);
                 }
-                catch (PermissionDeniedException)
+                catch (PermissionDeniedException ex)
                 {
+                    Debug.LogWarning($"[AppMonitorPanel] PermissionDeniedException: {ex.Message}");
                     ShowPermissionDeniedState();
                 }
                 catch (Exception exception)
                 {
+                    Debug.LogError($"[AppMonitorPanel] 刷新异常: {exception.GetType().Name}: {exception.Message}\n{exception.StackTrace}");
                     ShowQueryFailedState(exception.Message);
                 }
 
@@ -119,6 +145,7 @@ namespace NZ.VisualTest.Runtime
 
         private void UpdateUI(AppInfo info)
         {
+            Debug.Log($"[AppMonitorPanel] UpdateUI: info={(info == null ? "null" : $"IsSuccess={info.IsSuccess}")}");
             if (info == null)
             {
                 ShowUnknownState();
@@ -132,6 +159,7 @@ namespace NZ.VisualTest.Runtime
                     Destroy(info.Icon);
                 }
 
+                Debug.LogWarning($"[AppMonitorPanel] 获取失败: {info.ErrorMessage}");
                 ShowQueryFailedState(info.ErrorMessage);
                 return;
             }
@@ -139,6 +167,7 @@ namespace NZ.VisualTest.Runtime
             _statusLabel.RemoveFromClassList("error-state");
             _appNameLabel.text = string.IsNullOrWhiteSpace(info.AppName) ? DefaultAppName : info.AppName;
             _windowTitleLabel.text = string.IsNullOrWhiteSpace(info.WindowTitle) ? DefaultWindowTitle : info.WindowTitle;
+            Debug.Log($"[AppMonitorPanel] UI 更新: AppName='{_appNameLabel.text}', WindowTitle='{_windowTitleLabel.text}'");
 
             Texture2D iconTexture = ResolveIconWithCache(info);
             _appIconElement.style.backgroundImage = new StyleBackground(iconTexture);

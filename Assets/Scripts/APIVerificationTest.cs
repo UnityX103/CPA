@@ -21,7 +21,7 @@ public class APIVerificationTest : MonoBehaviour
         
         try
         {
-            AppInfo result = MacOSAppMonitor.Instance.GetCurrentApp();
+            AppInfo result = AppMonitor.Instance.GetCurrentApp();
             
             if (result == null)
             {
@@ -77,7 +77,7 @@ public class APIVerificationTest : MonoBehaviour
         
         try
         {
-            Texture2D icon = MacOSAppMonitor.Instance.GetAppIcon();
+            Texture2D icon = AppMonitor.Instance.GetAppIcon();
             
             if (icon == null)
             {

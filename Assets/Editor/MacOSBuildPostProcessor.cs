@@ -56,13 +56,20 @@ public static class MacOSBuildPostProcessor
     
     private static void ConfigureEntitlements(string buildPath, string appName)
     {
-        // 读取项目中的 entitlements 文件
-        string sourceEntitlements = Path.Combine(Application.dataPath, 
-            "Plugins/macOS/AppMonitor.entitlements");
-        
-        if (!File.Exists(sourceEntitlements))
+        // 查找 entitlements：优先从包路径，兼容旧 Assets 路径
+        string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        string[] candidatePaths =
         {
-            Debug.LogWarning($"[MacOSBuildPostProcessor] 未找到 Entitlements 文件: {sourceEntitlements}");
+            Path.Combine(projectRoot, "localpackage/com.nz.appmonitor/Plugins/macOS/AppMonitor.entitlements"),
+            Path.Combine(Application.dataPath, "Plugins/macOS/AppMonitor.entitlements"),
+        };
+
+        string sourceEntitlements = System.Array.Find(candidatePaths, File.Exists);
+
+        if (sourceEntitlements == null)
+        {
+            Debug.LogWarning("[MacOSBuildPostProcessor] 未找到 Entitlements 文件，已搜索路径：\n  "
+                + string.Join("\n  ", candidatePaths));
             return;
         }
         

@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "com.coplaydev.unity-mcp": "file:../localpackage/com.unity.mcp",
+    "com.kirurobo.uniwinc": "https://github.com/kirurobo/UniWindowController.git#upm",
+    "com.nz.appmonitor": "file:../localpackage/com.nz.appmonitor",
     "com.nz.visualtest": "file:../localpackage/com.nz.visualtest",
     "com.unity.ai.navigation": "2.0.11",
     "com.unity.collab-proxy": "2.5.2",
@@ -46,6 +48,7 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "testables": [
-    "com.nz.visualtest"
+    "com.nz.visualtest",
+    "com.nz.appmonitor"
   ]
 }
