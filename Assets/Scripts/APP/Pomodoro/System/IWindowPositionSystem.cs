@@ -16,8 +16,5 @@ namespace APP.Pomodoro.System
 
         /// <summary>更新窗口锚点并物理移动窗口到屏幕顶端或底端</summary>
         void MoveTo(PomodoroWindowAnchor anchor);
-
-        /// <summary>仅物理移动窗口到屏幕顶端（不改变 CSS 锚点）</summary>
-        void JumpToScreenTop();
     }
 }

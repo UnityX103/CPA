@@ -301,10 +301,9 @@ namespace APP.Pomodoro.Controller
                 _completionBanner?.AddToClassList("hidden");
             }
 
-            // 每次阶段切换时物理跳顶（不改变 CSS 布局）
             if (_model.AutoJumpToTopOnComplete.Value)
             {
-                this.SendCommand(new Cmd_PomodoroJumpToScreenTop());
+                this.SendCommand(new Cmd_PomodoroSetTopmost(true ));
             }
         }
 
