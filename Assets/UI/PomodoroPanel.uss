@@ -5,25 +5,30 @@
 
 /* ── CSS 变量（主题色） ── */
 .pomodoro-root {
-    --color-focus-accent:     rgba(255, 95, 87, 0.90);
-    --color-break-accent:     rgba(40, 200, 120, 0.90);
-    --color-completed-accent: rgba(90, 160, 255, 0.90);
-    --color-card-bg:          rgba(20, 20, 30, 0.72);
-    --color-card-border:      rgba(255, 255, 255, 0.12);
-    --color-text-primary:     rgba(255, 255, 255, 0.95);
-    --color-text-secondary:   rgba(255, 255, 255, 0.60);
-    --color-btn-primary-bg:   rgba(255, 95, 87, 0.85);
-    --color-btn-secondary-bg: rgba(255, 255, 255, 0.12);
+    --color-focus-accent:     rgba(255, 95, 87, 0.95);
+    --color-break-accent:     rgba(40, 200, 120, 0.95);
+    --color-completed-accent: rgba(90, 160, 255, 0.95);
+    --color-card-bg:          rgba(18, 18, 28, 0.92);
+    --color-card-border:      rgba(255, 255, 255, 0.18);
+    --color-text-primary:     rgba(255, 255, 255, 0.97);
+    --color-text-secondary:   rgba(255, 255, 255, 0.70);
+    --color-btn-primary-bg:   rgba(255, 95, 87, 0.90);
+    --color-btn-secondary-bg: rgba(255, 255, 255, 0.14);
     --color-btn-hover-blend:  rgba(255, 255, 255, 0.10);
 }
 
-/* ── 根容器：全屏，内容靠顶排列 ── */
+/* ── 根容器：全屏，内容靠顶排列（默认 anchor-top） ── */
 .pomodoro-root {
     width: 100%;
     height: 100%;
     align-items: stretch;
     justify-content: flex-start;
     background-color: transparent;
+}
+
+/* ── 底端吸附：反向列排列，主面板贴底，设置面板展开时在其上方 ── */
+.pomodoro-root.anchor-bottom {
+    flex-direction: column-reverse;
 }
 
 /* ── 主面板卡片 ── */
@@ -45,6 +50,8 @@
     margin-bottom: 4px;
     letter-spacing: 3px;
     -unity-text-align: upper-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.80);
 }
 
 /* 阶段主题色变化 */
@@ -59,6 +66,8 @@
     color: var(--color-text-primary);
     margin-bottom: 4px;
     -unity-text-align: upper-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.85);
 }
 
 .phase-focus .label-timer     { color: var(--color-focus-accent); }
@@ -71,6 +80,8 @@
     color: var(--color-text-secondary);
     margin-bottom: 14px;
     -unity-text-align: upper-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.70);
 }
 
 /* ── 按钮行 ── */
@@ -146,11 +157,19 @@
     border-color: var(--color-card-border);
 }
 
+/* 底端吸附时设置面板在主面板上方，边框贴向主面板（底边） */
+.anchor-bottom .settings-panel {
+    border-top-width: 0px;
+    border-bottom-width: 1px;
+    border-color: var(--color-card-border);
+}
+
 .settings-title {
     font-size: 16px;
     -unity-font-style: bold;
-    color: var(--color-text-primary);
+    color: rgb(255, 255, 255);
     margin-bottom: 16px;
+    -unity-text-outline-width: 0px;
 }
 
 .settings-row {
@@ -162,18 +181,19 @@
 
 .settings-label {
     font-size: 13px;
-    color: var(--color-text-secondary);
+    color: rgb(255, 255, 255);
     flex-grow: 1;
+    -unity-text-outline-width: 0px;
 }
 
 .settings-field {
     width: 70px;
     flex-shrink: 0;
-    color: var(--color-text-primary);
-    background-color: rgba(255, 255, 255, 0.08);
+    color: rgb(0, 0, 0);
+    background-color: rgba(255, 255, 255, 1.0);
     border-radius: 6px;
     border-width: 1px;
-    border-color: var(--color-card-border);
+    border-color: rgba(0, 0, 0, 0.25);
 }
 
 .settings-toggle {
@@ -181,13 +201,13 @@
 }
 
 .settings-dropdown {
-    width: 120px;
+    width: 140px;
     flex-shrink: 0;
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 1.0);
     border-radius: 6px;
     border-width: 1px;
-    border-color: var(--color-card-border);
-    color: var(--color-text-primary);
+    border-color: rgba(0, 0, 0, 0.25);
+    color: rgb(0, 0, 0);
 }
 
 .settings-button-row {

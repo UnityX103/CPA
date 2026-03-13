@@ -55,7 +55,7 @@
 
             <!-- 位置 Toggle -->
             <ui:VisualElement class="settings-row">
-                <ui:Label text="显示在顶端" class="settings-label" />
+                <ui:Label text="吸附到顶端" class="settings-label" />
                 <ui:Toggle name="toggle-anchor-top" class="settings-toggle" />
             </ui:VisualElement>
 
@@ -63,6 +63,12 @@
             <ui:VisualElement class="settings-row">
                 <ui:Label text="完成时跳到顶端提示" class="settings-label" />
                 <ui:Toggle name="toggle-auto-jump" value="true" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <!-- 目标屏幕 -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="目标屏幕" class="settings-label" />
+                <ui:DropdownField name="dropdown-target-monitor" class="settings-dropdown" />
             </ui:VisualElement>
 
             <!-- 完成音效 -->

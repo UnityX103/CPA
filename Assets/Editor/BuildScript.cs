@@ -11,26 +11,21 @@ using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 public static class BuildScript
 {
     private const string BuildPath = "Builds/macOS/AppMonitor.app";
+    /// <summary>运行验证等待秒数（等应用写出日志再读取）</summary>
+    private const int VerifyRunSeconds = 8;
 
     // ─── 菜单项 ──────────────────────────────────────────────────
-
-    /// <summary>构建并签名（原有逻辑，兼容保留）</summary>
-    [MenuItem("Build/Build and Package macOS App")]
-    public static void BuildAndPackageMacOS()
-    {
-        DoBuild(runAfterBuild: false);
-    }
 
     /// <summary>构建、签名，然后启动应用并打印启动日志</summary>
     [MenuItem("Build/Build, Run and Verify macOS App")]
     public static void BuildRunAndVerifyMacOS()
     {
-        DoBuild(runAfterBuild: true);
+        DoBuild();
     }
 
     // ─── 核心构建逻辑 ────────────────────────────────────────────
 
-    private static void DoBuild(bool runAfterBuild)
+    private static void DoBuild()
     {
         string[] scenes = GetBuildScenes();
         if (scenes.Length == 0)
@@ -57,25 +52,19 @@ public static class BuildScript
         BuildReport report = BuildPipeline.BuildPlayer(options);
         BuildSummary summary = report.summary;
 
-        if (summary.result == BuildResult.Succeeded)
-        {
-            Debug.Log($"[BuildScript] ✓ 构建成功: {summary.totalSize / 1024 / 1024} MB");
-            Debug.Log($"[BuildScript] ✓ 输出路径: {summary.outputPath}");
-
-            SignApplication(BuildPath);
-            VerifyBuild(BuildPath);
-
-            if (runAfterBuild)
-            {
-                RunAndCaptureLogs(BuildPath);
-            }
-        }
-        else
+        if (summary.result != BuildResult.Succeeded)
         {
             Debug.LogError($"[BuildScript] ✗ 构建失败: {summary.result}");
             Debug.LogError($"[BuildScript]   错误数: {summary.totalErrors}，警告数: {summary.totalWarnings}");
-            EditorApplication.Exit(1);
+            return; // 不退出编辑器，仅记录错误
         }
+
+        Debug.Log($"[BuildScript] ✓ 构建成功: {summary.totalSize / 1024 / 1024} MB");
+        Debug.Log($"[BuildScript] ✓ 输出路径: {summary.outputPath}");
+
+        SignApplication(BuildPath);
+        VerifyBuild(BuildPath);
+        RunAndCaptureLogs(BuildPath);
     }
 
     /// <summary>
@@ -123,14 +112,13 @@ public static class BuildScript
             return;
         }
 
-        // 将日志写到临时文件方便读取
         string logFile = Path.Combine(Path.GetTempPath(), "CPA_launch_verify.log");
-        if (!string.IsNullOrEmpty(logFile) && File.Exists(logFile))
+        if (File.Exists(logFile))
         {
             File.Delete(logFile);
         }
 
-        Debug.Log($"[BuildScript] ▶ 启动应用（验证模式，{VerifyRunSeconds} 秒后自动终止）...");
+        Debug.Log($"[BuildScript] ▶ 启动应用（{VerifyRunSeconds} 秒后读取启动日志）...");
 
         // 桌面宠物需要图形渲染，不加 -batchmode；通过 -logFile 指定日志路径
         ProcessStartInfo startInfo = new ProcessStartInfo
@@ -141,10 +129,9 @@ public static class BuildScript
             CreateNoWindow = false,
         };
 
-        Process proc = null;
         try
         {
-            proc = Process.Start(startInfo);
+            Process proc = Process.Start(startInfo);
             if (proc == null)
             {
                 Debug.LogError("[BuildScript] ✗ 无法启动应用进程。");
@@ -153,23 +140,16 @@ public static class BuildScript
 
             Debug.Log($"[BuildScript]   PID: {proc.Id}，日志: {logFile}");
 
-            // 等待应用启动并稳定（阻塞编辑器主线程，仅用于验证场景）
+            // 等待应用启动并稳定（会短暂阻塞编辑器 UI，属预期行为）
             Thread.Sleep(VerifyRunSeconds * 1000);
 
             PrintPlayerLog(logFile);
+
+            Debug.Log("[BuildScript] ✓ 应用已启动，保持运行中。");
         }
         catch (System.Exception ex)
         {
             Debug.LogError($"[BuildScript] ✗ 启动失败: {ex.Message}");
-        }
-        finally
-        {
-            if (proc != null && !proc.HasExited)
-            {
-                proc.Kill();
-                Debug.Log("[BuildScript] ■ 验证进程已终止。");
-            }
-            proc?.Dispose();
         }
     }
 
@@ -219,7 +199,6 @@ public static class BuildScript
             Debug.Log($"[BuildScript]   … 共 {lines.Length} 行，已截取前 80 行。完整日志：{logFile}");
         }
 
-        // 关键词检查
         bool hasException = content.Contains("Exception") || content.Contains("EXCEPTION");
         bool hasInitialized = content.Contains("Initialize") || content.Contains("initialized");
 
@@ -232,40 +211,38 @@ public static class BuildScript
             : "[BuildScript] ⚠ 未检测到初始化日志，应用可能未正常启动。");
     }
 
-    // 运行验证等待秒数
-    private const int VerifyRunSeconds = 5;
-    
-    
+    // ─── 签名与验证（保持不变）────────────────────────────────────
+
     private static void SignApplication(string appPath)
     {
         Debug.Log("[BuildScript] 开始签名应用...");
-        
+
         string fullPath = Path.GetFullPath(appPath);
         string appName = Path.GetFileNameWithoutExtension(appPath);
         string entitlementsPath = Path.Combine(fullPath, "Contents", $"{appName}.entitlements");
-        
+
         if (!File.Exists(entitlementsPath))
         {
             Debug.LogError($"[BuildScript] ✗ 未找到 Entitlements 文件: {entitlementsPath}");
             return;
         }
-        
+
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
-            FileName = "codesign",
+            FileName = "/usr/bin/codesign",
             Arguments = $"--force --deep --sign - --entitlements \"{entitlementsPath}\" \"{fullPath}\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
         };
-        
+
         using (Process process = Process.Start(startInfo))
         {
             string output = process.StandardOutput.ReadToEnd();
             string error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            
+
             if (process.ExitCode == 0)
             {
                 Debug.Log("[BuildScript] ✓ 应用签名成功");
@@ -284,23 +261,23 @@ public static class BuildScript
             }
         }
     }
-    
+
     private static void VerifyBuild(string appPath)
     {
         Debug.Log("[BuildScript] 验证构建...");
-        
+
         string fullPath = Path.GetFullPath(appPath);
-        
+
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
-            FileName = "codesign",
+            FileName = "/usr/bin/codesign",
             Arguments = $"-dv --entitlements - \"{fullPath}\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
         };
-        
+
         using (Process process = Process.Start(startInfo))
         {
             string output = process.StandardOutput.ReadToEnd();
@@ -313,7 +290,6 @@ public static class BuildScript
             if (process.ExitCode == 0)
             {
                 Debug.Log("[BuildScript] ✓ 签名验证成功");
-
                 if (combined.Contains("com.apple.security.automation.apple-events"))
                 {
                     Debug.Log("[BuildScript] ✓ Apple Events 权限已配置");
@@ -346,7 +322,7 @@ public static class BuildScript
                 Debug.Log("[BuildScript] ✓ Apple Events 权限描述已配置");
             }
         }
-        
+
         Debug.Log("[BuildScript] ========================================");
         Debug.Log("[BuildScript] 构建完成！应用已准备好发布。");
         Debug.Log($"[BuildScript] 输出路径: {fullPath}");

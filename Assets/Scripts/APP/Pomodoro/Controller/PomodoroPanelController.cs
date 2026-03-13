@@ -41,6 +41,7 @@ namespace APP.Pomodoro.Controller
         private Toggle _toggleAutoJump;
         private Toggle _toggleAnchorTop;
         private DropdownField _dropdownSound;
+        private DropdownField _dropdownTargetMonitor;
         private Button _btnApplySettings;
         private Button _btnCloseSettings;
 
@@ -63,7 +64,7 @@ namespace APP.Pomodoro.Controller
 
             if (_uwc == null)
             {
-                _uwc = FindObjectOfType<UniWindowController>();
+                _uwc = FindAnyObjectByType<UniWindowController>();
             }
         }
 
@@ -96,6 +97,10 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.IsRunning.RegisterWithInitValue(OnIsRunningChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            // 锚点变化 → 更新 CSS class（全屏透明窗口通过样式决定卡片位置）
+            _model.WindowAnchor.RegisterWithInitValue(OnWindowAnchorChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         private void Update()
@@ -126,6 +131,7 @@ namespace APP.Pomodoro.Controller
             _toggleAutoJump = root.Q<Toggle>("toggle-auto-jump");
             _toggleAnchorTop = root.Q<Toggle>("toggle-anchor-top");
             _dropdownSound = root.Q<DropdownField>("dropdown-sound");
+            _dropdownTargetMonitor = root.Q<DropdownField>("dropdown-target-monitor");
             _btnApplySettings = root.Q<Button>("btn-apply-settings");
             _btnCloseSettings = root.Q<Button>("btn-close-settings");
 
@@ -142,17 +148,15 @@ namespace APP.Pomodoro.Controller
             _btnApplySettings?.RegisterCallback<ClickEvent>(_ => OnApplySettings());
             _btnCloseSettings?.RegisterCallback<ClickEvent>(_ => ToggleSettings());
 
-            // 锚点 Toggle
+            // 置顶 Toggle
             _toggleAnchorTop?.RegisterCallback<ChangeEvent<bool>>(evt =>
             {
-                PomodoroWindowAnchor anchor = evt.newValue
-                    ? PomodoroWindowAnchor.Top
-                    : PomodoroWindowAnchor.Bottom;
-                this.SendCommand(new Cmd_PomodoroSetWindowAnchor(anchor));
+                this.SendCommand(new Cmd_PomodoroSetTopmost(evt.newValue));
             });
 
-            // 填充音效下拉列表
+            // 填充下拉列表
             RefreshSoundDropdown();
+            RefreshMonitorDropdown();
 
             // 初始化设置面板字段的当前值
             SyncSettingsFieldsFromModel();
@@ -178,9 +182,10 @@ namespace APP.Pomodoro.Controller
             int breakMin = _fieldBreakMinutes?.value ?? _config?.DefaultBreakMinutes ?? 5;
             int rounds = _fieldRounds?.value ?? _config?.DefaultRounds ?? 4;
             bool autoJump = _toggleAutoJump?.value ?? true;
+            int monitorIndex = GetSelectedMonitorIndex();
 
-            // AutoJumpToTopOnComplete 和 CompletionClipIndex 通过 Command 修改 Model
             this.SendCommand(new Cmd_PomodoroApplyMetaSettings(autoJump, GetSoundIndex()));
+            this.SendCommand(new Cmd_PomodoroSetMonitor(monitorIndex));
             this.SendCommand(new Cmd_PomodoroApplySettings(focusMin, breakMin, rounds, resetProgress: true));
             ToggleSettings();
         }
@@ -255,6 +260,25 @@ namespace APP.Pomodoro.Controller
             }
         }
 
+        private void OnWindowAnchorChanged(PomodoroWindowAnchor anchor)
+        {
+            VisualElement root = _uiDocument?.rootVisualElement;
+            if (root == null)
+            {
+                return;
+            }
+
+            // 全屏透明窗口下通过 CSS class 控制卡片吸附位置
+            if (anchor == PomodoroWindowAnchor.Bottom)
+            {
+                root.AddToClassList("anchor-bottom");
+            }
+            else
+            {
+                root.RemoveFromClassList("anchor-bottom");
+            }
+        }
+
         // ─── 事件回调 ────────────────────────────────────────────
 
         private void OnPhaseChanged(E_PomodoroPhaseChanged evt)
@@ -310,6 +334,18 @@ namespace APP.Pomodoro.Controller
             return Mathf.Clamp(_dropdownSound.index, 0, _config.CompletionClips.Count - 1);
         }
 
+        private int GetSelectedMonitorIndex()
+        {
+            if (_dropdownTargetMonitor == null ||
+                _dropdownTargetMonitor.choices == null ||
+                _dropdownTargetMonitor.choices.Count == 0)
+            {
+                return _model?.TargetMonitorIndex.Value ?? 0;
+            }
+
+            return Mathf.Clamp(_dropdownTargetMonitor.index, 0, _dropdownTargetMonitor.choices.Count - 1);
+        }
+
         private void RefreshSoundDropdown()
         {
             if (_dropdownSound == null || _config?.CompletionClips == null)
@@ -332,6 +368,28 @@ namespace APP.Pomodoro.Controller
             _dropdownSound.choices = choices;
             _dropdownSound.index = Mathf.Clamp(
                 _model?.CompletionClipIndex.Value ?? 0, 0, choices.Count - 1);
+        }
+
+        private void RefreshMonitorDropdown()
+        {
+            if (_dropdownTargetMonitor == null)
+            {
+                return;
+            }
+
+            int monitorCount = Mathf.Max(1, UniWindowController.GetMonitorCount());
+            var choices = new List<string>(monitorCount);
+            for (int i = 0; i < monitorCount; i++)
+            {
+                Rect rect = UniWindowController.GetMonitorRect(i);
+                int w = Mathf.RoundToInt(rect.width);
+                int h = Mathf.RoundToInt(rect.height);
+                choices.Add(w > 0 && h > 0 ? $"屏幕 {i + 1}  ({w}×{h})" : $"屏幕 {i + 1}");
+            }
+
+            _dropdownTargetMonitor.choices = choices;
+            int savedIndex = _model?.TargetMonitorIndex.Value ?? 0;
+            _dropdownTargetMonitor.index = Mathf.Clamp(savedIndex, 0, choices.Count - 1);
         }
 
         private void SyncSettingsFieldsFromModel()
@@ -359,7 +417,17 @@ namespace APP.Pomodoro.Controller
             }
             if (_toggleAnchorTop != null)
             {
-                _toggleAnchorTop.SetValueWithoutNotify(_model.WindowAnchor.Value == PomodoroWindowAnchor.Top);
+                _toggleAnchorTop.SetValueWithoutNotify(_model.IsTopmost.Value);
+            }
+            if (_dropdownTargetMonitor != null)
+            {
+                int safeIndex = Mathf.Clamp(
+                    _model.TargetMonitorIndex.Value, 0,
+                    Mathf.Max(0, _dropdownTargetMonitor.choices.Count - 1));
+                _dropdownTargetMonitor.SetValueWithoutNotify(
+                    _dropdownTargetMonitor.choices.Count > 0
+                        ? _dropdownTargetMonitor.choices[safeIndex]
+                        : string.Empty);
             }
         }
     }

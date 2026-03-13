@@ -1,4 +1,5 @@
 using APP.Pomodoro.Model;
+using Kirurobo;
 using QFramework;
 using UnityEngine;
 
@@ -6,50 +7,63 @@ namespace APP.Pomodoro.System
 {
     public sealed class WindowPositionSystem : AbstractSystem, IWindowPositionSystem
     {
-        private Kirurobo.UniWindowController _uwc;
-        private float _windowHeight;
-        private float _verticalMargin;
+        private UniWindowController _uwc;
 
         protected override void OnInit() { }
 
-        public void Initialize(Kirurobo.UniWindowController uwc, float windowHeight, float verticalMargin)
+        public void Initialize(UniWindowController uwc, float windowHeight, float verticalMargin)
         {
             _uwc = uwc;
-            _windowHeight = windowHeight;
-            _verticalMargin = verticalMargin;
         }
 
-        public void MoveTo(PomodoroWindowAnchor anchor)
+        public void MoveToMonitor(int monitorIndex)
         {
-            if (_uwc == null)
+            IPomodoroModel model = this.GetModel<IPomodoroModel>();
+            int monitorCount = UniWindowController.GetMonitorCount();
+
+            if (monitorCount <= 0)
             {
-                Debug.LogWarning("[WindowPositionSystem] UniWindowController 未初始化，跳过位置设置。");
+                model.TargetMonitorIndex.Value = 0;
                 return;
             }
 
-            // 获取主显示器分辨率（逻辑像素）
-            int screenHeight = Screen.currentResolution.height;
-            int screenWidth = Screen.currentResolution.width;
+            int safeIndex = Mathf.Clamp(monitorIndex, 0, monitorCount - 1);
+            model.TargetMonitorIndex.Value = safeIndex;
 
-            // 保持窗口水平居中（X 不变，或按需调整）
-            float posX = _uwc.windowPosition.x;
-
-            float posY;
-            if (anchor == PomodoroWindowAnchor.Top)
+            if (_uwc == null)
             {
-                // macOS 坐标原点在左下角，Y 向上增大
-                // 顶端：屏幕高度 - 窗口高度 - 边距
-                posY = screenHeight - _windowHeight - _verticalMargin;
-            }
-            else
-            {
-                // 底端：仅留边距
-                posY = _verticalMargin;
+                Debug.LogWarning("[WindowPositionSystem] UniWindowController 未初始化，跳过显示器切换。");
+                return;
             }
 
-            _uwc.windowPosition = new Vector2(posX, posY);
+            Rect monitorRect = UniWindowController.GetMonitorRect(safeIndex);
+            if (monitorRect.width <= 0f || monitorRect.height <= 0f)
+            {
+                Debug.LogWarning($"[WindowPositionSystem] 无法获取显示器 {safeIndex} 的有效区域。");
+                return;
+            }
 
-            // 同步 Model
+            _uwc.windowPosition = monitorRect.position;
+            _uwc.windowSize = monitorRect.size;
+        }
+
+        public void SetTopmost(bool isTopmost)
+        {
+            IPomodoroModel model = this.GetModel<IPomodoroModel>();
+            model.IsTopmost.Value = isTopmost;
+
+            if (_uwc != null)
+            {
+                _uwc.isTopmost = isTopmost;
+            }
+        }
+
+        /// <summary>
+        /// 全屏透明窗口下不再物理移动窗口，仅更新 Model。
+        /// 卡片顶/底吸附由 USS class "anchor-bottom" 控制。
+        /// </summary>
+        public void MoveTo(PomodoroWindowAnchor anchor)
+        {
             IPomodoroModel model = this.GetModel<IPomodoroModel>();
             model.WindowAnchor.Value = anchor;
         }

@@ -24,6 +24,12 @@ namespace APP.Pomodoro.Command
 
         protected override void OnExecute()
         {
+            // 初始化窗口定位系统（不依赖 config）
+            IWindowPositionSystem wps = this.GetSystem<IWindowPositionSystem>();
+            float windowHeight = _config?.FixedWindowHeight ?? 120f;
+            float verticalMargin = _config?.VerticalMargin ?? 4f;
+            wps.Initialize(_uwc, windowHeight, verticalMargin);
+
             if (_config == null)
             {
                 Debug.LogWarning("[PomodoroInitialize] PomodoroConfig 未赋值，使用 Model 默认值。");
@@ -39,12 +45,9 @@ namespace APP.Pomodoro.Command
             model.WindowAnchor.Value = _config.DefaultWindowAnchor;
             model.AutoJumpToTopOnComplete.Value = _config.DefaultAutoJumpToTopOnComplete;
             model.CompletionClipIndex.Value = _config.DefaultCompletionClipIndex;
+            model.TargetMonitorIndex.Value = 0;
 
-            // 初始化窗口定位系统
-            IWindowPositionSystem wps = this.GetSystem<IWindowPositionSystem>();
-            wps.Initialize(_uwc, _config.FixedWindowHeight, _config.VerticalMargin);
-
-            // 应用初始窗口位置
+            // 应用初始锚点（更新 Model，CSS class 由 Controller 响应）
             wps.MoveTo(_config.DefaultWindowAnchor);
         }
     }

@@ -12,9 +12,11 @@ namespace APP.Pomodoro.Model
         public BindableProperty<PomodoroPhase> CurrentPhase { get; } =
             new BindableProperty<PomodoroPhase>(PomodoroPhase.Focus);
         public BindableProperty<bool> IsRunning { get; } = new BindableProperty<bool>(false);
+        public BindableProperty<bool> IsTopmost { get; } = new BindableProperty<bool>(false);
         public BindableProperty<PomodoroWindowAnchor> WindowAnchor { get; } =
             new BindableProperty<PomodoroWindowAnchor>(PomodoroWindowAnchor.Bottom);
         public BindableProperty<bool> AutoJumpToTopOnComplete { get; } = new BindableProperty<bool>(true);
+        public BindableProperty<int> TargetMonitorIndex { get; } = new BindableProperty<int>(0);
         public BindableProperty<int> CompletionClipIndex { get; } = new BindableProperty<int>(0);
 
         protected override void OnInit()

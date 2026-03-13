@@ -25,11 +25,17 @@ namespace APP.Pomodoro.Model
         /// <summary>是否正在计时</summary>
         BindableProperty<bool> IsRunning { get; }
 
+        /// <summary>窗口是否置顶（isTopmost）</summary>
+        BindableProperty<bool> IsTopmost { get; }
+
         /// <summary>窗口吸附位置</summary>
         BindableProperty<PomodoroWindowAnchor> WindowAnchor { get; }
 
         /// <summary>在底端计时完成后是否自动跳到顶端提示</summary>
         BindableProperty<bool> AutoJumpToTopOnComplete { get; }
+
+        /// <summary>目标显示器索引（0-based）</summary>
+        BindableProperty<int> TargetMonitorIndex { get; }
 
         /// <summary>选中的完成音效索引</summary>
         BindableProperty<int> CompletionClipIndex { get; }
