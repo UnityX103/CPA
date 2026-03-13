@@ -64,7 +64,7 @@
 
             <!-- 自动跳顶 Toggle -->
             <ui:VisualElement class="settings-row">
-                <ui:Label text="完成时跳到顶端提示" class="settings-label" />
+                <ui:Label text="阶段切换时跳到顶端" class="settings-label" />
                 <ui:Toggle name="toggle-auto-jump" value="true" class="settings-toggle" />
             </ui:VisualElement>
 

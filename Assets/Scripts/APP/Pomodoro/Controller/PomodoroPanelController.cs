@@ -300,6 +300,12 @@ namespace APP.Pomodoro.Controller
             {
                 _completionBanner?.AddToClassList("hidden");
             }
+
+            // 每次阶段切换时物理跳顶（不改变 CSS 布局）
+            if (_model.AutoJumpToTopOnComplete.Value)
+            {
+                this.SendCommand(new Cmd_PomodoroJumpToScreenTop());
+            }
         }
 
         private void OnCycleCompleted(E_PomodoroCycleCompleted evt)
@@ -309,13 +315,6 @@ namespace APP.Pomodoro.Controller
 
             // 播放音效
             PlayCompletionSound();
-
-            // 自动跳顶
-            if (_model.AutoJumpToTopOnComplete.Value &&
-                _model.WindowAnchor.Value == PomodoroWindowAnchor.Bottom)
-            {
-                this.SendCommand(new Cmd_PomodoroSetWindowAnchor(PomodoroWindowAnchor.Top));
-            }
         }
 
         // ─── 辅助 ────────────────────────────────────────────────

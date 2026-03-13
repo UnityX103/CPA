@@ -14,7 +14,10 @@ namespace APP.Pomodoro.System
         /// <summary>设置窗口置顶状态</summary>
         void SetTopmost(bool isTopmost);
 
-        /// <summary>更新窗口锚点（全屏透明窗口下由 USS class 决定卡片位置，不物理移动窗口）</summary>
+        /// <summary>更新窗口锚点并物理移动窗口到屏幕顶端或底端</summary>
         void MoveTo(PomodoroWindowAnchor anchor);
+
+        /// <summary>仅物理移动窗口到屏幕顶端（不改变 CSS 锚点）</summary>
+        void JumpToScreenTop();
     }
 }

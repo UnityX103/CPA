@@ -848,11 +848,13 @@ PlayerSettings:
   additionalCompilerArguments: {}
   platformArchitecture:
     Standalone: 1
-  scriptingBackend: {}
+  scriptingBackend:
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   il2cppStacktraceInformation: {}
   managedStrippingLevel:
+    Standalone: 3
     EmbeddedLinux: 1
     GameCoreScarlett: 1
     GameCoreXboxOne: 1

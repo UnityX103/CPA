@@ -1,0 +1,9 @@
+<linker>
+  <!-- QFramework 核心（反射注册 Model/System/Utility） -->
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="QFramework.*" preserve="all" />
+    <type fullname="APP.Pomodoro.GameApp" preserve="all" />
+    <type fullname="APP.Pomodoro.Model.*" preserve="all" />
+    <type fullname="APP.Pomodoro.System.*" preserve="all" />
+  </assembly>
+</linker>
