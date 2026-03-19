@@ -7,9 +7,6 @@
         <!-- ───────────────── 主面板 ───────────────── -->
         <ui:VisualElement name="main-panel" class="main-panel">
 
-            <!-- 关闭按钮 -->
-            <ui:Button name="btn-close-app" text="×" class="btn btn-icon btn-close-app" />
-
             <!-- 阶段标签 -->
             <ui:Label name="label-phase" text="专注" class="label-phase" />
 
@@ -23,13 +20,34 @@
             <ui:VisualElement class="button-row">
                 <ui:Button name="btn-start-pause" text="开始" class="btn btn-primary" />
                 <ui:Button name="btn-reset" text="重置" class="btn btn-secondary" />
-                <ui:Button name="btn-settings" text="⚙" class="btn btn-icon" />
+                <ui:Button name="btn-settings" text="" class="btn btn-icon btn-settings">
+                    <ui:VisualElement class="settings-icon" picking-mode="Ignore">
+                        <ui:VisualElement class="settings-icon-row">
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r1-left" />
+                            <ui:VisualElement class="settings-icon-dot" />
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r1-right" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-icon-row">
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r2-left" />
+                            <ui:VisualElement class="settings-icon-dot" />
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r2-right" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-icon-row">
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r3-left" />
+                            <ui:VisualElement class="settings-icon-dot" />
+                            <ui:VisualElement class="settings-icon-seg settings-icon-r3-right" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
             </ui:VisualElement>
 
             <!-- 完成横幅（默认隐藏） -->
             <ui:VisualElement name="completion-banner" class="completion-banner hidden">
                 <ui:Label text="🎉 全部完成！" class="completion-text" />
             </ui:VisualElement>
+
+            <!-- 关闭按钮（右下角） -->
+            <ui:Button name="btn-close-app" text="×" class="btn btn-icon btn-close-app" />
 
         </ui:VisualElement>
 

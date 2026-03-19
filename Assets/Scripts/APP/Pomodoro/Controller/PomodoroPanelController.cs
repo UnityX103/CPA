@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Config;
@@ -79,6 +80,7 @@ namespace APP.Pomodoro.Controller
 
             // 3. 绑定 Model 缓存
             _model = this.GetModel<IPomodoroModel>();
+            RegisterPersistenceCallbacks();
 
             // 4. 绑定 UI
             BindUI();
@@ -95,6 +97,8 @@ namespace APP.Pomodoro.Controller
             _model.CurrentPhase.RegisterWithInitValue(OnCurrentPhaseChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.CurrentRound.RegisterWithInitValue(OnCurrentRoundChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.TotalRounds.RegisterWithInitValue(OnTotalRoundsChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.IsRunning.RegisterWithInitValue(OnIsRunningChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -115,6 +119,19 @@ namespace APP.Pomodoro.Controller
             {
                 this.SendCommand(new Cmd_PomodoroRevertTopmost());
             }
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                SavePersistentState(true);
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            SavePersistentState(true);
         }
 
         // ─── UI 绑定 ─────────────────────────────────────────────
@@ -150,14 +167,14 @@ namespace APP.Pomodoro.Controller
             _completionBanner?.AddToClassList("hidden");
 
             // 主面板按钮事件
-            _btnStartPause?.RegisterCallback<ClickEvent>(_ => OnStartPauseClicked());
-            _btnReset?.RegisterCallback<ClickEvent>(_ => this.SendCommand(new Cmd_PomodoroReset()));
-            _btnSettings?.RegisterCallback<ClickEvent>(_ => ToggleSettings());
-            _btnCloseApp?.RegisterCallback<ClickEvent>(_ => OnCloseAppClicked());
+            RegisterButtonOnPointerUp(_btnStartPause, OnStartPauseClicked);
+            RegisterButtonOnPointerUp(_btnReset, () => this.SendCommand(new Cmd_PomodoroReset()));
+            RegisterButtonOnPointerUp(_btnSettings, ToggleSettings);
+            RegisterButtonOnPointerUp(_btnCloseApp, OnCloseAppClicked);
 
             // 设置面板按钮事件
-            _btnApplySettings?.RegisterCallback<ClickEvent>(_ => OnApplySettings());
-            _btnCloseSettings?.RegisterCallback<ClickEvent>(_ => ToggleSettings());
+            RegisterButtonOnPointerUp(_btnApplySettings, OnApplySettings);
+            RegisterButtonOnPointerUp(_btnCloseSettings, ToggleSettings);
 
             // 置顶 Toggle
             _toggleAnchorTop?.RegisterCallback<ChangeEvent<bool>>(evt =>
@@ -189,6 +206,8 @@ namespace APP.Pomodoro.Controller
 
         private void OnCloseAppClicked()
         {
+            SavePersistentState(true);
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -215,6 +234,7 @@ namespace APP.Pomodoro.Controller
             _settingsOpen = !_settingsOpen;
             if (_settingsOpen)
             {
+                RefreshMonitorDropdown();
                 SyncSettingsFieldsFromModel();
                 _settingsPanel?.RemoveFromClassList("hidden");
             }
@@ -270,6 +290,11 @@ namespace APP.Pomodoro.Controller
             {
                 _labelRound.text = $"{round} / {_model.TotalRounds.Value}";
             }
+        }
+
+        private void OnTotalRoundsChanged(int _)
+        {
+            OnCurrentRoundChanged(_model?.CurrentRound.Value ?? 1);
         }
 
         private void OnIsRunningChanged(bool running)
@@ -340,6 +365,62 @@ namespace APP.Pomodoro.Controller
             }
 
             _audioSource.PlayOneShot(clip, _config.CompletionVolume);
+        }
+
+        private void RegisterPersistenceCallbacks()
+        {
+            if (_model == null)
+            {
+                return;
+            }
+
+            _model.FocusDurationSeconds.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.BreakDurationSeconds.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.TotalRounds.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.CurrentRound.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.RemainingSeconds.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.CurrentPhase.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.IsRunning.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.IsTopmost.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.WindowAnchor.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.AutoJumpToTopOnComplete.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.TargetMonitorIndex.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.CompletionClipIndex.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+        }
+
+        private void SavePersistentState(bool flushToDisk)
+        {
+            if (_model == null)
+            {
+                return;
+            }
+
+            PomodoroPersistence.Save(_model, flushToDisk);
+        }
+
+        private static void RegisterButtonOnPointerUp(Button button, Action onPointerUp)
+        {
+            if (button == null || onPointerUp == null)
+            {
+                return;
+            }
+
+            button.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                onPointerUp();
+            });
         }
 
         private int GetSoundIndex()

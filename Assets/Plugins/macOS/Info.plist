@@ -5,9 +5,5 @@
 	<!-- Accessibility 权限描述 (显示在系统权限对话框中) -->
 	<key>NSAccessibilityUsageDescription</key>
 	<string>此应用需要辅助功能权限来检测当前活动窗口，以便提供更好的使用体验。</string>
-	
-	<!-- Apple Events 权限描述 -->
-	<key>NSAppleEventsUsageDescription</key>
-	<string>此应用需要控制其他应用以执行自动化任务。</string>
 </dict>
 </plist>

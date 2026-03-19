@@ -30,25 +30,35 @@ namespace APP.Pomodoro.Command
             float verticalMargin = _config?.VerticalMargin ?? 4f;
             wps.Initialize(_uwc, windowHeight, verticalMargin);
 
-            if (_config == null)
+            IPomodoroModel model = this.GetModel<IPomodoroModel>();
+
+            if (_config != null)
+            {
+                // 写入 Model 默认配置
+                model.FocusDurationSeconds.Value = _config.DefaultFocusMinutes * 60;
+                model.BreakDurationSeconds.Value = _config.DefaultBreakMinutes * 60;
+                model.TotalRounds.Value = _config.DefaultRounds;
+                model.RemainingSeconds.Value = _config.DefaultFocusMinutes * 60;
+                model.WindowAnchor.Value = _config.DefaultWindowAnchor;
+                model.AutoJumpToTopOnComplete.Value = _config.DefaultAutoJumpToTopOnComplete;
+                model.CompletionClipIndex.Value = _config.DefaultCompletionClipIndex;
+                model.TargetMonitorIndex.Value = 0;
+            }
+            else
             {
                 Debug.LogWarning("[PomodoroInitialize] PomodoroConfig 未赋值，使用 Model 默认值。");
-                return;
             }
 
-            // 写入 Model 默认配置
-            IPomodoroModel model = this.GetModel<IPomodoroModel>();
-            model.FocusDurationSeconds.Value = _config.DefaultFocusMinutes * 60;
-            model.BreakDurationSeconds.Value = _config.DefaultBreakMinutes * 60;
-            model.TotalRounds.Value = _config.DefaultRounds;
-            model.RemainingSeconds.Value = _config.DefaultFocusMinutes * 60;
-            model.WindowAnchor.Value = _config.DefaultWindowAnchor;
-            model.AutoJumpToTopOnComplete.Value = _config.DefaultAutoJumpToTopOnComplete;
-            model.CompletionClipIndex.Value = _config.DefaultCompletionClipIndex;
-            model.TargetMonitorIndex.Value = 0;
+            // 若存在持久化状态，用持久化覆盖默认值
+            if (PomodoroPersistence.TryLoad(model))
+            {
+                Debug.Log("[PomodoroInitialize] 已加载持久化状态。");
+            }
 
-            // 应用初始锚点（更新 Model，CSS class 由 Controller 响应）
-            wps.MoveTo(_config.DefaultWindowAnchor);
+            // 按恢复后的偏好应用显示器/置顶/锚点
+            wps.MoveToMonitor(model.TargetMonitorIndex.Value);
+            wps.SetTopmost(model.IsTopmost.Value);
+            wps.MoveTo(model.WindowAnchor.Value);
         }
     }
 }

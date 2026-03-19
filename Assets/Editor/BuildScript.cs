@@ -10,8 +10,8 @@ using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 
 public static class BuildScript
 {
-    private const string BuildPath = "Builds/macOS/AppMonitor.app";
-    private const string ProfilerBuildPath = "Builds/macOS/AppMonitor_Profiler.app";
+    private const string BuildPath = "Builds/macOS/CTClock.app";
+    private const string ProfilerBuildPath = "Builds/macOS/CTClock_Profiler.app";
     /// <summary>运行验证等待秒数（等应用写出日志再读取）</summary>
     private const int VerifyRunSeconds = 8;
 
@@ -392,13 +392,17 @@ public static class BuildScript
             if (process.ExitCode == 0)
             {
                 Debug.Log("[BuildScript] ✓ 签名验证成功");
-                if (combined.Contains("com.apple.security.automation.apple-events"))
-                {
-                    Debug.Log("[BuildScript] ✓ Apple Events 权限已配置");
-                }
                 if (combined.Contains("com.apple.security.cs.allow-jit"))
                 {
                     Debug.Log("[BuildScript] ✓ JIT 权限已配置");
+                }
+                if (combined.Contains("com.apple.security.cs.allow-unsigned-executable-memory"))
+                {
+                    Debug.Log("[BuildScript] ✓ Unsigned Executable Memory 权限已配置");
+                }
+                if (combined.Contains("com.apple.security.automation.apple-events"))
+                {
+                    Debug.LogWarning("[BuildScript] ⚠ 检测到额外 Apple Events 权限，请确认是否必须。");
                 }
             }
             else
@@ -421,7 +425,7 @@ public static class BuildScript
             }
             if (plistContent.Contains("NSAppleEventsUsageDescription"))
             {
-                Debug.Log("[BuildScript] ✓ Apple Events 权限描述已配置");
+                Debug.LogWarning("[BuildScript] ⚠ 检测到额外 Apple Events 权限描述，请确认是否必须。");
             }
         }
 

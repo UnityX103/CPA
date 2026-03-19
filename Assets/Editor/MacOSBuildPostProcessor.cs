@@ -45,10 +45,6 @@ public static class MacOSBuildPostProcessor
         rootDict.SetString("NSAccessibilityUsageDescription", 
             "此应用需要辅助功能权限来检测当前活动窗口，以便提供更好的使用体验。");
         
-        // 添加 Apple Events 权限描述
-        rootDict.SetString("NSAppleEventsUsageDescription", 
-            "此应用需要控制其他应用以执行自动化任务。");
-        
         plist.WriteToFile(plistPath);
         
         Debug.Log($"[MacOSBuildPostProcessor] ✓ Info.plist 已更新: {plistPath}");
@@ -56,11 +52,9 @@ public static class MacOSBuildPostProcessor
     
     private static void ConfigureEntitlements(string buildPath, string appName)
     {
-        // 查找 entitlements：优先从包路径，兼容旧 Assets 路径
-        string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        // 查找 entitlements：仅使用 Assets 路径
         string[] candidatePaths =
         {
-            Path.Combine(projectRoot, "localpackage/com.nz.appmonitor/Plugins/macOS/AppMonitor.entitlements"),
             Path.Combine(Application.dataPath, "Plugins/macOS/AppMonitor.entitlements"),
         };
 
