@@ -41,6 +41,7 @@ namespace APP.Pomodoro.Command
                 model.RemainingSeconds.Value = _config.DefaultFocusMinutes * 60;
                 model.WindowAnchor.Value = _config.DefaultWindowAnchor;
                 model.AutoJumpToTopOnComplete.Value = _config.DefaultAutoJumpToTopOnComplete;
+                model.AutoStartBreak.Value = _config.DefaultAutoStartBreak;
                 model.CompletionClipIndex.Value = _config.DefaultCompletionClipIndex;
                 model.TargetMonitorIndex.Value = 0;
             }

@@ -40,6 +40,10 @@ namespace APP.Pomodoro.Config
         [Tooltip("在底端计时完成后，是否默认自动跳到顶端提示")]
         public bool DefaultAutoJumpToTopOnComplete = true;
 
+        [Header("休息阶段")]
+        [Tooltip("专注结束后是否自动开始休息计时")]
+        public bool DefaultAutoStartBreak = true;
+
         [Header("完成音效")]
         [Tooltip("默认使用的音效索引（对应 CompletionClips 列表）")]
         [Min(0)]

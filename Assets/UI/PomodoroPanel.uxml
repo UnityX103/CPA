@@ -7,14 +7,26 @@
         <!-- ───────────────── 主面板 ───────────────── -->
         <ui:VisualElement name="main-panel" class="main-panel">
 
-            <!-- 阶段标签 -->
-            <ui:Label name="label-phase" text="专注" class="label-phase" />
+            <ui:VisualElement class="phase-layout-row">
+                <ui:VisualElement class="break-side-placeholder" />
 
-            <!-- 倒计时 -->
-            <ui:Label name="label-timer" text="25:00" class="label-timer" />
+                <ui:VisualElement class="timer-main-block">
+                    <!-- 阶段标签 -->
+                    <ui:Label name="label-phase" text="专注" class="label-phase" />
 
-            <!-- 轮次 -->
-            <ui:Label name="label-round" text="1 / 4" class="label-round" />
+                    <!-- 倒计时 -->
+                    <ui:Label name="label-timer" text="25:00" class="label-timer" />
+
+                    <!-- 轮次 -->
+                    <ui:Label name="label-round" text="1 / 4" class="label-round" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="break-action-panel" class="break-action-panel">
+                    <ui:Label text="备忘录" class="break-action-title" />
+                    <ui:TextField name="field-break-memo" multiline="true" class="break-memo-field" />
+                    <ui:Button name="btn-start-break" text="开始休息" class="btn btn-primary btn-start-break" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- 控制按钮行 -->
             <ui:VisualElement class="button-row">
@@ -85,6 +97,12 @@
             <ui:VisualElement class="settings-row">
                 <ui:Label text="阶段切换时跳到顶端" class="settings-label" />
                 <ui:Toggle name="toggle-auto-jump" value="true" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <!-- 自动开始休息 Toggle -->
+            <ui:VisualElement class="settings-row">
+                <ui:Label text="自动开始休息" class="settings-label" />
+                <ui:Toggle name="toggle-auto-start-break" value="true" class="settings-toggle" />
             </ui:VisualElement>
 
             <!-- 目标屏幕 -->

@@ -110,6 +110,11 @@ namespace APP.Pomodoro.System
                 // 专注结束 → 进入休息
                 model.CurrentPhase.Value = PomodoroPhase.Break;
                 model.RemainingSeconds.Value = model.BreakDurationSeconds.Value;
+                if (!model.AutoStartBreak.Value)
+                {
+                    model.IsRunning.Value = false;
+                    _accumulator = 0f;
+                }
                 this.SendEvent(new E_PomodoroPhaseChanged(
                     PomodoroPhase.Break, model.CurrentRound.Value, model.TotalRounds.Value));
             }

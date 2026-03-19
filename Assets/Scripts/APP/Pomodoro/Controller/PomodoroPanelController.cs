@@ -42,11 +42,18 @@ namespace APP.Pomodoro.Controller
         private IntegerField _fieldBreakMinutes;
         private IntegerField _fieldRounds;
         private Toggle _toggleAutoJump;
+        private Toggle _toggleAutoStartBreak;
         private Toggle _toggleAnchorTop;
         private DropdownField _dropdownSound;
         private DropdownField _dropdownTargetMonitor;
         private Button _btnApplySettings;
         private Button _btnCloseSettings;
+
+        // 休息阶段附加面板
+        private VisualElement _breakActionPanel;
+        private TextField _fieldBreakMemo;
+        private Button _btnStartBreak;
+        private string _breakMemoText = string.Empty;
 
         // 完成提示横幅
         private VisualElement _completionBanner;
@@ -103,6 +110,8 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.IsRunning.RegisterWithInitValue(OnIsRunningChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.AutoStartBreak.RegisterWithInitValue(OnAutoStartBreakChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
 
             // 锚点变化 → 更新 CSS class（全屏透明窗口通过样式决定卡片位置）
             _model.WindowAnchor.RegisterWithInitValue(OnWindowAnchorChanged)
@@ -158,11 +167,27 @@ namespace APP.Pomodoro.Controller
             _fieldBreakMinutes = root.Q<IntegerField>("field-break-minutes");
             _fieldRounds = root.Q<IntegerField>("field-rounds");
             _toggleAutoJump = root.Q<Toggle>("toggle-auto-jump");
+            _toggleAutoStartBreak = root.Q<Toggle>("toggle-auto-start-break");
             _toggleAnchorTop = root.Q<Toggle>("toggle-anchor-top");
             _dropdownSound = root.Q<DropdownField>("dropdown-sound");
             _dropdownTargetMonitor = root.Q<DropdownField>("dropdown-target-monitor");
             _btnApplySettings = root.Q<Button>("btn-apply-settings");
             _btnCloseSettings = root.Q<Button>("btn-close-settings");
+
+            // 休息阶段附加面板
+            _breakActionPanel = root.Q<VisualElement>("break-action-panel");
+            _fieldBreakMemo = root.Q<TextField>("field-break-memo");
+            _btnStartBreak = root.Q<Button>("btn-start-break");
+
+            if (_fieldBreakMemo != null)
+            {
+                _fieldBreakMemo.multiline = true;
+                _fieldBreakMemo.value = _breakMemoText;
+                _fieldBreakMemo.RegisterValueChangedCallback(evt =>
+                {
+                    _breakMemoText = evt.newValue ?? string.Empty;
+                });
+            }
 
             // 初始状态
             _settingsPanel?.AddToClassList("hidden");
@@ -178,6 +203,7 @@ namespace APP.Pomodoro.Controller
             // 设置面板按钮事件
             RegisterButtonOnPointerUp(_btnApplySettings, OnApplySettings);
             RegisterButtonOnPointerUp(_btnCloseSettings, ToggleSettings);
+            RegisterButtonOnPointerUp(_btnStartBreak, OnStartBreakClicked);
 
             // 置顶 Toggle
             _toggleAnchorTop?.RegisterCallback<ChangeEvent<bool>>(evt =>
@@ -218,6 +244,19 @@ namespace APP.Pomodoro.Controller
 #endif
         }
 
+        private void OnStartBreakClicked()
+        {
+            if (_model == null ||
+                _model.CurrentPhase.Value != PomodoroPhase.Break ||
+                _model.IsRunning.Value ||
+                _model.AutoStartBreak.Value)
+            {
+                return;
+            }
+
+            this.SendCommand(new Cmd_PomodoroStart());
+        }
+
         private void OnSkipPhaseClicked()
         {
             this.SendCommand(new Cmd_PomodoroSkipCurrentPhase());
@@ -229,9 +268,10 @@ namespace APP.Pomodoro.Controller
             int breakMin = _fieldBreakMinutes?.value ?? _config?.DefaultBreakMinutes ?? 5;
             int rounds = _fieldRounds?.value ?? _config?.DefaultRounds ?? 4;
             bool autoJump = _toggleAutoJump?.value ?? true;
+            bool autoStartBreak = _toggleAutoStartBreak?.value ?? true;
             int monitorIndex = GetSelectedMonitorIndex();
 
-            this.SendCommand(new Cmd_PomodoroApplyMetaSettings(autoJump, GetSoundIndex()));
+            this.SendCommand(new Cmd_PomodoroApplyMetaSettings(autoJump, autoStartBreak, GetSoundIndex()));
             this.SendCommand(new Cmd_PomodoroSetMonitor(monitorIndex));
             this.SendCommand(new Cmd_PomodoroApplySettings(focusMin, breakMin, rounds, resetProgress: true));
             ToggleSettings();
@@ -290,6 +330,8 @@ namespace APP.Pomodoro.Controller
                 PomodoroPhase.Completed => "phase-completed",
                 _ => "phase-focus",
             });
+
+            UpdateBreakActionPanel();
         }
 
         private void OnCurrentRoundChanged(int round)
@@ -313,6 +355,12 @@ namespace APP.Pomodoro.Controller
             }
 
             UpdateSkipButtonVisibility(running);
+            UpdateBreakActionPanel();
+        }
+
+        private void OnAutoStartBreakChanged(bool _)
+        {
+            UpdateBreakActionPanel();
         }
 
         private void OnWindowAnchorChanged(PomodoroWindowAnchor anchor)
@@ -404,6 +452,8 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.AutoJumpToTopOnComplete.Register(_ => SavePersistentState(false))
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.AutoStartBreak.Register(_ => SavePersistentState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.TargetMonitorIndex.Register(_ => SavePersistentState(false))
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.CompletionClipIndex.Register(_ => SavePersistentState(false))
@@ -447,6 +497,45 @@ namespace APP.Pomodoro.Controller
             else
             {
                 _btnSkipPhase.AddToClassList("hidden");
+            }
+        }
+
+        private void UpdateBreakActionPanel()
+        {
+            if (_model == null)
+            {
+                return;
+            }
+
+            bool shouldShow = _model.CurrentPhase.Value == PomodoroPhase.Break && !_model.AutoStartBreak.Value;
+
+            VisualElement root = _uiDocument?.rootVisualElement;
+            if (root != null)
+            {
+                if (shouldShow)
+                {
+                    root.AddToClassList("show-break-actions");
+                }
+                else
+                {
+                    root.RemoveFromClassList("show-break-actions");
+                }
+            }
+
+            if (_breakActionPanel != null)
+            {
+                _breakActionPanel.SetEnabled(shouldShow);
+            }
+            if (_fieldBreakMemo != null)
+            {
+                _fieldBreakMemo.SetEnabled(shouldShow);
+            }
+
+            if (_btnStartBreak != null)
+            {
+                bool canStart = shouldShow && !_model.IsRunning.Value;
+                _btnStartBreak.text = canStart ? "开始休息" : "休息中";
+                _btnStartBreak.SetEnabled(canStart);
             }
         }
 
@@ -540,6 +629,10 @@ namespace APP.Pomodoro.Controller
             if (_toggleAutoJump != null)
             {
                 _toggleAutoJump.SetValueWithoutNotify(_model.AutoJumpToTopOnComplete.Value);
+            }
+            if (_toggleAutoStartBreak != null)
+            {
+                _toggleAutoStartBreak.SetValueWithoutNotify(_model.AutoStartBreak.Value);
             }
             if (_toggleAnchorTop != null)
             {

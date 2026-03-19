@@ -34,6 +34,9 @@ namespace APP.Pomodoro.Model
         /// <summary>在底端计时完成后是否自动跳到顶端提示</summary>
         BindableProperty<bool> AutoJumpToTopOnComplete { get; }
 
+        /// <summary>专注结束后是否自动开始休息</summary>
+        BindableProperty<bool> AutoStartBreak { get; }
+
         /// <summary>目标显示器索引（0-based）</summary>
         BindableProperty<int> TargetMonitorIndex { get; }
 

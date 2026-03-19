@@ -10,11 +10,13 @@ namespace APP.Pomodoro.Command
     public sealed class Cmd_PomodoroApplyMetaSettings : AbstractCommand
     {
         private readonly bool _autoJumpToTop;
+        private readonly bool _autoStartBreak;
         private readonly int _completionClipIndex;
 
-        public Cmd_PomodoroApplyMetaSettings(bool autoJumpToTop, int completionClipIndex)
+        public Cmd_PomodoroApplyMetaSettings(bool autoJumpToTop, bool autoStartBreak, int completionClipIndex)
         {
             _autoJumpToTop = autoJumpToTop;
+            _autoStartBreak = autoStartBreak;
             _completionClipIndex = Mathf.Max(0, completionClipIndex);
         }
 
@@ -22,6 +24,7 @@ namespace APP.Pomodoro.Command
         {
             IPomodoroModel model = this.GetModel<IPomodoroModel>();
             model.AutoJumpToTopOnComplete.Value = _autoJumpToTop;
+            model.AutoStartBreak.Value = _autoStartBreak;
             model.CompletionClipIndex.Value = _completionClipIndex;
         }
     }

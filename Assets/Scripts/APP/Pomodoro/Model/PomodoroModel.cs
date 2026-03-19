@@ -18,6 +18,7 @@ namespace APP.Pomodoro.Model
         public BindableProperty<PomodoroWindowAnchor> WindowAnchor { get; } =
             new BindableProperty<PomodoroWindowAnchor>(PomodoroWindowAnchor.Bottom);
         public BindableProperty<bool> AutoJumpToTopOnComplete { get; } = new BindableProperty<bool>(true);
+        public BindableProperty<bool> AutoStartBreak { get; } = new BindableProperty<bool>(true);
         public BindableProperty<int> TargetMonitorIndex { get; } = new BindableProperty<int>(0);
         public BindableProperty<int> CompletionClipIndex { get; } = new BindableProperty<int>(0);
 
@@ -41,6 +42,7 @@ namespace APP.Pomodoro.Model
         public bool IsTopmost;
         public int WindowAnchor = (int)PomodoroWindowAnchor.Bottom;
         public bool AutoJumpToTopOnComplete = true;
+        public bool AutoStartBreak = true;
         public int TargetMonitorIndex;
         public int CompletionClipIndex;
     }
@@ -83,6 +85,12 @@ namespace APP.Pomodoro.Model
                 return false;
             }
 
+            // 兼容旧版本持久化数据：缺少字段时保持默认自动开始休息
+            if (!json.Contains("\"AutoStartBreak\""))
+            {
+                state.AutoStartBreak = true;
+            }
+
             ApplyState(model, state);
             _cachedJson = json;
             return true;
@@ -107,6 +115,7 @@ namespace APP.Pomodoro.Model
                 IsTopmost = model.IsTopmost.Value,
                 WindowAnchor = (int)model.WindowAnchor.Value,
                 AutoJumpToTopOnComplete = model.AutoJumpToTopOnComplete.Value,
+                AutoStartBreak = model.AutoStartBreak.Value,
                 TargetMonitorIndex = Mathf.Max(0, model.TargetMonitorIndex.Value),
                 CompletionClipIndex = Mathf.Max(0, model.CompletionClipIndex.Value),
             };
@@ -145,6 +154,7 @@ namespace APP.Pomodoro.Model
             model.IsTopmost.Value = state.IsTopmost;
             model.WindowAnchor.Value = anchor;
             model.AutoJumpToTopOnComplete.Value = state.AutoJumpToTopOnComplete;
+            model.AutoStartBreak.Value = state.AutoStartBreak;
             model.TargetMonitorIndex.Value = Mathf.Max(0, state.TargetMonitorIndex);
             model.CompletionClipIndex.Value = Mathf.Max(0, state.CompletionClipIndex);
         }
