@@ -75,6 +75,19 @@ namespace APP.Pomodoro.System
             }
         }
 
+        public void SkipCurrentPhase()
+        {
+            IPomodoroModel model = this.GetModel<IPomodoroModel>();
+
+            if (!model.IsRunning.Value || model.CurrentPhase.Value == PomodoroPhase.Completed)
+            {
+                return;
+            }
+
+            _accumulator = 0f;
+            AdvancePhase(model);
+        }
+
         public void ApplySettings(int focusSeconds, int breakSeconds, int totalRounds, bool resetProgress)
         {
             IPomodoroModel model = this.GetModel<IPomodoroModel>();

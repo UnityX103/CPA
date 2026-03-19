@@ -16,6 +16,9 @@ namespace APP.Pomodoro.System
         /// <summary>每帧由 Controller 驱动，推进倒计时</summary>
         void Tick(float deltaTime);
 
+        /// <summary>跳过当前阶段并立即进入下一阶段</summary>
+        void SkipCurrentPhase();
+
         /// <summary>应用设置面板中填写的参数并选择性重置进度</summary>
         void ApplySettings(int focusSeconds, int breakSeconds, int totalRounds, bool resetProgress);
     }

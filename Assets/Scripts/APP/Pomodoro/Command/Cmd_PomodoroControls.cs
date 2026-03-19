@@ -30,4 +30,10 @@ namespace APP.Pomodoro.Command
         protected override void OnExecute() =>
             this.GetSystem<IPomodoroTimerSystem>().Tick(_deltaTime);
     }
+
+    public sealed class Cmd_PomodoroSkipCurrentPhase : AbstractCommand
+    {
+        protected override void OnExecute() =>
+            this.GetSystem<IPomodoroTimerSystem>().SkipCurrentPhase();
+    }
 }

@@ -31,6 +31,7 @@ namespace APP.Pomodoro.Controller
         private Label _labelTimer;
         private Label _labelRound;
         private Button _btnStartPause;
+        private Button _btnSkipPhase;
         private Button _btnReset;
         private Button _btnSettings;
         private Button _btnCloseApp;
@@ -145,6 +146,7 @@ namespace APP.Pomodoro.Controller
             _labelTimer = root.Q<Label>("label-timer");
             _labelRound = root.Q<Label>("label-round");
             _btnStartPause = root.Q<Button>("btn-start-pause");
+            _btnSkipPhase = root.Q<Button>("btn-skip-phase");
             _btnReset = root.Q<Button>("btn-reset");
             _btnSettings = root.Q<Button>("btn-settings");
             _btnCloseApp = root.Q<Button>("btn-close-app");
@@ -168,6 +170,7 @@ namespace APP.Pomodoro.Controller
 
             // 主面板按钮事件
             RegisterButtonOnPointerUp(_btnStartPause, OnStartPauseClicked);
+            RegisterButtonOnPointerUp(_btnSkipPhase, OnSkipPhaseClicked);
             RegisterButtonOnPointerUp(_btnReset, () => this.SendCommand(new Cmd_PomodoroReset()));
             RegisterButtonOnPointerUp(_btnSettings, ToggleSettings);
             RegisterButtonOnPointerUp(_btnCloseApp, OnCloseAppClicked);
@@ -213,6 +216,11 @@ namespace APP.Pomodoro.Controller
 #else
             Application.Quit();
 #endif
+        }
+
+        private void OnSkipPhaseClicked()
+        {
+            this.SendCommand(new Cmd_PomodoroSkipCurrentPhase());
         }
 
         private void OnApplySettings()
@@ -303,6 +311,8 @@ namespace APP.Pomodoro.Controller
             {
                 _btnStartPause.text = running ? "暂停" : "开始";
             }
+
+            UpdateSkipButtonVisibility(running);
         }
 
         private void OnWindowAnchorChanged(PomodoroWindowAnchor anchor)
@@ -421,6 +431,23 @@ namespace APP.Pomodoro.Controller
             {
                 onPointerUp();
             });
+        }
+
+        private void UpdateSkipButtonVisibility(bool isRunning)
+        {
+            if (_btnSkipPhase == null)
+            {
+                return;
+            }
+
+            if (isRunning)
+            {
+                _btnSkipPhase.RemoveFromClassList("hidden");
+            }
+            else
+            {
+                _btnSkipPhase.AddToClassList("hidden");
+            }
         }
 
         private int GetSoundIndex()

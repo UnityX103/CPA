@@ -123,6 +123,12 @@
     color: var(--color-text-primary);
 }
 
+.btn-skip-phase {
+    min-width: 92px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
 .btn-icon {
     background-color: transparent;
     color: var(--color-text-secondary);
