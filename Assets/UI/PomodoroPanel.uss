@@ -51,7 +51,9 @@
 }
 
 .timer-main-block {
-    min-width: 220px;
+    min-width: 180px;
+    flex-grow: 1;
+    flex-shrink: 1;
     flex-direction: column;
     align-items: center;
     margin-left: 14px;
@@ -60,7 +62,9 @@
 
 .break-side-placeholder,
 .break-action-panel {
-    width: 220px;
+    width: 28%;
+    min-width: 160px;
+    max-width: 220px;
     flex-shrink: 0;
     display: none;
 }
@@ -115,6 +119,28 @@
 .btn-start-break {
     width: 100%;
     margin: 0px;
+}
+
+.compact-layout .phase-layout-row {
+    flex-direction: column;
+    align-items: center;
+}
+
+.compact-layout .timer-main-block {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.compact-layout .show-break-actions .break-side-placeholder {
+    display: none;
+}
+
+.compact-layout .break-action-panel {
+    width: 100%;
+    min-width: 0px;
+    max-width: none;
+    margin-top: 8px;
 }
 
 /* ── 阶段文字 ── */

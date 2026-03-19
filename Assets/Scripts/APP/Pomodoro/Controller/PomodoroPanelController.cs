@@ -62,6 +62,8 @@ namespace APP.Pomodoro.Controller
         private IPomodoroModel _model;
         private bool _settingsOpen;
 
+        private const float CompactLayoutWidthThreshold = 900f;
+
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
@@ -149,6 +151,7 @@ namespace APP.Pomodoro.Controller
         private void BindUI()
         {
             VisualElement root = _uiDocument.rootVisualElement;
+            root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChanged);
 
             // 主面板
             _labelPhase = root.Q<Label>("label-phase");
@@ -217,6 +220,9 @@ namespace APP.Pomodoro.Controller
 
             // 初始化设置面板字段的当前值
             SyncSettingsFieldsFromModel();
+
+            // 首帧兜底触发一次布局自适应（处理启动和切换屏幕后的尺寸变化）
+            root.schedule.Execute(() => UpdateResponsiveLayout(root.resolvedStyle.width));
         }
 
         // ─── 按钮回调 ────────────────────────────────────────────
@@ -382,6 +388,11 @@ namespace APP.Pomodoro.Controller
             }
         }
 
+        private void OnRootGeometryChanged(GeometryChangedEvent evt)
+        {
+            UpdateResponsiveLayout(evt.newRect.width);
+        }
+
         // ─── 事件回调 ────────────────────────────────────────────
 
         private void OnPhaseChanged(E_PomodoroPhaseChanged evt)
@@ -536,6 +547,25 @@ namespace APP.Pomodoro.Controller
                 bool canStart = shouldShow && !_model.IsRunning.Value;
                 _btnStartBreak.text = canStart ? "开始休息" : "休息中";
                 _btnStartBreak.SetEnabled(canStart);
+            }
+        }
+
+        private void UpdateResponsiveLayout(float rootWidth)
+        {
+            VisualElement root = _uiDocument?.rootVisualElement;
+            if (root == null)
+            {
+                return;
+            }
+
+            bool useCompactLayout = rootWidth > 0f && rootWidth < CompactLayoutWidthThreshold;
+            if (useCompactLayout)
+            {
+                root.AddToClassList("compact-layout");
+            }
+            else
+            {
+                root.RemoveFromClassList("compact-layout");
             }
         }
 
