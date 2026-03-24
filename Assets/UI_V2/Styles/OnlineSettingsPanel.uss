@@ -1,0 +1,102 @@
+/*
+ * OnlineSettingsPanel.uss
+ * 对应 TSX: components/OnlineSettingsPanel.tsx
+ */
+
+.osp-root {
+    width: 484px;
+    flex-direction: column;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: rgb(241, 229, 216);
+    background-color: rgb(255, 255, 255);
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* ── 顶部 header ─────────────────────────────────────────── */
+
+.osp-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.osp-title-group {
+    flex-direction: row;
+    align-items: center;
+}
+
+.osp-badge-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    background-color: rgb(238, 242, 255);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.osp-badge-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.osp-title-text {
+    flex-direction: column;
+}
+
+.osp-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+    -unity-text-align: middle-left;
+    margin-bottom: 2px;
+}
+
+.osp-subtitle {
+    font-size: 13px;
+    color: rgb(107, 114, 128);
+    -unity-text-align: middle-left;
+}
+
+/* 绿色 Toggle */
+.osp-toggle {
+    flex-direction: row-reverse;
+}
+
+/* ── 内容区 ──────────────────────────────────────────────── */
+
+.osp-content {
+    flex-direction: column;
+    border-radius: 16px;
+    background-color: rgb(246, 247, 248);
+    padding: 16px;
+}
+
+.osp-content-tag {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(156, 163, 175);
+    -unity-text-align: middle-left;
+    margin-bottom: 8px;
+}
+
+.osp-content-title {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+    -unity-text-align: middle-left;
+    margin-bottom: 8px;
+}
+
+.osp-content-desc {
+    font-size: 13px;
+    color: rgb(107, 114, 128);
+    -unity-text-align: upper-left;
+    white-space: normal;
+}

@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="PomodoroPanel" src="project://database/Assets/UI_V2/Documents/PomodoroPanel.uxml?fileID=9197481963319205126&amp;guid=cbf5638ad0ab048998be547920a9d8ca&amp;type=3#PomodoroPanel" />
+    <ui:Template name="PomodoroSettingsPanel" src="project://database/Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml?fileID=9197481963319205126&amp;guid=b0135545624a3454cb075f4597f9ce8e&amp;type=3#PomodoroSettingsPanel" />
+    <ui:Template name="OnlineSettingsPanel" src="project://database/Assets/UI_V2/Documents/OnlineSettingsPanel.uxml?fileID=9197481963319205126&amp;guid=4e2bd0c7d4bd44058946dd9382af2eb4&amp;type=3#OnlineSettingsPanel" />
+    <ui:Template name="PetSettingsPanel" src="project://database/Assets/UI_V2/Documents/PetSettingsPanel.uxml?fileID=9197481963319205126&amp;guid=1e1a7736c8a844fe792584d349b31913&amp;type=3#PetSettingsPanel" />
+    <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
+    <Style src="project://database/Assets/UI_V2/Styles/DeskWindow.uss?fileID=7433441132597879392&amp;guid=1fd1c07e4450e431fad56cc90cc090fb&amp;type=3#DeskWindow" />
+    <ui:VisualElement name="dw-wrap" class="dw-wrap" style="opacity: 1; background-color: rgba(252, 250, 250, 0); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0;">
+<ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
+        <ui:VisualElement name="menu-container" class="menu-container">
+            <ui:Button name="btn-pomodoro" class="menu-btn">
+                <ui:VisualElement class="menu-btn-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-timer.png?fileID=2800000&amp;guid=69c5e1d8307cf42889859fe33623a583&amp;type=3#icon-timer&quot;);" />
+                <ui:Label text="番茄钟设置" class="menu-btn-label" />
+            </ui:Button>
+            <ui:Button name="btn-online" class="menu-btn">
+                <ui:VisualElement class="menu-btn-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-wifi.png?fileID=2800000&amp;guid=0811442ae18054fc9bd67b9d53fe7d81&amp;type=3#icon-wifi&quot;);" />
+                <ui:Label text="联机设置" class="menu-btn-label" />
+            </ui:Button>
+            <ui:Button name="btn-pet" class="menu-btn" style="margin-bottom: 0;">
+                <ui:VisualElement class="menu-btn-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-pets.png?fileID=2800000&amp;guid=35af9da9cdd754f00aba50e2d1bfd5b7&amp;type=3#icon-pets&quot;); align-items: flex-end; justify-content: space-evenly; align-self: auto; flex-direction: column;" />
+                <ui:Label text="宠物设置" class="menu-btn-label" />
+            </ui:Button>
+        </ui:VisualElement>
+        <ui:VisualElement name="panel-overlay" class="panel-overlay" style="display: none;">
+            <ui:Button name="overlay-close" class="overlay-close" />
+            <ui:VisualElement class="overlay-content">
+                <ui:Instance name="panel-pomodoro-s" template="PomodoroSettingsPanel" />
+                <ui:Instance name="panel-online-s" template="OnlineSettingsPanel" style="display: none;" />
+                <ui:Instance name="panel-pet-s" template="PetSettingsPanel" style="display: none;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

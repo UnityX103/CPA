@@ -1,0 +1,63 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+  <!-- Clock 子组件模板引用 -->
+  <ui:Template name="Clock" src="Clock.uxml"/>
+
+  <ui:Style src="../Styles/Variables.uss"/>
+  <ui:Style src="../Styles/PomodoroPanel.uss"/>
+
+  <!--
+    PomodoroPanel — 番茄钟主面板
+    对应 TSX: components/PomodoroPanel.tsx
+    尺寸: width 286px（高度自适应内容）
+
+    C# 绑定名称（Q<>() 查询用）:
+      #pp-root          — 根容器（可设 absolute 位置）
+      #pp-title         — 标题 Label
+      #pp-streak-value  — 连续次数 Label
+      #pp-clock         — Clock Template Instance（TemplateContainer）
+                          内部子元素通过 pp-clock.Q<>() 访问：
+                            #clock-ring   外环（颜色/进度）
+                            #clock-time   时间 Label
+                            #clock-state  状态 Label
+      #pp-btn-primary   — 主操作按钮（开始/暂停）
+      #pp-btn-secondary — 次操作按钮（跳过）
+  -->
+  <ui:VisualElement name="pp-root" class="pp-root">
+
+    <!-- 顶部：标题 + 连续专注 -->
+    <ui:VisualElement class="pp-header">
+      <ui:Label name="pp-title" class="pp-title" text="番茄钟"/>
+      <ui:VisualElement class="pp-streak">
+        <ui:Label class="pp-streak-label" text="连续专注"/>
+        <ui:Label name="pp-streak-value" class="pp-streak-value" text="3 次"/>
+      </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- 主体：时钟 + 操作按钮 -->
+    <ui:VisualElement class="pp-body">
+
+      <!--
+        Clock Template Instance（104×104px）
+        TSX: <Clock state={clockState} time={time} />
+        class="pp-clock" 提供 margin-right: 22px 的外部定位
+        内部进度环 / 颜色 / 文字由 C# 操作 #pp-clock.Q<>() 访问
+      -->
+      <ui:Instance name="pp-clock" template="Clock" class="pp-clock"/>
+
+      <!-- 操作按钮 -->
+      <ui:VisualElement class="pp-actions">
+        <ui:Button name="pp-btn-primary"   class="pp-btn pp-btn--primary"   text="开始"/>
+        <ui:Button name="pp-btn-secondary" class="pp-btn pp-btn--secondary" text="跳过" style="margin-bottom: 0;"/>
+      </ui:VisualElement>
+
+    </ui:VisualElement>
+
+    <!-- 收纳按钮：仅展开模式可见，点击后切换为收纳模式 -->
+    <ui:Button name="pp-btn-collapse" class="pp-btn-collapse" text="−"/>
+
+  </ui:VisualElement>
+</ui:UXML>

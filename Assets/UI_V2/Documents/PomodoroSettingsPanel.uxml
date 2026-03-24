@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
+    <Style src="project://database/Assets/UI_V2/Styles/PomodoroSettingsPanel.uss?fileID=7433441132597879392&amp;guid=fdc2e9c1c8f98438f9e4baf0d67697f0&amp;type=3#PomodoroSettingsPanel" />
+    <ui:VisualElement name="psp-root" class="psp-root">
+        <!-- Pencil: pomoHead 3列 space-between: badge | titleWrap | statusSwitch -->
+        <ui:VisualElement class="psp-header">
+            <ui:VisualElement class="psp-badge-wrap psp-badge-wrap--orange">
+                <ui:VisualElement class="psp-badge-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-timer.png?fileID=2800000&amp;guid=69c5e1d8307cf42889859fe33623a583&amp;type=3#icon-timer&quot;);" />
+            </ui:VisualElement>
+            <ui:VisualElement class="psp-title-text">
+                <ui:Label text="番茄钟设置" class="psp-title" />
+                <ui:Label text="专注周期、休息时长与提醒方式。" class="psp-subtitle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="psp-status-switch">
+                <ui:Label text="已启用" class="psp-status-text" />
+                <ui:Toggle name="psp-toggle" value="true" class="psp-toggle" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="psp-metrics">
+            <ui:VisualElement class="psp-metric psp-metric--neutral">
+                <ui:Label text="专注时长" class="psp-metric-label psp-metric-label--neutral" />
+                <ui:VisualElement class="psp-metric-input psp-metric-input--neutral">
+                    <ui:Label name="psp-focus-value" text="25" class="psp-metric-value" />
+                    <ui:Label text="分钟" class="psp-metric-suffix psp-metric-suffix--neutral" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="psp-metric psp-metric--warm">
+                <ui:Label text="休息时长" class="psp-metric-label psp-metric-label--warm" />
+                <ui:VisualElement class="psp-metric-input psp-metric-input--warm">
+                    <ui:Label name="psp-break-value" text="5" class="psp-metric-value" />
+                    <ui:Label text="分钟" class="psp-metric-suffix psp-metric-suffix--warm" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="psp-settings">
+            <ui:VisualElement class="psp-row">
+                <ui:VisualElement class="psp-row-left">
+                    <ui:VisualElement class="psp-row-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-panel-monitor.png?fileID=2800000&amp;guid=d94c4f052e9294c638cc6dc16e3b9e44&amp;type=3#icon-panel-monitor&quot;);" />
+                    <ui:Label text="阶段切换时自动指定窗口提示" class="psp-row-label" />
+                </ui:VisualElement>
+                <ui:Toggle name="psp-hint-toggle" value="true" class="psp-row-toggle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="psp-row" style="margin-bottom: 0;">
+                <ui:VisualElement class="psp-row-left">
+                    <ui:VisualElement class="psp-row-icon" style="background-image: url(&quot;project://database/Assets/UI_V2/Icons/icon-panel-bell.png?fileID=2800000&amp;guid=f4e16f914912e413b87a2469ad3f20e7&amp;type=3#icon-panel-bell&quot;);" />
+                    <ui:Label text="结束提示音" class="psp-row-label" />
+                </ui:VisualElement>
+                <ui:Label name="psp-sound-label" text="柔和铃声" class="psp-row-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

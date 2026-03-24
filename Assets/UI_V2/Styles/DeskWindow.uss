@@ -1,0 +1,165 @@
+/*
+ * DeskWindow.uss
+ * 对应 TSX: components/DeskWindow.tsx + app/globals.css
+ *
+ * 不支持特性处理：
+ *   backdrop-blur      → 移除
+ *   transition-transform → 移除（hover 效果需 C#）
+ *   @media 响应式     → 移除（Unity 窗口固定尺寸）
+ *   box-shadow        → border 模拟
+ *   blur-3xl 背景     → 移除（装饰性，Unity 不支持 filter）
+ */
+
+/* ── 主容器（自适应尺寸，右下角锚定）────────────────────── */
+
+.dw-wrap {
+    flex-direction: row;
+    align-items: flex-end;
+    border-radius: 28px;
+    border-width: 1px;
+    border-color: rgb(241, 229, 216);
+    background-color: rgb(252, 250, 250);
+    overflow: hidden;
+    position: relative;
+    /* box-shadow: 0 30px 80px rgba(197,156,127,0.18) → border 已模拟 */
+}
+
+/* ── 悬停提示气泡（absolute left:303 top:30）──────────────── */
+
+.hover-hint {
+    position: absolute;
+    left: 303px;
+    top: 30px;
+    width: 174px;
+    height: 48px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 24px; /* 9999px 在 Unity 中对非正方形元素会生成真椭圆；height=48px 故取 24px */
+    border-width: 1px;
+    border-color: rgb(242, 222, 195);
+    background-color: rgb(255, 253, 242);
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.hover-hint-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hover-hint-text {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(123, 102, 87);
+    -unity-text-align: middle-left;
+}
+
+/* ── 番茄钟面板（flex 子项，左侧）─────────────────────────── */
+
+.dw-pomodoro {
+    flex-shrink: 0;
+}
+
+/* ── 右侧菜单按钮栏（flex 子项，右侧）─────────────────────── */
+
+.menu-container {
+    flex-shrink: 0;
+    width: 124px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: rgb(240, 221, 208);
+    background-color: rgba(255, 255, 255, 0.91);
+    padding: 8px;
+    margin-left: 12px;
+    /* gap-2 → margin-bottom on children */
+}
+
+/* ── 菜单按钮 ─────────────────────────────────────────────── */
+
+.menu-btn {
+    height: 40px;
+    width: 108px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: rgb(240, 221, 208);
+    background-color: rgba(255, 255, 255, 0.91);
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-bottom: 8px;
+    /* backdrop-blur 移除 */
+}
+
+/* :last-child 不支持；DeskWindow.uxml 最后一个 menu-btn 用 style="margin-bottom:0" */
+
+.menu-btn:hover {
+    background-color: rgb(255, 248, 242);
+}
+
+.menu-btn-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-right: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.menu-btn-label {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}
+
+/* ── 面板覆盖层 ───────────────────────────────────────────── */
+
+.panel-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    /* z-index 等效：调整层级在 C# 中用 BringToFront() */
+}
+
+/* 半透明背景按钮（点击关闭） */
+.overlay-close {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(252, 250, 250, 0.9);
+    border-width: 0;
+    /* backdrop-blur 移除 */
+}
+
+/* 内容居中区域 */
+.overlay-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+}
+
+/* ── 通用隐藏 class ─────────────────────────────────────── */
+
+.hidden {
+    display: none;
+}

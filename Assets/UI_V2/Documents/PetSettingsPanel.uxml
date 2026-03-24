@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../Styles/Variables.uss"/>
+  <ui:Style src="../Styles/PetSettingsPanel.uss"/>
+
+  <!--
+    PetSettingsPanel — 宠物设置面板
+    对应 TSX: components/PetSettingsPanel.tsx
+    尺寸: width 484px
+  -->
+  <ui:VisualElement name="pet-root" class="pet-root">
+
+    <ui:VisualElement class="pet-header">
+      <ui:VisualElement class="pet-badge-wrap">
+        <ui:VisualElement class="pet-badge-icon" style="background-image: url('../Icons/icon-panel-pet.png');"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="pet-title-text">
+        <ui:Label class="pet-title" text="宠物设置"/>
+        <ui:Label class="pet-subtitle" text="开发中。。。"/>
+      </ui:VisualElement>
+    </ui:VisualElement>
+
+  </ui:VisualElement>
+</ui:UXML>

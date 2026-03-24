@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
+    <Style src="project://database/Assets/UI_V2/Styles/Clock.uss?fileID=7433441132597879392&amp;guid=ec58cd3d704b84e1090674e15baef535&amp;type=3#Clock" />
+    <ui:VisualElement name="clock-root" class="clock-root">
+        <ui:VisualElement name="clock-ring" class="clock-ring" />
+        <ui:VisualElement class="clock-inner" />
+        <ui:VisualElement class="clock-text-layer" style="flex-basis: auto;">
+            <ui:Label name="clock-time" text="24:18" class="clock-time" style="margin-bottom: 0;" />
+            <ui:Label name="clock-state" text="未开始" class="clock-state" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 2px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

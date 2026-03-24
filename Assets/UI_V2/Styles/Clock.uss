@@ -1,0 +1,104 @@
+/*
+ * Clock.uss — 来自 Pencil 设计稿 cont-clock-component (nNt9z)
+ *
+ * Pencil 设计数据：
+ *   组件尺寸      104×104
+ *   环形轨道      ellipse 104×104, innerRadius=0.77 → 环宽12px, 内圆半径40px, inset=12px
+ *   clock-time    pos(20,34) size(64×21) fontSize=23 fontWeight=500
+ *   clock-state   pos(25,61) size(53×13) fontSize=13 fontWeight=500
+ *   时间/状态间距  state.y(61) - time.bottom(55) = 6px → margin-top:6px
+ *
+ * 不支持特性处理：
+ *   conic-gradient 进度环  → C# Painter2D 绘制真实进度弧（ClockView.cs）
+ *   inner-shadow           → 移除（Unity 不支持 inset box-shadow）
+ *   fontWeight: 500        → Unity 无 medium 权重，使用 normal 近似
+ *
+ * 颜色说明（对应 CLOCK_THEMES，运行时由 C# 动态设置）：
+ *   focus  track=#FFE5D9 progress=#D15F3D value=#5B4636 label=#D15F3D
+ *   rest   track=#C8EDD5 progress=#34A853 value=#1D6B35 label=#34A853
+ *   off    track=#E0D9D3 progress=#E0D9D3 value=#5B4636 label=#B5A49A
+ *   paused track=#FFF0D4 progress=#F5A623 value=#5B4636 label=#E08C10
+ */
+
+/* ── 根容器 ─────────────────────────────────────────────────
+ * TSX: <div className="relative shrink-0" style={{ width: size, height: size }}>
+ *   size 默认 104；position: relative（Unity VisualElement 默认）
+ */
+.clock-root {
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* ── 外环（进度圆）──────────────────────────────────────────
+ * TSX: <div className="absolute inset-0 rounded-full
+ *             shadow-[inset_0_2px_6px_rgba(255,255,255,0.45)]"
+ *           style={ringStyle} />
+ *   ringStyle = backgroundColor 或 backgroundImage(conic-gradient)
+ *   默认 off 状态：backgroundColor #E0D9D3
+ *   inset shadow → 移除
+ */
+.clock-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 9999px;
+    background-color: rgb(224, 217, 211); /* off: #E0D9D3 */
+}
+
+/* ── 内白圆 ─────────────────────────────────────────────────
+ * TSX: <div className="absolute rounded-full bg-[#FFFEFD]"
+ *           style={{ inset }} />
+ *   inset = Math.round(104 * 0.115) = 12px
+ */
+.clock-inner {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    border-radius: 9999px;
+    background-color: rgb(255, 254, 253);
+}
+
+/* ── 文字层 ─────────────────────────────────────────────────
+ * TSX: <div className="absolute inset-0 flex flex-col items-center justify-center">
+ */
+.clock-text-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── 时间 Label ─────────────────────────────────────────────
+ * Pencil: pos(20,34) size(64×21) fontSize=23 fontWeight=500
+ *   fontWeight=500 → Unity 无 medium 权重，使用 normal 近似
+ *   默认 off/paused 颜色: #5B4636（运行时 C# 动态覆盖）
+ */
+.clock-time {
+    font-size: 23px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    color: rgb(91, 70, 54); /* off/paused: #5B4636 */
+}
+
+/* ── 状态 Label ─────────────────────────────────────────────
+ * Pencil: pos(25,61) size(53×13) fontSize=13 fontWeight=500
+ *   state.y(61) - time.bottom(55) = 6px → margin-top: 6px
+ *   默认 off 颜色: #B5A49A（运行时 C# 动态覆盖）
+ */
+.clock-state {
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-center;
+    color: rgb(181, 164, 154); /* off: #B5A49A */
+    margin-top: 6px;
+}

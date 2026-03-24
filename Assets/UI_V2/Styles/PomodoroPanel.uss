@@ -1,0 +1,182 @@
+/*
+ * PomodoroPanel.uss
+ * 对应 TSX: components/PomodoroPanel.tsx
+ *
+ * gap 处理：USS 不支持 gap，改用子元素 margin-bottom。
+ * 时钟内部样式（ring / inner / time / state）已迁移到 Clock.uss。
+ * backdrop-blur：不支持，移除。
+ * transition-transform / hover:-translate-y：不支持，移除。
+ */
+
+/* ── 根容器 ──────────────────────────────────────────────── */
+
+.pp-root {
+    width: 286px;
+    flex-direction: column;
+    border-radius: 24px;
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    background-color: rgba(255, 253, 251, 0.93);
+    padding-top: 18px;
+    padding-right: 18px;
+    padding-bottom: 18px;
+    padding-left: 18px;
+    overflow: hidden;
+    /* box-shadow: 0_16px_24px_rgba(199,133,84,0.19) → border 模拟 */
+}
+
+/* ── 顶部 header ─────────────────────────────────────────── */
+
+.pp-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.pp-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    color: rgb(91, 70, 54);
+}
+
+.pp-streak {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.pp-streak-label {
+    font-size: 9px;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-right;
+}
+
+.pp-streak-value {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(209, 95, 61);
+    -unity-text-align: middle-right;
+    margin-top: 1px;
+}
+
+/* ── 主体 body ──────────────────────────────────────────── */
+
+.pp-body {
+    flex-direction: row;
+    align-items: center;
+    padding-left: 16px;
+    padding-right: 16px;
+    /* gap-[22px] → margin-right on clock */
+}
+
+/* ── Clock Instance 外部布局 ─────────────────────────────
+ * TSX: <Clock className="..." /> 在 flex-row 容器中，gap-[22px]
+ * 内部样式（ring / inner / time / state）全部在 Clock.uss 中
+ *
+ * 注意：TemplateContainer 不会自动继承模板内容尺寸，
+ * 必须在此显式声明 width/height/position，否则 Clock 不渲染。
+ */
+.pp-clock {
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    position: relative;
+    margin-right: 22px;
+}
+
+/* ── 操作按钮 ────────────────────────────────────────────── */
+
+.pp-actions {
+    flex-direction: column;
+    width: 96px;
+}
+
+.pp-btn {
+    height: 32px;
+    width: 96px;
+    border-radius: 16px; /* Pencil: cornerRadius:999 胶囊；height:32px / 2 = 16px */
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+    overflow: hidden;
+    /* transition / hover 效果移除，需 C# 实现 */
+    /* :last-child 不支持；最后一个按钮在 UXML 中用 style="margin-bottom:0" */
+}
+
+.pp-btn--primary {
+    background-color: rgb(209, 95, 61);
+    color: rgb(255, 255, 255);
+    border-width: 0;
+}
+
+.pp-btn--primary:hover {
+    background-color: rgb(195, 82, 48);
+}
+
+.pp-btn--secondary {
+    background-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-color: rgb(232, 196, 168);
+    color: rgb(162, 139, 121);
+}
+
+.pp-btn--secondary:hover {
+    background-color: rgb(250, 245, 240);
+}
+
+/* ── 收纳状态 ────────────────────────────────────────────── */
+
+.pp-collapsed .pp-header {
+    display: none;
+}
+
+.pp-collapsed .pp-actions {
+    display: none;
+}
+
+/* 收纳时背景仅包裹时钟本体，去除所有额外空间 */
+.pp-collapsed.pp-root {
+    width: auto;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.pp-collapsed .pp-body {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.pp-collapsed .pp-clock {
+    margin-right: 0;
+}
+
+/* ── 收纳按钮 ────────────────────────────────────────────── */
+
+.pp-btn-collapse {
+    align-self: flex-end;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(232, 196, 168);
+    background-color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+    margin-top: 8px;
+    padding: 0;
+}
+
+.pp-btn-collapse:hover {
+    background-color: rgb(255, 245, 238);
+}
+
+/* 收纳模式下隐藏收纳按钮 */
+.pp-collapsed .pp-btn-collapse {
+    display: none;
+}
