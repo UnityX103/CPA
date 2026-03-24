@@ -56,10 +56,9 @@ namespace APP.Pomodoro.Command
                 Debug.Log("[PomodoroInitialize] 已加载持久化状态。");
             }
 
-            // 按恢复后的偏好应用显示器/置顶/锚点
+            // 按恢复后的偏好应用显示器/置顶
             wps.MoveToMonitor(model.TargetMonitorIndex.Value);
             wps.SetTopmost(model.IsTopmost.Value);
-            wps.MoveTo(model.WindowAnchor.Value);
         }
     }
 }

@@ -14,8 +14,6 @@ namespace APP.Pomodoro.System
         /// <summary>设置窗口置顶状态</summary>
         void SetTopmost(bool isTopmost);
 
-        /// <summary>更新窗口锚点并物理移动窗口到屏幕顶端或底端</summary>
-        void MoveTo(PomodoroWindowAnchor anchor);
 
         /// <summary>临时置顶窗口（不改变 Model 偏好），用于阶段切换提醒</summary>
         void JumpToScreenTop();

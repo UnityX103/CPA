@@ -36,14 +36,28 @@ namespace APP.Pomodoro.System
             int previousIndex = model.TargetMonitorIndex.Value;
             model.TargetMonitorIndex.Value = safeIndex;
 
-            // 仅在显示器实际切换时重新定位窗口
             if (safeIndex == previousIndex || _uwc == null)
             {
                 return;
             }
 
-            Debug.Log($"[WindowPositionSystem] MoveToMonitor({previousIndex} → {safeIndex})");
-            MoveTo(model.WindowAnchor.Value);
+            Rect monitorRect = UniWindowController.GetMonitorRect(safeIndex);
+            if (monitorRect.width <= 0f || monitorRect.height <= 0f)
+            {
+                Debug.LogWarning($"[WindowPositionSystem] 无法获取显示器 {safeIndex} 的有效区域。");
+                return;
+            }
+
+            float x = monitorRect.x;
+            float y = model.WindowAnchor.Value == PomodoroWindowAnchor.Top
+                ? monitorRect.y + _verticalMargin
+                : monitorRect.y + monitorRect.height - _windowHeight - _verticalMargin;
+
+            _uwc.windowPosition = new Vector2(x, y);
+            _uwc.windowSize = new Vector2(monitorRect.width, _windowHeight);
+            Debug.Log(
+                $"[WindowPositionSystem] MoveToMonitor({previousIndex} → {safeIndex}): " +
+                $"position=({x}, {y}), size=({monitorRect.width}, {_windowHeight})");
         }
 
         public void SetTopmost(bool isTopmost)
@@ -56,44 +70,6 @@ namespace APP.Pomodoro.System
                 _uwc.isTopmost = isTopmost;
                 Debug.Log($"[WindowPositionSystem] SetTopmost({isTopmost})");
             }
-        }
-
-        /// <summary>
-        /// 物理移动窗口到屏幕顶端或底端（不修改 CSS 布局）。
-        /// </summary>
-        public void MoveTo(PomodoroWindowAnchor anchor)
-        {
-            if (_uwc == null)
-            {
-                Debug.LogWarning("[WindowPositionSystem] UniWindowController 未初始化，跳过物理定位。");
-                return;
-            }
-
-            IPomodoroModel model = this.GetModel<IPomodoroModel>();
-            int monitorIndex = model.TargetMonitorIndex.Value;
-            int monitorCount = UniWindowController.GetMonitorCount();
-            if (monitorCount <= 0)
-            {
-                return;
-            }
-
-            int safeIndex = Mathf.Clamp(monitorIndex, 0, monitorCount - 1);
-            Rect monitorRect = UniWindowController.GetMonitorRect(safeIndex);
-            if (monitorRect.width <= 0f || monitorRect.height <= 0f)
-            {
-                Debug.LogWarning($"[WindowPositionSystem] 无法获取显示器 {safeIndex} 的有效区域。");
-                return;
-            }
-
-            float x = monitorRect.x;
-            float y = anchor == PomodoroWindowAnchor.Top
-                ? monitorRect.y + _verticalMargin
-                : monitorRect.y + monitorRect.height - _windowHeight - _verticalMargin;
-
-            _uwc.windowPosition = new Vector2(x, y);
-            _uwc.windowSize = new Vector2(monitorRect.width, _windowHeight);
-
-            Debug.Log($"[WindowPositionSystem] MoveTo({anchor}): position=({x}, {y}), size=({monitorRect.width}, {_windowHeight})");
         }
 
         /// <summary>
