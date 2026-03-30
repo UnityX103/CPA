@@ -4,7 +4,10 @@
       "Bash(*)",
       "mcp__UnityMCP__*",
       "WebFetch(domain:github.com)",
-      "mcp__codex__codex"
+      "mcp__codex__codex",
+      "WebFetch(domain:docs.unity3d.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [
       "Bash(rm *)",
