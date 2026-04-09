@@ -1,0 +1,15 @@
+{
+  "id": "3",
+  "subject": "[Unity-UI] PlayerCard + DraggableElement + DeskWindow 集成 (Phase 4)",
+  "description": "## 你的子任务: Unity UI Layer - UI Toolkit 玩家面板\n\n完整子任务规格文件: /Users/xpy/Desktop/NanZhai/CPA/.omc/team-tasks/pomodoro-mp/worker-3-unity-ui.md\n\n立即执行: 读取上面这个 .md 文件 (里面有完整的 5 个新建文件 + 3 个测试 + 3 个修改文件清单、Step 4.1-4.7 实施要点、DraggableElement 细节、DeskWindowController M-5 修订点), 然后严格按照规格实施。\n\n文件所有权: 只写 Assets/UI_V2/** + Assets/Tests/EditMode/PlayerCardTests/** + Assets/Scenes/MainV2.unity (场景挂载, 通过 MCP)。严禁写 Server/**、Assets/Scripts/APP/Network/**、Assets/Scripts/APP/Pomodoro/** (包括 GameApp.cs)。\n\n总方案参考: /Users/xpy/Desktop/NanZhai/CPA/.omc/plans/multiplayer-pomodoro-plan.md (只读, Phase 4 的 Step 4.1-4.7 + Implementation Notes 必读)\n项目规范: /Users/xpy/Desktop/NanZhai/CPA/CLAUDE.md (QFramework 规范)\n工作目录: /Users/xpy/Desktop/NanZhai/CPA\n\n关键注意事项 (方案 M-5 修订 + Implementation Notes):\n1. DeskWindowController root PointerDown 改为 TrickleDown.NoTrickleDown (冒泡阶段), 让 StopPropagation 真正生效\n2. 白名单检查必须循环向上遍历祖先 (GetFirstAncestorOfType 只查直系, 不够)\n3. player-card-layer 必须 pickingMode = PickingMode.Ignore\n4. DraggableElement 单指针桌面假设 (第二根手指按下行为未定义, v1 可接受)\n5. DeskWindowController.Update 里 Cmd_PomodoroTick(Time.deltaTime) 之后新增 IStateSyncSystem.Tick(Time.unscaledDeltaTime)\n6. PlayerCard.uss 必须与本地面板视觉区分 (只读感, AC-4)\n\n依赖协调: 本任务依赖 Worker 2 的 APP.Network.Model.IRoomModel / RemotePlayerData / E_* 事件 / Cmd_*. 建议先完成不依赖 Worker 2 的部分 (PlayerCard.uxml/.uss + DraggableElement.cs + 测试框架), 然后查询 task 2 状态, 待其到 IN_PROGRESS 或 DONE 后再完成依赖部分。若遇到符号未定义, 通过 mailbox 向 worker-2 发 status_check 协商。\n\n完成标准:\n1. 5 个新文件 + 3 个修改文件完成\n2. Unity 编译 0 错误\n3. EditMode 测试 (PlayerCardTests) 全部通过\n4. DeskWindow 拖拽不触发收纳 (手工验证或 PlayMode 测试)\n5. transition 任务到 DONE\n6. mailbox 发送摘要给 leader-fixed",
+  "status": "in_progress",
+  "owner": "worker-3",
+  "result": null,
+  "created_at": "2026-04-09T07:36:13.979Z",
+  "version": 3,
+  "claim": {
+    "owner": "worker-3",
+    "token": "c91a77e9-ca46-46f7-b8af-a3f8e99f4652",
+    "leased_until": "2026-04-09T07:54:25.271Z"
+  }
+}

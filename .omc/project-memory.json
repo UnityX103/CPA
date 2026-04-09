@@ -1,0 +1,492 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775702310708,
+  "projectRoot": "/Users/xpy/Desktop/NanZhai/CPA",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "AUI": {
+      "path": "AUI",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1775702310685,
+      "keyFiles": [
+        "MaokenAssortedSans.ttf",
+        "PUI.pen"
+      ]
+    },
+    "Assets": {
+      "path": "Assets",
+      "purpose": "Static assets",
+      "fileCount": 16,
+      "lastAccessed": 1775702310689,
+      "keyFiles": [
+        "Editor.meta",
+        "FigmaTest.unity",
+        "FigmaTest.unity.meta",
+        "Plugins.meta",
+        "Prefabs.meta"
+      ]
+    },
+    "Builds": {
+      "path": "Builds",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775702310689,
+      "keyFiles": []
+    },
+    "Library": {
+      "path": "Library",
+      "purpose": null,
+      "fileCount": 30,
+      "lastAccessed": 1775702310689,
+      "keyFiles": [
+        "AnnotationManager",
+        "ArtifactDB",
+        "ArtifactDB-lock",
+        "BuildPlayer.prefs",
+        "BuildProfileContext.asset"
+      ]
+    },
+    "Logs": {
+      "path": "Logs",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775702310689,
+      "keyFiles": [
+        "AssetImportWorker0-prev.log",
+        "AssetImportWorker1-prev.log",
+        "shadercompiler-UnityShaderCompiler-0.log"
+      ]
+    },
+    "Packages": {
+      "path": "Packages",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "manifest.json",
+        "packages-lock.json"
+      ]
+    },
+    "ProjectSettings": {
+      "path": "ProjectSettings",
+      "purpose": null,
+      "fileCount": 24,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "AudioManager.asset",
+        "BurstAotSettings_StandaloneOSX.json",
+        "ClusterInputManager.asset",
+        "DynamicsManager.asset",
+        "EditorBuildSettings.asset"
+      ]
+    },
+    "Temp": {
+      "path": "Temp",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "FSTimeGet-4e29b163654b846ff96cf64bd553b2b4",
+        "UnityLockfile",
+        "workerlic"
+      ]
+    },
+    "TestResults": {
+      "path": "TestResults",
+      "purpose": null,
+      "fileCount": 20,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "CURRENT_STATUS.md",
+        "FINAL_STATUS_REPORT.md",
+        "PLAYER_TEST_GUIDE.md",
+        "PlayerTestResults.xml",
+        "PlayerTestResults2.xml"
+      ]
+    },
+    "TestVideo": {
+      "path": "TestVideo",
+      "purpose": null,
+      "fileCount": 20,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "AppMonitorVisualTest_20260307_173051.mp4",
+        "AppMonitorVisualTest_20260307_173529.mp4",
+        "AppMonitorVisualTest_20260309_105310.mp4",
+        "AppMonitorVisualTest_20260309_105331.mp4",
+        "MacOSAppMonitor_PlayerTest_20260309_120107.mp4"
+      ]
+    },
+    "UIElementsSchema": {
+      "path": "UIElementsSchema",
+      "purpose": null,
+      "fileCount": 17,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "UIElements.xsd",
+        "Unity.Profiling.Editor.UI.xsd",
+        "Unity.Profiling.Editor.xsd",
+        "Unity.UI.Builder.xsd",
+        "UnityEditor.Accessibility.xsd"
+      ]
+    },
+    "UserSettings": {
+      "path": "UserSettings",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "EditorUserSettings.asset",
+        "Search.index",
+        "Search.settings"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 2,
+      "lastAccessed": 1775702310690,
+      "keyFiles": [
+        "PACKAGE_CONFIG.md",
+        "USAGE.md"
+      ]
+    },
+    "localpackage": {
+      "path": "localpackage",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775702310690,
+      "keyFiles": []
+    },
+    "obj": {
+      "path": "obj",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775702310690,
+      "keyFiles": []
+    },
+    "Builds/Build": {
+      "path": "Builds/Build",
+      "purpose": "Build output",
+      "fileCount": 2,
+      "lastAccessed": 1775702310691,
+      "keyFiles": [
+        "build_single_exe.sh",
+        "强制番茄钟.exe"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "Assets",
+      "accessCount": 10,
+      "lastAccessed": 1775719423572,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/DeskWindowController.cs",
+      "accessCount": 9,
+      "lastAccessed": 1775719408412,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/GameApp.cs",
+      "accessCount": 7,
+      "lastAccessed": 1775719411647,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2",
+      "accessCount": 5,
+      "lastAccessed": 1775719034804,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/System/PomodoroTimerSystem.cs",
+      "accessCount": 5,
+      "lastAccessed": 1775719409226,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Model/IPomodoroModel.cs",
+      "accessCount": 5,
+      "lastAccessed": 1775719411122,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Event/PomodoroEvents.cs",
+      "accessCount": 4,
+      "lastAccessed": 1775719409943,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 4,
+      "lastAccessed": 1775719420617,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro",
+      "accessCount": 4,
+      "lastAccessed": 1775719562656,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/DeskWindow.uxml",
+      "accessCount": 4,
+      "lastAccessed": 1775719562669,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Model/PomodoroEnums.cs",
+      "accessCount": 3,
+      "lastAccessed": 1775717949834,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Model/PomodoroModel.cs",
+      "accessCount": 3,
+      "lastAccessed": 1775717970774,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroControls.cs",
+      "accessCount": 3,
+      "lastAccessed": 1775719410336,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml",
+      "accessCount": 3,
+      "lastAccessed": 1775719562605,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Plugins/macOS/Info.plist",
+      "accessCount": 3,
+      "lastAccessed": 1775719562718,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 2,
+      "lastAccessed": 1775010948562,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/QFramework.cs",
+      "accessCount": 2,
+      "lastAccessed": 1775717670558,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/System/WindowPositionSystem.cs",
+      "accessCount": 2,
+      "lastAccessed": 1775717678733,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Plugins/macOS/AppMonitor.entitlements",
+      "accessCount": 2,
+      "lastAccessed": 1775717930163,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command",
+      "accessCount": 2,
+      "lastAccessed": 1775717948862,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/DeskWindow.uss",
+      "accessCount": 2,
+      "lastAccessed": 1775717957089,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts",
+      "accessCount": 2,
+      "lastAccessed": 1775717969478,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Model",
+      "accessCount": 2,
+      "lastAccessed": 1775719032107,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/PomodoroPanelView.cs",
+      "accessCount": 2,
+      "lastAccessed": 1775719418961,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/System/IPomodoroTimerSystem.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702855841,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/System/IWindowPositionSystem.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702856471,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroInitialize.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702861276,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/ClockView.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702864918,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Config/PomodoroConfig.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702868813,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/PomodoroPanel.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775702869233,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroSetTopmost.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702872762,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroApplySettings.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702873145,
+      "type": "file"
+    },
+    {
+      "path": "AUI/desk-window-next/package.json",
+      "accessCount": 1,
+      "lastAccessed": 1775702884824,
+      "type": "file"
+    },
+    {
+      "path": "AUI/desk-window-next/components/DeskWindow.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775702888693,
+      "type": "file"
+    },
+    {
+      "path": "AUI/desk-window-next/app/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775702888741,
+      "type": "file"
+    },
+    {
+      "path": "AUI/desk-window-next/components/PomodoroSettingsPanel.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775702893065,
+      "type": "file"
+    },
+    {
+      "path": "AUI/desk-window-next/components/OnlineSettingsPanel.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775702893098,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroJumpToScreenTop.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702901339,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroSetMonitor.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702901807,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroApplyMetaSettings.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702901873,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroRevertTopmost.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775702905415,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775702906043,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Clock.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775702906094,
+      "type": "file"
+    },
+    {
+      "path": "AppMonitor.csproj",
+      "accessCount": 1,
+      "lastAccessed": 1775703206215,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP",
+      "accessCount": 1,
+      "lastAccessed": 1775718579033,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/Editor/BuildScript.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775719562633,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/Editor/MacOSBuildPostProcessor.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775719562687,
+      "type": "directory"
+    }
+  ],
+  "userDirectives": []
+}

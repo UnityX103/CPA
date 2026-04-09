@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "name": "team-codex-executor-worker-tea",
+  "task": "Worker 1: 你是桌宠多人番茄钟实施 team 的其中一个 codex executor worker (team-name: pomodoro-mp-i; Worker 2: 你是桌宠多人番茄钟实施 team 的其中一个 codex executor worker (team-name: pomodoro-mp-i; Worker 3: 你是桌宠多人番茄钟实施 team 的其中一个 codex executor worker (team-name: pomodoro-mp-i",
+  "leader": {
+    "session_id": "omc-team-team-codex-executor-worker-tea-mnr5xzbe:0",
+    "worker_id": "leader-fixed",
+    "role": "leader"
+  },
+  "policy": {
+    "display_mode": "split_pane",
+    "worker_launch_mode": "interactive",
+    "dispatch_mode": "hook_preferred_with_fallback",
+    "dispatch_ack_timeout_ms": 15000
+  },
+  "governance": {
+    "delegation_only": false,
+    "plan_approval_required": false,
+    "nested_teams_allowed": false,
+    "one_team_per_leader_session": true,
+    "cleanup_requires_all_workers_inactive": true
+  },
+  "permissions_snapshot": {
+    "approval_mode": "default",
+    "sandbox_mode": "default",
+    "network_access": false
+  },
+  "tmux_session": "omc-team-team-codex-executor-worker-tea-mnr5xzbe:0",
+  "worker_count": 3,
+  "workers": [
+    {
+      "name": "worker-1",
+      "index": 1,
+      "role": "executor",
+      "assigned_tasks": [],
+      "working_dir": "/Users/xpy/Desktop/NanZhai/CPA",
+      "pane_id": "%1"
+    },
+    {
+      "name": "worker-2",
+      "index": 2,
+      "role": "executor",
+      "assigned_tasks": [],
+      "working_dir": "/Users/xpy/Desktop/NanZhai/CPA",
+      "pane_id": "%2"
+    },
+    {
+      "name": "worker-3",
+      "index": 3,
+      "role": "executor",
+      "assigned_tasks": [],
+      "working_dir": "/Users/xpy/Desktop/NanZhai/CPA",
+      "pane_id": "%3"
+    }
+  ],
+  "next_task_id": 4,
+  "created_at": "2026-04-09T07:36:14.453Z",
+  "leader_cwd": "/Users/xpy/Desktop/NanZhai/CPA",
+  "team_state_root": "/Users/xpy/Desktop/NanZhai/CPA/.omc/state/team/team-codex-executor-worker-tea",
+  "workspace_mode": "single",
+  "leader_pane_id": "%0",
+  "hud_pane_id": null,
+  "resize_hook_name": null,
+  "resize_hook_target": null
+}

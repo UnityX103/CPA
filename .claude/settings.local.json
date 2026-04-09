@@ -7,7 +7,12 @@
       "mcp__codex__codex",
       "WebFetch(domain:docs.unity3d.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "WebSearch",
+      "WebFetch(domain:docs.pencil.dev)",
+      "WebFetch(domain:pencil.dev)",
+      "WebFetch(domain:dev.classmethod.jp)",
+      "mcp__pencil__get_editor_state"
     ],
     "deny": [
       "Bash(rm *)",
@@ -17,5 +22,9 @@
       "Bash(* rm\t*)",
       "Bash(unlink *)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "pencil"
+  ]
 }

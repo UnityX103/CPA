@@ -1,5 +1,5 @@
 {
-  "version": "2.9",
+  "version": "2.10",
   "children": [
     {
       "type": "frame",
@@ -32,7 +32,14 @@
               "type": "ref",
               "ref": "ztG6B",
               "name": "titleRef",
-              "x": 0
+              "x": 0,
+              "width": "fit_content",
+              "height": "fit_content",
+              "descendants": {
+                "NkQs8": {
+                  "y": 20
+                }
+              }
             },
             {
               "id": "85MsI",
@@ -45,10 +52,13 @@
               "padding": 4,
               "width": 44,
               "x": 488,
+              "y": 3.5,
               "descendants": {
                 "hTGM9": {
                   "width": 18,
-                  "height": 18
+                  "height": 18,
+                  "x": 22,
+                  "y": 4
                 }
               }
             }
@@ -241,10 +251,14 @@
                   "fill": "#6366F1",
                   "height": 26,
                   "padding": 4,
+                  "x": 472,
+                  "y": 14,
                   "descendants": {
                     "hTGM9": {
                       "width": 18,
-                      "height": 18
+                      "height": 18,
+                      "x": 22,
+                      "y": 4
                     }
                   }
                 }
@@ -322,12 +336,17 @@
           "type": "ref",
           "ref": "ztG6B",
           "name": "newHead",
+          "width": "fit_content",
+          "height": "fit_content",
+          "x": 20,
+          "y": 20,
           "descendants": {
             "EmxQf": {
               "content": "联机模式"
             },
             "NkQs8": {
-              "content": "连接、同步与隐私选项。"
+              "content": "连接、同步与隐私选项。",
+              "y": 20
             }
           }
         },
@@ -420,12 +439,15 @@
               "type": "ref",
               "ref": "ztG6B",
               "name": "newTitle",
+              "width": "fit_content",
+              "height": "fit_content",
               "descendants": {
                 "EmxQf": {
                   "content": "宠物设置"
                 },
                 "NkQs8": {
-                  "content": "开发中。。。"
+                  "content": "开发中。。。",
+                  "y": 20
                 }
               }
             }
@@ -437,7 +459,7 @@
       "type": "frame",
       "id": "YRqeB",
       "x": 701,
-      "y": -399,
+      "y": -398,
       "name": "pomodoroPanel",
       "reusable": true,
       "width": "fit_content(230)",
@@ -484,7 +506,15 @@
               "id": "xbZEs",
               "type": "ref",
               "ref": "G6VSO",
-              "name": "collapseBtn"
+              "name": "collapseBtn",
+              "x": 98,
+              "y": 1,
+              "descendants": {
+                "3eDk5": {
+                  "x": 4,
+                  "y": 4
+                }
+              }
             },
             {
               "type": "frame",
@@ -564,9 +594,12 @@
                   "ref": "Za5wE",
                   "name": "startBtn",
                   "width": "fill_container",
+                  "height": "fit_content",
                   "descendants": {
                     "oNDTH": {
-                      "content": "开始"
+                      "content": "开始",
+                      "x": 19,
+                      "y": 7
                     }
                   }
                 },
@@ -576,9 +609,13 @@
                   "ref": "RPLJq",
                   "name": "skipBtn",
                   "width": "fill_container",
+                  "height": "fit_content",
+                  "y": 34,
                   "descendants": {
                     "zgOkx": {
-                      "content": "跳过"
+                      "content": "跳过",
+                      "x": 19,
+                      "y": 7
                     }
                   }
                 }
@@ -836,6 +873,14 @@
         "TqjjH": {
           "y": 2
         },
+        "xbZEs": {
+          "x": 98,
+          "y": 1
+        },
+        "xbZEs/3eDk5": {
+          "x": 4,
+          "y": 4
+        },
         "XcJUF": {
           "width": "fit_content",
           "height": "fit_content",
@@ -875,10 +920,23 @@
           "y": 9
         },
         "xBxOF": {
-          "fill": "#E08C10"
+          "fill": "#E08C10",
+          "width": "fill_container",
+          "height": "fit_content"
         },
         "xBxOF/oNDTH": {
-          "content": "恢复"
+          "content": "恢复",
+          "x": 19,
+          "y": 7
+        },
+        "14BjF": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "y": 34
+        },
+        "14BjF/zgOkx": {
+          "x": 19,
+          "y": 7
         }
       }
     },
@@ -900,6 +958,14 @@
         },
         "TqjjH": {
           "y": 2
+        },
+        "xbZEs": {
+          "x": 98,
+          "y": 1
+        },
+        "xbZEs/3eDk5": {
+          "x": 4,
+          "y": 4
         },
         "XcJUF": {
           "width": "fit_content",
@@ -927,8 +993,23 @@
           "x": 116,
           "y": 9
         },
+        "xBxOF": {
+          "width": "fill_container",
+          "height": "fit_content"
+        },
         "xBxOF/oNDTH": {
-          "content": "暂停"
+          "content": "暂停",
+          "x": 19,
+          "y": 7
+        },
+        "14BjF": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "y": 34
+        },
+        "14BjF/zgOkx": {
+          "x": 19,
+          "y": 7
         }
       }
     },
@@ -944,23 +1025,61 @@
       "descendants": {
         "S3Nbk": {
           "width": "fill_container(84)",
-          "enabled": false
+          "enabled": false,
+          "height": "fit_content"
+        },
+        "TqjjH": {
+          "y": 2
+        },
+        "xbZEs": {
+          "x": 43,
+          "y": 1
+        },
+        "xbZEs/3eDk5": {
+          "x": 4,
+          "y": 4
         },
         "XcJUF": {
-          "x": 48
+          "x": 48,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "90Tqv": {
+          "x": 9,
+          "y": 10
         },
         "DiaNW": {
           "width": "fill_container",
           "justifyContent": "center",
           "padding": 0,
-          "y": 18
+          "y": 18,
+          "height": "fit_content",
+          "x": 18
         },
         "6SX3a": {
           "x": 3
         },
         "p4kgU": {
           "width": "fill_container(1)",
-          "enabled": false
+          "enabled": false,
+          "height": "fit_content"
+        },
+        "xBxOF": {
+          "width": "fill_container",
+          "height": "fit_content"
+        },
+        "xBxOF/oNDTH": {
+          "x": -11.5,
+          "y": 7
+        },
+        "14BjF": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "y": 34
+        },
+        "14BjF/zgOkx": {
+          "x": -11.5,
+          "y": 7
         }
       }
     },
@@ -1002,11 +1121,54 @@
               "x": 18,
               "y": 18
             },
+            "TqjjH": {
+              "y": 2
+            },
+            "xbZEs": {
+              "x": 98,
+              "y": 1
+            },
+            "xbZEs/3eDk5": {
+              "x": 4,
+              "y": 4
+            },
+            "XcJUF": {
+              "width": "fit_content",
+              "height": "fit_content",
+              "x": 158
+            },
+            "90Tqv": {
+              "x": 9,
+              "y": 10
+            },
             "DiaNW": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 18,
               "y": 60
+            },
+            "p4kgU": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "x": 116,
+              "y": 9
+            },
+            "xBxOF": {
+              "width": "fill_container",
+              "height": "fit_content"
+            },
+            "xBxOF/oNDTH": {
+              "x": 19,
+              "y": 7
+            },
+            "14BjF": {
+              "width": "fill_container",
+              "height": "fit_content",
+              "y": 34
+            },
+            "14BjF/zgOkx": {
+              "x": 19,
+              "y": 7
             }
           }
         },
@@ -1018,22 +1180,42 @@
           "x": 270,
           "y": 20,
           "width": "fit_content",
+          "height": "fit_content",
           "descendants": {
             "mVLgt": {
               "width": "fit_content",
-              "x": 0
+              "x": 0,
+              "height": "fit_content"
             },
             "kQDRe": {
               "x": 12,
-              "y": 8
+              "y": 8,
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "kQDRe/Z8Bzt": {
+              "x": 12,
+              "y": 6
             },
             "kddG2": {
               "x": 99,
-              "y": 8
+              "y": 8,
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "kddG2/Z8Bzt": {
+              "x": 12,
+              "y": 6
             },
             "L55Yj": {
               "x": 175,
-              "y": 8
+              "y": 8,
+              "width": "fit_content",
+              "height": "fit_content"
+            },
+            "L55Yj/Z8Bzt": {
+              "x": 12,
+              "y": 6
             },
             "5ZlKI": {
               "x": 67.5,
@@ -1060,10 +1242,17 @@
                     "position": 1
                   }
                 ]
-              }
+              },
+              "y": 51
+            },
+            "I18kh": {
+              "x": 30,
+              "y": 34
             },
             "vMeEe": {
-              "content": "这是一只宠物"
+              "content": "这是一只宠物",
+              "x": 24,
+              "y": 94
             }
           }
         }
@@ -1079,11 +1268,38 @@
       "x": 1078,
       "y": -399,
       "descendants": {
+        "S3Nbk": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "x": 18,
+          "y": 18
+        },
+        "TqjjH": {
+          "y": 2
+        },
+        "xbZEs": {
+          "x": 98,
+          "y": 1
+        },
+        "xbZEs/3eDk5": {
+          "x": 4,
+          "y": 4
+        },
         "XcJUF": {
-          "x": 158
+          "x": 158,
+          "width": "fit_content",
+          "height": "fit_content"
         },
         "90Tqv": {
-          "fill": "#B5A49A"
+          "fill": "#B5A49A",
+          "x": 9,
+          "y": 10
+        },
+        "DiaNW": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "x": 18,
+          "y": 60
         },
         "6SX3a/mMujP": {
           "fill": "#E0D9D3"
@@ -1095,11 +1311,30 @@
         "6SX3a/CeG66": {
           "enabled": false
         },
+        "p4kgU": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "x": 116,
+          "y": 9
+        },
         "xBxOF": {
-          "fill": "#B5A49A"
+          "fill": "#B5A49A",
+          "width": "fill_container",
+          "height": "fit_content"
+        },
+        "xBxOF/oNDTH": {
+          "x": 19,
+          "y": 7
+        },
+        "14BjF": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "y": 34
         },
         "14BjF/zgOkx": {
-          "content": "重置"
+          "content": "重置",
+          "x": 19,
+          "y": 7
         }
       }
     },
@@ -1139,10 +1374,14 @@
               "name": "tab1",
               "x": 12,
               "y": 8,
+              "width": "fit_content",
+              "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
                   "content": "番茄钟设置",
-                  "fill": "#D15F3D"
+                  "fill": "#D15F3D",
+                  "x": 12,
+                  "y": 6
                 }
               }
             },
@@ -1154,10 +1393,14 @@
               "name": "tab2",
               "x": 99,
               "y": 8,
+              "width": "fit_content",
+              "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
                   "content": "联网设置",
-                  "fill": "#6366F1"
+                  "fill": "#6366F1",
+                  "x": 12,
+                  "y": 6
                 }
               }
             },
@@ -1169,10 +1412,14 @@
               "name": "tab3",
               "x": 175,
               "y": 8,
+              "width": "fit_content",
+              "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
                   "content": "宠物设置",
-                  "fill": "#D97706"
+                  "fill": "#D97706",
+                  "x": 12,
+                  "y": 6
                 }
               }
             }
@@ -1265,25 +1512,54 @@
         "settingsBtnState": "show"
       },
       "width": "fit_content",
+      "height": "fit_content",
       "descendants": {
         "mVLgt": {
           "width": "fit_content",
-          "x": 0
+          "x": 0,
+          "height": "fit_content"
         },
         "kQDRe": {
           "x": 12,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "kQDRe/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "kddG2": {
           "x": 99,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "kddG2/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "L55Yj": {
           "x": 175,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "L55Yj/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "5ZlKI": {
-          "x": 67.5
+          "x": 67.5,
+          "y": 51
+        },
+        "I18kh": {
+          "x": 30,
+          "y": 34
+        },
+        "vMeEe": {
+          "x": 48,
+          "y": 94
         }
       }
     },
@@ -1302,23 +1578,50 @@
       "descendants": {
         "mVLgt": {
           "enabled": false,
-          "width": "fit_content"
+          "width": "fit_content",
+          "height": "fit_content"
         },
         "kQDRe": {
           "x": 12,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "kQDRe/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "kddG2": {
           "x": 99,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "kddG2/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "L55Yj": {
           "x": 175,
-          "y": 8
+          "y": 8,
+          "width": "fit_content",
+          "height": "fit_content"
+        },
+        "L55Yj/Z8Bzt": {
+          "x": 12,
+          "y": 6
         },
         "5ZlKI": {
           "x": 0,
           "y": 0
+        },
+        "I18kh": {
+          "x": 30,
+          "y": 34
+        },
+        "vMeEe": {
+          "x": 48,
+          "y": 94
         }
       }
     },
@@ -1842,6 +2145,14 @@
         "TqjjH": {
           "y": 2
         },
+        "xbZEs": {
+          "x": 98,
+          "y": 1
+        },
+        "xbZEs/3eDk5": {
+          "x": 4,
+          "y": 4
+        },
         "XcJUF": {
           "width": "fit_content",
           "height": "fit_content",
@@ -1884,10 +2195,23 @@
           "y": 9
         },
         "xBxOF": {
-          "fill": "#B5A49A"
+          "fill": "#B5A49A",
+          "width": "fill_container",
+          "height": "fit_content"
         },
         "xBxOF/oNDTH": {
-          "content": "开始"
+          "content": "开始",
+          "x": 19,
+          "y": 7
+        },
+        "14BjF": {
+          "width": "fill_container",
+          "height": "fit_content",
+          "y": 34
+        },
+        "14BjF/zgOkx": {
+          "x": 19,
+          "y": 7
         }
       }
     }

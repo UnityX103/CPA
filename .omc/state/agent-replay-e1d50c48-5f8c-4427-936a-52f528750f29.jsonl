@@ -1,0 +1,11 @@
+{"t":0,"agent":"a1c9a3b","agent_type":"architect","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a1c9a3b","agent_type":"architect","event":"agent_stop","success":true,"duration_ms":216156}
+{"t":0,"agent":"a00e6a0","agent_type":"critic","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a00e6a0","agent_type":"critic","event":"agent_stop","success":true,"duration_ms":311614}
+{"t":0,"agent":"a41eb1b","agent_type":"architect","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a41eb1b","agent_type":"architect","event":"agent_stop","success":true,"duration_ms":203747}
+{"t":0,"agent":"a03da44","agent_type":"architect","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a03da44","agent_type":"architect","event":"agent_stop","success":true,"duration_ms":187412}
+{"t":0,"agent":"af173f3","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"a99de7d","agent_type":"critic","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"omc-teams"}
