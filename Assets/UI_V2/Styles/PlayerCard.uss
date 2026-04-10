@@ -1,0 +1,234 @@
+/*
+ * PlayerCard.uss
+ * 远端玩家卡片样式（由 Pencil 设计稿 drqFB 转译而来）
+ * 保留既有 Controller/View 查询约定：
+ *   - .pc-root 为绝对定位根节点，叠加 pc-phase-* 切换阶段配色
+ *   - Label#pc-name / #pc-phase / #pc-time / #pc-rounds / #pc-app
+ */
+
+/* ── 卡片层（全屏覆盖，由 PlayerCardManager 动态创建）── */
+.player-card-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* ── 根容器 ──────────────────────────────────────────── */
+.pc-root {
+    position: absolute;
+    width: 232px;
+    padding: 14px;
+    border-radius: 20px;
+    background-color: rgba(255, 253, 251, 0.95);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── 顶部：头像 + 名字列 ─────────────────────────────── */
+.pc-head {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.pc-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 19px;
+    background-color: rgb(250, 221, 202);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    flex-shrink: 0;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.pc-name-col {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.pc-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
+    -unity-text-align: middle-left;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 阶段徽章：胶囊 ──────────────────────────────────── */
+.pc-phase-badge {
+    flex-direction: row;
+    align-items: center;
+    align-self: flex-start;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 8px;
+    padding-right: 10px;
+    border-radius: 10px;
+    background-color: rgb(181, 164, 154);
+}
+
+.pc-phase-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(255, 255, 255);
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.pc-phase {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-left;
+}
+
+/* ── 时间行：时间 + 运行点 + 轮次胶囊 ──────────────── */
+.pc-time-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.pc-time-wrap {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 1;
+}
+
+.pc-time {
+    font-size: 34px;
+    -unity-font-style: bold;
+    color: rgb(181, 164, 154);
+    -unity-text-align: middle-left;
+    margin-right: 8px;
+}
+
+.pc-run-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgb(181, 164, 154);
+    flex-shrink: 0;
+}
+
+.pc-rounds-pill {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 12px;
+    background-color: rgb(255, 243, 234);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    flex-shrink: 0;
+}
+
+.pc-rounds {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+}
+
+/* ── 分割线 ─────────────────────────────────────────── */
+.pc-divider {
+    height: 1px;
+    background-color: rgb(243, 227, 211);
+    margin-bottom: 12px;
+}
+
+/* ── 底部：图标 + 应用/状态描述 ─────────────────────── */
+.pc-footer {
+    flex-direction: row;
+    align-items: center;
+}
+
+.pc-foot-icon {
+    width: 13px;
+    height: 13px;
+    border-radius: 2px;
+    background-color: rgb(181, 164, 154);
+    margin-right: 6px;
+    flex-shrink: 0;
+    opacity: 0.55;
+}
+
+.pc-app {
+    font-size: 11px;
+    -unity-font-style: normal;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 阶段配色：仅切换时间/徽章/运行点的颜色 ─────────── */
+
+/* idle —— 灰调（默认基色已是 idle） */
+.pc-phase-idle .pc-phase-badge {
+    background-color: rgb(181, 164, 154);
+}
+.pc-phase-idle .pc-time {
+    color: rgb(181, 164, 154);
+}
+.pc-phase-idle .pc-run-dot {
+    background-color: rgb(181, 164, 154);
+}
+
+/* focus —— 番茄橙 */
+.pc-phase-focus .pc-phase-badge {
+    background-color: rgb(209, 95, 61);
+}
+.pc-phase-focus .pc-time {
+    color: rgb(209, 95, 61);
+}
+.pc-phase-focus .pc-run-dot {
+    background-color: rgb(209, 95, 61);
+}
+
+/* rest —— 抹茶绿 */
+.pc-phase-rest .pc-phase-badge {
+    background-color: rgb(52, 168, 83);
+}
+.pc-phase-rest .pc-time {
+    color: rgb(52, 168, 83);
+}
+.pc-phase-rest .pc-run-dot {
+    background-color: rgb(52, 168, 83);
+}
+
+/* paused —— 琥珀 */
+.pc-phase-paused .pc-phase-badge {
+    background-color: rgb(224, 140, 16);
+}
+.pc-phase-paused .pc-time {
+    color: rgb(224, 140, 16);
+}
+.pc-phase-paused .pc-run-dot {
+    background-color: rgba(224, 140, 16, 0);
+}
+
+/* completed —— 靛紫 */
+.pc-phase-completed .pc-phase-badge {
+    background-color: rgb(99, 102, 241);
+}
+.pc-phase-completed .pc-time {
+    color: rgb(99, 102, 241);
+}
+.pc-phase-completed .pc-run-dot {
+    background-color: rgba(99, 102, 241, 0);
+}

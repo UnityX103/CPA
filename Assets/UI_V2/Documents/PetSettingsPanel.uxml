@@ -2,24 +2,26 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
+  <ui:Template name="BackButton" src="BackButton.uxml"/>
   <ui:Style src="../Styles/Variables.uss"/>
   <ui:Style src="../Styles/PetSettingsPanel.uss"/>
+  <!-- 组件 USS -->
+  <ui:Style src="../Styles/Components/PanelTitle.uss"/>
 
   <!--
     PetSettingsPanel — 宠物设置面板
-    对应 TSX: components/PetSettingsPanel.tsx
-    尺寸: width 484px
+    对应 Pencil 组件: Pet Settings Panel (id = v2ZgA)
+    尺寸: width 572px
   -->
   <ui:VisualElement name="pet-root" class="pet-root">
 
-    <ui:VisualElement class="pet-header">
-      <ui:VisualElement class="pet-badge-wrap">
-        <ui:VisualElement class="pet-badge-icon" style="background-image: url('../Icons/icon-panel-pet.png');"/>
-      </ui:VisualElement>
-      <ui:VisualElement class="pet-title-text">
-        <ui:Label class="pet-title" text="宠物设置"/>
-        <ui:Label class="pet-subtitle" text="开发中。。。"/>
-      </ui:VisualElement>
+    <!-- 统一返回按钮（Pencil 组件: Button/Back）-->
+    <ui:Instance name="pet-back" template="BackButton" class="panel-back-instance"/>
+
+    <!-- Pencil: Panel Title 组件 (ztG6B) -->
+    <ui:VisualElement class="pet-head">
+      <ui:Label class="comp-panel-title__title" text="宠物设置"/>
+      <ui:Label class="comp-panel-title__subtitle" text="开发中。。。"/>
     </ui:VisualElement>
 
   </ui:VisualElement>

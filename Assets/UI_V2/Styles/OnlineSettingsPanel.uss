@@ -1,102 +1,72 @@
 /*
  * OnlineSettingsPanel.uss
- * 对应 TSX: components/OnlineSettingsPanel.tsx
+ * 对应 Pencil 组件: Online Settings Panel (id = 8Le5R)
+ * 当前为开发中占位状态。
  */
 
 .osp-root {
-    width: 484px;
+    width: 572px; /* Pencil: fill_container(572) */
     flex-direction: column;
     border-radius: 20px;
     border-width: 1px;
-    border-color: rgb(241, 229, 216);
+    border-color: rgb(241, 229, 216); /* #F1E5D8 */
     background-color: rgb(255, 255, 255);
     padding: 20px;
     overflow: hidden;
 }
 
-/* ── 顶部 header ─────────────────────────────────────────── */
-
-.osp-header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 16px;
+/* ── Panel Title（样式已迁移至 Components/PanelTitle.uss）─── */
+.osp-title-instance {
+    margin-bottom: 16px; /* gap: 16 */
 }
 
-.osp-title-group {
-    flex-direction: row;
-    align-items: center;
-}
+/* ── 开发中占位卡片（Pencil: onlDevCard / 6p0SI）─────────── */
 
-.osp-badge-wrap {
-    width: 38px;
-    height: 38px;
-    border-radius: 9999px;
-    background-color: rgb(238, 242, 255);
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-right: 12px;
-}
-
-.osp-badge-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.osp-title-text {
-    flex-direction: column;
-}
-
-.osp-title {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: rgb(26, 26, 26);
-    -unity-text-align: middle-left;
-    margin-bottom: 2px;
-}
-
-.osp-subtitle {
-    font-size: 13px;
-    color: rgb(107, 114, 128);
-    -unity-text-align: middle-left;
-}
-
-/* 绿色 Toggle */
-.osp-toggle {
-    flex-direction: row-reverse;
-}
-
-/* ── 内容区 ──────────────────────────────────────────────── */
-
-.osp-content {
+.osp-dev-card {
     flex-direction: column;
     border-radius: 16px;
-    background-color: rgb(246, 247, 248);
+    background-color: rgb(246, 247, 248); /* #F6F7F8 */
     padding: 16px;
 }
 
-.osp-content-tag {
+.osp-dev-label {
     font-size: 12px;
     -unity-font-style: bold;
-    color: rgb(156, 163, 175);
+    color: rgb(156, 163, 175); /* #9CA3AF */
     -unity-text-align: middle-left;
-    margin-bottom: 8px;
+    margin-bottom: 8px; /* gap: 8 */
 }
 
-.osp-content-title {
+.osp-dev-text {
     font-size: 24px;
     -unity-font-style: bold;
-    color: rgb(26, 26, 26);
+    color: rgb(26, 26, 26); /* #1A1A1A */
     -unity-text-align: middle-left;
-    margin-bottom: 8px;
+    margin-bottom: 8px; /* gap: 8 */
 }
 
-.osp-content-desc {
+.osp-dev-sub {
     font-size: 13px;
-    color: rgb(107, 114, 128);
-    -unity-text-align: upper-left;
+    color: rgb(107, 114, 128); /* #6B7280 */
+    -unity-text-align: middle-left;
     white-space: normal;
+}
+
+/* ── 错误提示 ──────────────────────────────────────────────
+ *   默认隐藏；C# 通过 EnableInClassList("is-visible", bool) 切换显示。
+ */
+
+.osp-error {
+    margin-top: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: rgb(209, 95, 61); /* #D15F3D */
+    background-color: rgb(255, 241, 238); /* #FFF1EE */
+    border-radius: 8px;
+    white-space: normal;
+    display: none;
+}
+
+.osp-error.is-visible {
+    display: flex;
 }

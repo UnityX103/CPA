@@ -1,0 +1,118 @@
+using System.Collections.Generic;
+using APP.Network.Command;
+using APP.Network.Event;
+using APP.Network.Model;
+using APP.Network.System;
+using QFramework;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace APP.Pomodoro.Controller
+{
+    /// <summary>
+    /// 联机设置面板控制器（独立 UIDocument）。
+    /// 管理 OnlineSettingsPanel.uxml 的 UI 绑定与联机逻辑。
+    /// </summary>
+    [RequireComponent(typeof(UIDocument))]
+    public sealed class OnlineSettingsPanelController : MonoBehaviour, IController, ISettingsPanel
+    {
+        // ─── QFramework ──────────────────────────────────────────
+        IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
+
+        // ─── 私有字段 ────────────────────────────────────────────
+        private UIDocument _uiDocument;
+        private IRoomModel _roomModel;
+        private Label _ospError;
+        private bool _modelBound;
+
+        // ─── ISettingsPanel ──────────────────────────────────────
+        public bool IsVisible => _uiDocument != null && _uiDocument.enabled;
+
+        public void Show()
+        {
+            if (_uiDocument == null)
+            {
+                return;
+            }
+
+            _uiDocument.enabled = true;
+            BindUI();
+        }
+
+        public void Hide()
+        {
+            if (_uiDocument == null)
+            {
+                return;
+            }
+
+            _uiDocument.enabled = false;
+        }
+
+        // ─── Unity 生命周期 ──────────────────────────────────────
+
+        private void Awake()
+        {
+            _uiDocument = GetComponent<UIDocument>();
+        }
+
+        private void Start()
+        {
+            if (_uiDocument != null)
+            {
+                _uiDocument.enabled = false;
+            }
+        }
+
+        // ─── UI 绑定 ─────────────────────────────────────────────
+
+        /// <summary>
+        /// 每次 Show 时重新绑定 UI 元素。
+        /// UIDocument.enabled false→true 会重建 visual tree，旧回调全部失效。
+        /// </summary>
+        private void BindUI()
+        {
+            if (_uiDocument == null)
+            {
+                return;
+            }
+
+            VisualElement root = _uiDocument.rootVisualElement;
+            if (root == null)
+            {
+                return;
+            }
+
+            // 返回按钮（每次重建都需重新绑定）
+            root.Q<Button>("back-btn")?.RegisterCallback<PointerUpEvent>(_ => Hide());
+
+            // 错误提示（每次重新查找，因为 visual tree 已重建）
+            _ospError = root.Q<Label>("osp-error");
+
+            // Model/Event 订阅（仅一次，生命周期绑定 GameObject）
+            if (!_modelBound)
+            {
+                _roomModel = this.GetModel<IRoomModel>();
+
+                this.RegisterEvent<E_NetworkError>(OnNetworkError)
+                    .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+                _modelBound = true;
+            }
+        }
+
+        // ─── 事件回调 ────────────────────────────────────────────
+
+        private void OnNetworkError(E_NetworkError e)
+        {
+            if (_ospError == null)
+            {
+                return;
+            }
+
+            string message = string.IsNullOrEmpty(e.Message) ? e.Code : e.Message;
+            _ospError.text = message ?? string.Empty;
+            _ospError.EnableInClassList("is-visible", !string.IsNullOrEmpty(message));
+        }
+    }
+}

@@ -20,6 +20,12 @@
       "padding": 20,
       "children": [
         {
+          "id": "q369I",
+          "type": "ref",
+          "ref": "UAbZg",
+          "name": "pspBack"
+        },
+        {
           "type": "frame",
           "id": "wpCU1",
           "name": "pomoHead",
@@ -332,6 +338,12 @@
       "padding": 20,
       "children": [
         {
+          "id": "Vp1Tr",
+          "type": "ref",
+          "ref": "UAbZg",
+          "name": "ospBack"
+        },
+        {
           "id": "q7pJd",
           "type": "ref",
           "ref": "ztG6B",
@@ -339,7 +351,7 @@
           "width": "fit_content",
           "height": "fit_content",
           "x": 20,
-          "y": 20,
+          "y": 68,
           "descendants": {
             "EmxQf": {
               "content": "联机模式"
@@ -426,6 +438,14 @@
       "gap": 16,
       "padding": 20,
       "children": [
+        {
+          "id": "SqjqS",
+          "type": "ref",
+          "ref": "UAbZg",
+          "name": "petBack",
+          "x": 20,
+          "y": 20
+        },
         {
           "type": "frame",
           "id": "g1YnN",
@@ -1198,7 +1218,7 @@
               "y": 6
             },
             "kddG2": {
-              "x": 99,
+              "x": 77,
               "y": 8,
               "width": "fit_content",
               "height": "fit_content"
@@ -1208,7 +1228,7 @@
               "y": 6
             },
             "L55Yj": {
-              "x": 175,
+              "x": 131,
               "y": 8,
               "width": "fit_content",
               "height": "fit_content"
@@ -1218,7 +1238,7 @@
               "y": 6
             },
             "5ZlKI": {
-              "x": 67.5,
+              "x": 34.5,
               "fill": {
                 "type": "gradient",
                 "gradientType": "radial",
@@ -1378,7 +1398,7 @@
               "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
-                  "content": "番茄钟设置",
+                  "content": "番茄钟",
                   "fill": "#D15F3D",
                   "x": 12,
                   "y": 6
@@ -1391,13 +1411,13 @@
               "ref": "JZ0T6",
               "fill": "#EEF2FF",
               "name": "tab2",
-              "x": 99,
+              "x": 77,
               "y": 8,
               "width": "fit_content",
               "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
-                  "content": "联网设置",
+                  "content": "联网",
                   "fill": "#6366F1",
                   "x": 12,
                   "y": 6
@@ -1410,13 +1430,13 @@
               "ref": "JZ0T6",
               "fill": "#FFF7D9",
               "name": "tab3",
-              "x": 175,
+              "x": 131,
               "y": 8,
               "width": "fit_content",
               "height": "fit_content",
               "descendants": {
                 "Z8Bzt": {
-                  "content": "宠物设置",
+                  "content": "宠物",
                   "fill": "#D97706",
                   "x": 12,
                   "y": 6
@@ -1530,7 +1550,7 @@
           "y": 6
         },
         "kddG2": {
-          "x": 99,
+          "x": 77,
           "y": 8,
           "width": "fit_content",
           "height": "fit_content"
@@ -1540,7 +1560,7 @@
           "y": 6
         },
         "L55Yj": {
-          "x": 175,
+          "x": 131,
           "y": 8,
           "width": "fit_content",
           "height": "fit_content"
@@ -1550,7 +1570,7 @@
           "y": 6
         },
         "5ZlKI": {
-          "x": 67.5,
+          "x": 34.5,
           "y": 51
         },
         "I18kh": {
@@ -1592,7 +1612,7 @@
           "y": 6
         },
         "kddG2": {
-          "x": 99,
+          "x": 77,
           "y": 8,
           "width": "fit_content",
           "height": "fit_content"
@@ -1602,7 +1622,7 @@
           "y": 6
         },
         "L55Yj": {
-          "x": 175,
+          "x": 131,
           "y": 8,
           "width": "fit_content",
           "height": "fit_content"
@@ -1629,9 +1649,10 @@
       "type": "frame",
       "id": "ce62U",
       "x": 100,
-      "y": -500,
+      "y": -501,
       "name": "Component Library",
       "width": 420,
+      "height": 775,
       "fill": "#FAFAF9",
       "cornerRadius": 24,
       "stroke": {
@@ -2214,6 +2235,416 @@
           "y": 7
         }
       }
+    },
+    {
+      "type": "frame",
+      "id": "drqFB",
+      "x": 701,
+      "y": 780,
+      "name": "PlayerCard",
+      "reusable": true,
+      "width": 232,
+      "fill": "#FFFDFBF2",
+      "cornerRadius": 20,
+      "stroke": {
+        "thickness": 1,
+        "fill": "#EFDCCD"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#C7855430",
+        "offset": {
+          "x": 0,
+          "y": 14
+        },
+        "blur": 24
+      },
+      "layout": "vertical",
+      "gap": 12,
+      "padding": 14,
+      "children": [
+        {
+          "type": "frame",
+          "id": "tyyE3",
+          "name": "head",
+          "width": "fill_container",
+          "gap": 10,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "faUx5",
+              "name": "avatar",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "radial",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "width": 1,
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFE5D9",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5D5C0",
+                    "position": 1
+                  }
+                ]
+              },
+              "width": 38,
+              "height": 38,
+              "stroke": {
+                "thickness": 1,
+                "fill": "#EFDCCD"
+              }
+            },
+            {
+              "type": "frame",
+              "id": "MHhxc",
+              "name": "nameCol",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "1JKIJ",
+                  "name": "name",
+                  "fill": "#5B4636",
+                  "content": "远端玩家",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "jtlhD",
+                  "name": "phaseBadge",
+                  "fill": "#D15F3D",
+                  "cornerRadius": 999,
+                  "gap": 5,
+                  "padding": [
+                    3,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "bI6eO",
+                      "name": "dot",
+                      "fill": "#FFFFFF",
+                      "width": 6,
+                      "height": 6
+                    },
+                    {
+                      "type": "text",
+                      "id": "qfQSq",
+                      "name": "label",
+                      "fill": "#FFFFFF",
+                      "content": "专注中",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CjhcN",
+          "name": "timeRow",
+          "width": "fill_container",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "5lTZx",
+              "name": "timeWrap",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "pMVUl",
+                  "name": "time",
+                  "fill": "#D15F3D",
+                  "content": "24:38",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 36,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "ellipse",
+                  "id": "t5189",
+                  "name": "runDot",
+                  "fill": "#D15F3D",
+                  "width": 8,
+                  "height": 8
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eGfPq",
+              "name": "roundsPill",
+              "fill": "#FFF3EA",
+              "cornerRadius": 999,
+              "stroke": {
+                "thickness": 1,
+                "fill": "#EFDCCD"
+              },
+              "gap": 3,
+              "padding": [
+                5,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "7XQkG",
+                  "name": "rounds",
+                  "fill": "#A28B79",
+                  "content": "3/4 轮",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "cnbrI",
+          "name": "divider",
+          "fill": "#F3E3D3",
+          "width": "fill_container",
+          "height": 1
+        },
+        {
+          "type": "frame",
+          "id": "cwbeK",
+          "name": "footer",
+          "width": "fill_container",
+          "gap": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "KN0dX",
+              "name": "footIcon",
+              "width": 13,
+              "height": 13,
+              "iconFontName": "app-window",
+              "iconFontFamily": "lucide",
+              "fill": "#B5A49A"
+            },
+            {
+              "type": "text",
+              "id": "rFcKx",
+              "name": "footText",
+              "fill": "#A28B79",
+              "content": "VS Code",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hwZs8",
+      "x": 980,
+      "y": 780,
+      "name": "PlayerCard/States",
+      "fill": "#F7ECE0",
+      "cornerRadius": 16,
+      "gap": 24,
+      "padding": 24,
+      "children": [
+        {
+          "id": "rW2e2",
+          "type": "ref",
+          "ref": "drqFB",
+          "name": "PlayerCard/focus"
+        },
+        {
+          "id": "ti1ni",
+          "type": "ref",
+          "ref": "drqFB",
+          "name": "PlayerCard/break",
+          "descendants": {
+            "1JKIJ": {
+              "content": "小南瓜"
+            },
+            "jtlhD": {
+              "fill": "#34A853"
+            },
+            "qfQSq": {
+              "content": "休息中"
+            },
+            "pMVUl": {
+              "fill": "#34A853"
+            },
+            "t5189": {
+              "fill": "#34A853"
+            },
+            "7XQkG": {
+              "content": "2/4 轮"
+            },
+            "rFcKx": {
+              "content": "放空中"
+            }
+          }
+        },
+        {
+          "id": "dsjTg",
+          "type": "ref",
+          "ref": "drqFB",
+          "name": "PlayerCard/paused",
+          "descendants": {
+            "1JKIJ": {
+              "content": "咸鱼之王"
+            },
+            "jtlhD": {
+              "fill": "#E08C10"
+            },
+            "qfQSq": {
+              "content": "已暂停"
+            },
+            "pMVUl": {
+              "fill": "#E08C10"
+            },
+            "t5189": {
+              "fill": "#E08C10",
+              "enabled": false
+            },
+            "7XQkG": {
+              "content": "1/4 轮"
+            },
+            "rFcKx": {
+              "content": "Figma"
+            }
+          }
+        },
+        {
+          "id": "5ur7B",
+          "type": "ref",
+          "ref": "drqFB",
+          "name": "PlayerCard/completed",
+          "descendants": {
+            "1JKIJ": {
+              "content": "茶叶蛋"
+            },
+            "jtlhD": {
+              "fill": "#6366F1"
+            },
+            "qfQSq": {
+              "content": "已完成"
+            },
+            "pMVUl": {
+              "fill": "#6366F1",
+              "content": "00:00"
+            },
+            "t5189": {
+              "fill": "#6366F1",
+              "enabled": false
+            },
+            "7XQkG": {
+              "content": "4/4 轮"
+            },
+            "rFcKx": {
+              "content": "今日目标达成"
+            }
+          }
+        },
+        {
+          "id": "5hKOW",
+          "type": "ref",
+          "ref": "drqFB",
+          "name": "PlayerCard/idle",
+          "descendants": {
+            "1JKIJ": {
+              "content": "摸鱼大佬"
+            },
+            "jtlhD": {
+              "fill": "#B5A49A"
+            },
+            "qfQSq": {
+              "content": "未开始"
+            },
+            "pMVUl": {
+              "fill": "#B5A49A",
+              "content": "25:00"
+            },
+            "t5189": {
+              "fill": "#B5A49A",
+              "enabled": false
+            },
+            "7XQkG": {
+              "content": "0/4 轮"
+            },
+            "rFcKx": {
+              "content": "待机中"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "UAbZg",
+      "x": 134,
+      "y": 164,
+      "name": "Button/Back",
+      "reusable": true,
+      "fill": "#FFF7E8",
+      "cornerRadius": 999,
+      "stroke": {
+        "thickness": 1,
+        "fill": "#F1E5D8"
+      },
+      "gap": 8,
+      "padding": [
+        8,
+        14
+      ],
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "icon_font",
+          "id": "n9XdL",
+          "name": "backIcon",
+          "width": 16,
+          "height": 16,
+          "iconFontName": "chevron-left",
+          "iconFontFamily": "lucide",
+          "fill": "#A28B79"
+        },
+        {
+          "type": "text",
+          "id": "iTA1G",
+          "name": "backLabel",
+          "fill": "#5B4636",
+          "content": "返回",
+          "fontFamily": "MaokenAssortedSans",
+          "fontSize": 13,
+          "fontWeight": "700"
+        }
+      ]
     }
   ],
   "themes": {

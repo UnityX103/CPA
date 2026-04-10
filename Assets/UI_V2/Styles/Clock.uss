@@ -2,11 +2,10 @@
  * Clock.uss — 来自 Pencil 设计稿 cont-clock-component (nNt9z)
  *
  * Pencil 设计数据：
- *   组件尺寸      104×104
- *   环形轨道      ellipse 104×104, innerRadius=0.77 → 环宽12px, 内圆半径40px, inset=12px
- *   clock-time    pos(20,34) size(64×21) fontSize=23 fontWeight=500
- *   clock-state   pos(25,61) size(53×13) fontSize=13 fontWeight=500
- *   时间/状态间距  state.y(61) - time.bottom(55) = 6px → margin-top:6px
+ *   组件尺寸      78×78
+ *   环形轨道      ellipse 78×78, innerRadius=0.77 → 环宽9px, inset=9px
+ *   clock-time    fontSize=17 fontWeight=500
+ *   clock-state   fontSize=13 fontWeight=500
  *
  * 不支持特性处理：
  *   conic-gradient 进度环  → C# Painter2D 绘制真实进度弧（ClockView.cs）
@@ -25,8 +24,8 @@
  *   size 默认 104；position: relative（Unity VisualElement 默认）
  */
 .clock-root {
-    width: 104px;
-    height: 104px;
+    width: 78px;
+    height: 78px;
     flex-shrink: 0;
     position: relative;
 }
@@ -52,14 +51,14 @@
 /* ── 内白圆 ─────────────────────────────────────────────────
  * TSX: <div className="absolute rounded-full bg-[#FFFEFD]"
  *           style={{ inset }} />
- *   inset = Math.round(104 * 0.115) = 12px
+ *   inset = Math.round(78 * 0.115) ≈ 9px
  */
 .clock-inner {
     position: absolute;
-    left: 12px;
-    top: 12px;
-    right: 12px;
-    bottom: 12px;
+    left: 9px;
+    top: 9px;
+    right: 9px;
+    bottom: 9px;
     border-radius: 9999px;
     background-color: rgb(255, 254, 253);
 }
@@ -79,26 +78,63 @@
 }
 
 /* ── 时间 Label ─────────────────────────────────────────────
- * Pencil: pos(20,34) size(64×21) fontSize=23 fontWeight=500
+ * Pencil: cont-clock-component (nNt9z) time-value fontSize=17 fontWeight=500
  *   fontWeight=500 → Unity 无 medium 权重，使用 normal 近似
- *   默认 off/paused 颜色: #5B4636（运行时 C# 动态覆盖）
+ *   默认颜色在这里声明，状态颜色通过 .clock-root.state-* 覆盖
  */
 .clock-time {
-    font-size: 23px;
+    font-size: 17px;
     -unity-font-style: normal;
     -unity-text-align: middle-center;
-    color: rgb(91, 70, 54); /* off/paused: #5B4636 */
+    color: rgb(91, 70, 54); /* 默认/off/paused/focus/completed: #5B4636 */
 }
 
 /* ── 状态 Label ─────────────────────────────────────────────
- * Pencil: pos(25,61) size(53×13) fontSize=13 fontWeight=500
- *   state.y(61) - time.bottom(55) = 6px → margin-top: 6px
- *   默认 off 颜色: #B5A49A（运行时 C# 动态覆盖）
+ * Pencil: cont-clock-component (nNt9z) state-label fontSize=13 fontWeight=500
+ *   state.y(44) - time.bottom(39) = 5px（考虑字形 baseline 近似 6px）
  */
 .clock-state {
     font-size: 13px;
     -unity-font-style: normal;
     -unity-text-align: middle-center;
-    color: rgb(181, 164, 154); /* off: #B5A49A */
+    color: rgb(181, 164, 154); /* 默认/idle/completed: #B5A49A */
     margin-top: 6px;
+}
+
+/* ── 状态主题（由 ClockView.SetStateClass 切换）────────────
+ * 代码中仅切换 state-* class，颜色规则在 USS 中维护。
+ * Painter2D 环色保留在 C# 中（非样式，属于绘制参数）。
+ *
+ * idle / completed: 时间 #5B4636 / 状态 #B5A49A
+ * focus:            时间 #5B4636 / 状态 #D15F3D
+ * rest:             时间 #1D6B35 / 状态 #34A853
+ * paused:           时间 #5B4636 / 状态 #E08C10
+ */
+
+.clock-root.state-idle .clock-time,
+.clock-root.state-completed .clock-time,
+.clock-root.state-paused .clock-time,
+.clock-root.state-focus .clock-time {
+    color: rgb(91, 70, 54); /* #5B4636 */
+}
+
+.clock-root.state-rest .clock-time {
+    color: rgb(29, 107, 53); /* #1D6B35 */
+}
+
+.clock-root.state-idle .clock-state,
+.clock-root.state-completed .clock-state {
+    color: rgb(181, 164, 154); /* #B5A49A */
+}
+
+.clock-root.state-focus .clock-state {
+    color: rgb(209, 95, 61); /* #D15F3D */
+}
+
+.clock-root.state-rest .clock-state {
+    color: rgb(52, 168, 83); /* #34A853 */
+}
+
+.clock-root.state-paused .clock-state {
+    color: rgb(224, 140, 16); /* #E08C10 */
 }

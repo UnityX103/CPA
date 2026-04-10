@@ -1,0 +1,22 @@
+/*
+ * ButtonIcon.uss
+ * Pencil 组件: Button/Icon (G6VSO)
+ * 22x22 圆形图标按钮（收纳按钮）
+ */
+
+.comp-btn-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    border-width: 0;
+    background-color: rgb(240, 224, 208); /* #F0E0D0 */
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(162, 139, 121); /* #A28B79 */
+    -unity-text-align: middle-center;
+    padding: 0;
+}
+
+.comp-btn-icon:hover {
+    background-color: rgb(232, 214, 196);
+}

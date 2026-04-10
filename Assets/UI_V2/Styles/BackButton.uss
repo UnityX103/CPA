@@ -1,0 +1,49 @@
+/*
+ * BackButton.uss
+ * 对应 Pencil 组件: Button/Back (id = UAbZg)
+ * 视觉: 胶囊按钮 + 左侧 chevron + "返回" 文字
+ */
+
+/* 面板中的 TemplateContainer 外壳：保证按钮贴左上角，不被拉伸 */
+.panel-back-instance {
+    align-self: flex-start;
+    flex-shrink: 0;
+    margin-bottom: 16px; /* 匹配面板 gap: 16 */
+}
+
+.back-btn {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;              /* height/2 ≈ 16px，避免 9999px 椭圆问题 */
+    border-width: 1px;
+    border-color: rgb(241, 229, 216); /* #F1E5D8 */
+    background-color: rgb(255, 247, 232); /* #FFF7E8 */
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
+    align-self: flex-start;            /* 紧贴左上角，不拉伸 */
+    min-height: 32px;
+}
+
+.back-btn:hover {
+    background-color: rgb(255, 238, 212);
+    border-color: rgb(232, 196, 168);
+}
+
+.back-btn-icon {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(162, 139, 121);         /* #A28B79 */
+    -unity-text-align: middle-center;
+    margin-right: 8px; /* Pencil gap: 8 */
+    margin-bottom: 2px;                /* 视觉对齐，Unicode ‹ 的基线偏下 */
+}
+
+.back-btn-label {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);            /* #5B4636 */
+    -unity-text-align: middle-left;
+}

@@ -1,3 +1,5 @@
+using APP.Network.Model;
+using APP.Network.System;
 using APP.Pomodoro.Model;
 using APP.Pomodoro.System;
 using QFramework;
@@ -13,8 +15,11 @@ namespace APP.Pomodoro
         protected override void Init()
         {
             RegisterModel<IPomodoroModel>(new PomodoroModel());
+            RegisterModel<IRoomModel>(new RoomModel());
             RegisterSystem<IPomodoroTimerSystem>(new PomodoroTimerSystem());
             RegisterSystem<IWindowPositionSystem>(new WindowPositionSystem());
+            RegisterSystem<INetworkSystem>(new NetworkSystem());
+            RegisterSystem<IStateSyncSystem>(new StateSyncSystem());
         }
     }
 }

@@ -1,0 +1,55 @@
+/*
+ * ToggleSwitch.uss
+ * Pencil 组件: Toggle Switch (NGo9f)
+ * 44x24 滑动开关，重写 Unity Toggle 默认视觉
+ */
+
+/* ── 根容器 ── */
+.comp-toggle-switch {
+    width: 44px;
+    height: 24px;
+    flex-direction: row;
+    padding: 0;
+    margin: 0;
+}
+
+/* ── 隐藏默认 Label ── */
+.comp-toggle-switch .unity-toggle__label {
+    display: none;
+}
+
+/* ── 轨道（input 区域）── */
+.comp-toggle-switch .unity-toggle__input {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: rgb(209, 213, 219); /* 关闭态：灰色 #D1D5DB */
+    border-width: 0;
+    padding: 2px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* ── 旋钮（checkmark 充当） ── */
+.comp-toggle-switch .unity-toggle__checkmark {
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background-color: rgb(255, 255, 255); /* #FFFFFF */
+    border-width: 0;
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0);
+    background-image: none;
+}
+
+/* ── 开启态 ── */
+.comp-toggle-switch:checked .unity-toggle__input {
+    background-color: rgb(34, 197, 94); /* #22C55E */
+    justify-content: flex-end;
+}
+
+.comp-toggle-switch:checked .unity-toggle__checkmark {
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0);
+}

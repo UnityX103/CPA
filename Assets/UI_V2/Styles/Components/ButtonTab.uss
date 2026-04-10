@@ -1,0 +1,44 @@
+/*
+ * ButtonTab.uss
+ * Pencil 组件: Button/Tab (JZ0T6)
+ * 药丸 Tab 按钮，默认番茄红配色，通过变体 class 切换配色
+ */
+
+.comp-btn-tab {
+    border-radius: 9999px;
+    border-width: 0;
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    /* 默认/番茄钟配色 */
+    background-color: rgb(255, 241, 238); /* #FFF1EE */
+    color: rgb(209, 95, 61); /* #D15F3D */
+}
+
+.comp-btn-tab:hover {
+    background-color: rgb(255, 228, 222);
+}
+
+/* ── 变体：联网（靛蓝）── */
+.comp-btn-tab--online {
+    background-color: rgb(238, 242, 255); /* #EEF2FF */
+    color: rgb(99, 102, 241); /* #6366F1 */
+}
+
+.comp-btn-tab--online:hover {
+    background-color: rgb(224, 230, 255);
+}
+
+/* ── 变体：宠物（琥珀）── */
+.comp-btn-tab--pet {
+    background-color: rgb(255, 247, 217); /* #FFF7D9 */
+    color: rgb(217, 119, 6); /* #D97706 */
+}
+
+.comp-btn-tab--pet:hover {
+    background-color: rgb(255, 238, 190);
+}

@@ -1,0 +1,25 @@
+/*
+ * ButtonSecondary.uss
+ * Pencil 组件: Button/Secondary (RPLJq)
+ * 圆角次按钮，白底 + #E8C4A8 描边
+ */
+
+.comp-btn-secondary {
+    border-radius: 9999px;
+    background-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-color: rgb(232, 196, 168); /* #E8C4A8 */
+    color: rgb(162, 139, 121); /* #A28B79 */
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow: hidden;
+}
+
+.comp-btn-secondary:hover {
+    background-color: rgb(250, 245, 240);
+}

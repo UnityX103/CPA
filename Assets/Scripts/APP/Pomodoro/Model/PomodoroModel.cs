@@ -47,7 +47,7 @@ namespace APP.Pomodoro.Model
         public int CompletionClipIndex;
     }
 
-    internal static class PomodoroPersistence
+    public static class PomodoroPersistence
     {
         private const string SaveKey = "APP.Pomodoro.PersistentState.v1";
         private static string _cachedJson;

@@ -1,0 +1,21 @@
+/*
+ * PanelTitle.uss
+ * Pencil 组件: Panel Title (ztG6B)
+ * 标题 + 副标题竖排布局
+ */
+
+.comp-panel-title {
+    flex-direction: column;
+}
+
+.comp-panel-title__title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+    margin-bottom: 2px; /* gap: 2 */
+}
+
+.comp-panel-title__subtitle {
+    font-size: 13px;
+    color: rgb(107, 114, 128); /* #6B7280 */
+}

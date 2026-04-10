@@ -15,7 +15,7 @@
 /* ── 根容器 ──────────────────────────────────────────────── */
 
 .psp-root {
-    width: 484px;
+    width: 572px; /* Pencil: fill_container(572) */
     flex-direction: column;
     border-radius: 20px;
     border-width: 1px;
@@ -29,58 +29,15 @@
 
 .psp-header {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
 }
 
-.psp-title-group {
-    flex-direction: row;
-    align-items: center;
-}
-
-/* 图标徽章（Pencil: pomoHeadLeft — 单独一列，space-between 自动分配间距） */
-.psp-badge-wrap {
-    width: 38px;
-    height: 38px;
-    border-radius: 9999px;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    /* margin-right 移除：改为 3 列 space-between，由父容器控制间距 */
-}
-
-.psp-badge-wrap--orange {
-    background-color: rgb(255, 241, 238);
-}
-
-.psp-badge-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-/* 标题文字（Pencil: pomoTitleWrap — 中间列，flex:1 撑开剩余空间，两侧留对称间距） */
-.psp-title-text {
-    flex-direction: column;
+/* 标题文字（已迁移至 Components/PanelTitle.uss，此处仅保留布局） */
+.psp-title-instance {
     flex: 1;
-    margin-left: 12px;
     margin-right: 12px;
-}
-
-.psp-title {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: rgb(26, 26, 26);
-    -unity-text-align: middle-left;
-    margin-bottom: 2px;
-}
-
-.psp-subtitle {
-    font-size: 13px;
-    color: rgb(107, 114, 128);
-    -unity-text-align: middle-left;
 }
 
 /* 状态开关区域 */
@@ -103,10 +60,7 @@
     margin-right: 8px;
 }
 
-/* Toggle 自定义样式（Unity 原生 Toggle 有自带样式，此处仅微调） */
-.psp-toggle {
-    flex-direction: row-reverse;
-}
+/* Toggle 样式已迁移至 Components/ToggleSwitch.uss */
 
 /* ── 指标卡片区（两列）────────────────────────────────────── */
 
@@ -201,20 +155,6 @@
 
 /* :last-child 不支持；PomodoroSettingsPanel.uxml 最后一个 psp-row 用 style="margin-bottom:0" */
 
-.psp-row-left {
-    flex-direction: row;
-    align-items: center;
-    flex: 1;
-}
-
-.psp-row-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    margin-right: 10px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
 .psp-row-label {
     font-size: 14px;
     color: rgb(26, 26, 26);
@@ -222,10 +162,7 @@
     flex: 1;
 }
 
-/* 小型 Toggle（阶段切换开关）*/
-.psp-row-toggle {
-    flex-direction: row-reverse;
-}
+/* Toggle 行内样式已迁移至 Components/ToggleSwitch.uss */
 
 .psp-row-value {
     font-size: 12px;

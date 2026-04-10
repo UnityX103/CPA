@@ -1,3 +1,4 @@
+using APP.Network.System;
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Config;
 using APP.Pomodoro.Model;
@@ -10,7 +11,7 @@ namespace APP.Pomodoro.Controller
 {
     /// <summary>
     /// DeskWindow 主控制器，负责整个桌面组件的 UI 交互逻辑。
-    /// 包含：菜单显隐、覆盖面板切换、番茄钟面板可见性管理。
+    /// 包含：Tab 按钮切换独立设置面板、番茄钟面板可见性管理。
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class DeskWindowController : MonoBehaviour, IController
@@ -25,36 +26,27 @@ namespace APP.Pomodoro.Controller
         [Header("番茄钟子面板视图")]
         [SerializeField] private PomodoroPanelView _pomodoroPanelView;
 
+        [Header("玩家卡片 UXML（多人番茄钟）")]
+        [SerializeField] private VisualTreeAsset _playerCardUxml;
+
+        [Header("设置面板（独立 UIDocument）")]
+        [SerializeField] private PomodoroSettingsPanelController _pomodoroSettingsPanel;
+        [SerializeField] private OnlineSettingsPanelController _onlineSettingsPanel;
+        [SerializeField] private PetSettingsPanelController _petSettingsPanel;
+
         // ─── 私有字段 ────────────────────────────────────────────
         private UIDocument     _uiDocument;
         private IPomodoroModel _model;
+        private PlayerCardManager _playerCardManager;
 
         // 主容器元素
         private VisualElement    _dwWrap;
-        private VisualElement    _panelOverlay;
         private TemplateContainer _pomodoroPanelContainer;
 
-        // 设置子面板
-        private TemplateContainer _panelPomodoroS;
-        private TemplateContainer _panelOnlineS;
-        private TemplateContainer _panelPetS;
-
-        // 覆盖层关闭按钮
-        private Button _overlayClose;
-
-        // 菜单按钮
+        // Tab 按钮
         private Button _btnPomodoro;
         private Button _btnOnline;
         private Button _btnPet;
-
-
-        // ─── 覆盖面板枚举 ────────────────────────────────────────
-        private enum ActivePanel
-        {
-            Pomodoro,
-            Online,
-            Pet,
-        }
 
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
@@ -92,18 +84,22 @@ namespace APP.Pomodoro.Controller
             if (_pomodoroPanelView != null && _pomodoroPanelContainer != null)
             {
                 _pomodoroPanelView.Init(_pomodoroPanelContainer);
-                // 默认可见但收纳
                 _pomodoroPanelView.SetVisible(true);
             }
             else if (_pomodoroPanelView != null)
             {
-                Debug.LogError("[DeskWindowController] 未找到 pomodoro-panel 节点，番茄钟面板无法初始化。请检查 DeskWindow.uxml 中是否存在 name=\"pomodoro-panel\" 的 Instance。");
+                Debug.LogError("[DeskWindowController] 未找到 pomodoro-panel 节点，番茄钟面板无法初始化。");
             }
+
+            // 7. 多人番茄钟：卡片管理器
+            _playerCardManager = new PlayerCardManager();
+            _playerCardManager.Initialize(_uiDocument.rootVisualElement, _playerCardUxml, gameObject);
         }
 
         private void Update()
         {
             this.SendCommand(new Cmd_PomodoroTick(Time.deltaTime));
+            this.GetSystem<IStateSyncSystem>().Tick(Time.unscaledDeltaTime);
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -133,85 +129,72 @@ namespace APP.Pomodoro.Controller
         {
             VisualElement root = _uiDocument.rootVisualElement;
 
-            // 1. 将 root 定位到右下角（全屏透明窗口坐标系）
-            root.style.justifyContent = Justify.FlexEnd;
-            root.style.alignItems     = Align.FlexEnd;
+            root.AddToClassList("dw-root-anchor");
 
-            // 2. 查找关键元素
-            _dwWrap       = root.Q<VisualElement>("dw-wrap");
-            _panelOverlay = root.Q<VisualElement>("panel-overlay");
-
-            // 番茄钟面板 TemplateContainer（PomodoroPanel.uxml 实例）
+            _dwWrap = root.Q<VisualElement>("dw-wrap");
             _pomodoroPanelContainer = root.Q<TemplateContainer>("pomodoro-panel");
 
-            // 各设置子面板
-            _panelPomodoroS = root.Q<TemplateContainer>("panel-pomodoro-s");
-            _panelOnlineS   = root.Q<TemplateContainer>("panel-online-s");
-            _panelPetS      = root.Q<TemplateContainer>("panel-pet-s");
-
-            // 覆盖层关闭按钮
-            _overlayClose = root.Q<Button>("overlay-close");
-
-            // 菜单按钮
+            // Tab 按钮
             _btnPomodoro = root.Q<Button>("btn-pomodoro");
             _btnOnline   = root.Q<Button>("btn-online");
             _btnPet      = root.Q<Button>("btn-pet");
 
-            // 3. 初始状态
-            _panelOverlay?.AddToClassList("hidden");    // 覆盖层默认隐藏
-
-            // 4. 点击 dw-wrap 外部 → 收纳番茄钟面板
+            // 点击 dw-wrap 外部 → 收纳番茄钟面板
             root.RegisterCallback<PointerDownEvent>(evt =>
             {
                 bool clickInDwWrap = _dwWrap != null && _dwWrap.worldBound.Contains(evt.position);
-                if (!clickInDwWrap)
+
+                bool clickInCardLayer = false;
+                if (evt.target is VisualElement target)
+                {
+                    VisualElement node = target;
+                    while (node != null)
+                    {
+                        if (node.name == "player-card-layer" || node.ClassListContains("pc-root"))
+                        {
+                            clickInCardLayer = true;
+                            break;
+                        }
+                        node = node.parent;
+                    }
+                }
+
+                if (!clickInDwWrap && !clickInCardLayer)
                 {
                     _pomodoroPanelView?.Collapse();
                 }
-            }, TrickleDown.TrickleDown);
+            });
 
-            // 覆盖层关闭按钮
-            _overlayClose?.RegisterCallback<PointerUpEvent>(_ => HideOverlay());
-
-            // 7. 菜单按钮事件
-            _btnPomodoro?.RegisterCallback<PointerUpEvent>(_ => ShowOverlayPanel(ActivePanel.Pomodoro));
-            _btnOnline?.RegisterCallback<PointerUpEvent>(_ => ShowOverlayPanel(ActivePanel.Online));
-            _btnPet?.RegisterCallback<PointerUpEvent>(_ => ShowOverlayPanel(ActivePanel.Pet));
+            // Tab 按钮事件 → 切换独立 UIDocument 面板
+            _btnPomodoro?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_pomodoroSettingsPanel));
+            _btnOnline?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_onlineSettingsPanel));
+            _btnPet?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_petSettingsPanel));
         }
 
+        // ─── 面板切换 ────────────────────────────────────────────
 
-        // ─── 覆盖面板控制 ────────────────────────────────────────
-
-        private void ShowOverlayPanel(ActivePanel panel)
+        private void TogglePanel(ISettingsPanel panel)
         {
-            _panelOverlay?.RemoveFromClassList("hidden");
-
-            // 根据目标面板显示对应子面板
-            if (_panelPomodoroS != null)
+            if (panel == null)
             {
-                _panelPomodoroS.style.display =
-                    panel == ActivePanel.Pomodoro ? DisplayStyle.Flex : DisplayStyle.None;
+                return;
             }
 
-            if (_panelOnlineS != null)
+            if (panel.IsVisible)
             {
-                _panelOnlineS.style.display =
-                    panel == ActivePanel.Online ? DisplayStyle.Flex : DisplayStyle.None;
+                panel.Hide();
+                return;
             }
 
-            if (_panelPetS != null)
-            {
-                _panelPetS.style.display =
-                    panel == ActivePanel.Pet ? DisplayStyle.Flex : DisplayStyle.None;
-            }
-
-            // 确保覆盖层在最顶层
-            _panelOverlay?.BringToFront();
+            HideAllPanels();
+            panel.Show();
         }
 
-        private void HideOverlay()
+        private void HideAllPanels()
         {
-            _panelOverlay?.AddToClassList("hidden");
+            _pomodoroSettingsPanel?.Hide();
+            _onlineSettingsPanel?.Hide();
+            _petSettingsPanel?.Hide();
         }
 
         // ─── 持久化 ──────────────────────────────────────────────

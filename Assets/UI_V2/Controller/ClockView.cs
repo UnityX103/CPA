@@ -30,35 +30,35 @@ namespace APP.Pomodoro.Controller
     public sealed class ClockView
     {
         // ─── 几何常量 ────────────────────────────────────────────
-        // 与 Pencil 设计稿对应：104×104，innerRadius=0.77 → 环宽 12px
-        private const float RingThickness = 12f;
+        // 与 Pencil 设计稿对应：78×78，innerRadius=0.77 → 环宽 9px
+        private const float RingThickness = 9f;
         private const float ArcStartDeg   = -90f; // 从顶部（12 点钟）开始
 
-        // ─── 颜色主题（对应 Clock.uss 注释中的 CLOCK_THEMES）────
+        // ─── Painter2D 环色（非样式，属于 2D 绘制参数，保留在 C# 中）─
         // focus: 橙红
         private static readonly Color FocusTrack    = new Color32(0xFF, 0xE5, 0xD9, 0xFF); // #FFE5D9
         private static readonly Color FocusProgress = new Color32(0xD1, 0x5F, 0x3D, 0xFF); // #D15F3D
-        private static readonly Color FocusValue    = new Color32(0x5B, 0x46, 0x36, 0xFF); // #5B4636
-        private static readonly Color FocusLabel    = new Color32(0xD1, 0x5F, 0x3D, 0xFF); // #D15F3D
 
         // rest: 绿色
         private static readonly Color RestTrack    = new Color32(0xC8, 0xED, 0xD5, 0xFF); // #C8EDD5
         private static readonly Color RestProgress = new Color32(0x34, 0xA8, 0x53, 0xFF); // #34A853
-        private static readonly Color RestValue    = new Color32(0x1D, 0x6B, 0x35, 0xFF); // #1D6B35
-        private static readonly Color RestLabel    = new Color32(0x34, 0xA8, 0x53, 0xFF); // #34A853
 
-        // off / idle / completed: 灰色
-        private static readonly Color OffRing  = new Color32(0xE0, 0xD9, 0xD3, 0xFF); // #E0D9D3
-        private static readonly Color OffValue = new Color32(0x5B, 0x46, 0x36, 0xFF); // #5B4636
-        private static readonly Color OffLabel = new Color32(0xB5, 0xA4, 0x9A, 0xFF); // #B5A49A
+        // off / idle / completed: 灰色（track/progress 同色以等效不显示进度）
+        private static readonly Color OffRing = new Color32(0xE0, 0xD9, 0xD3, 0xFF); // #E0D9D3
 
         // paused: 琥珀
         private static readonly Color PausedTrack    = new Color32(0xFF, 0xF0, 0xD4, 0xFF); // #FFF0D4
         private static readonly Color PausedProgress = new Color32(0xF5, 0xA6, 0x23, 0xFF); // #F5A623
-        private static readonly Color PausedValue    = new Color32(0x5B, 0x46, 0x36, 0xFF); // #5B4636
-        private static readonly Color PausedLabel    = new Color32(0xE0, 0x8C, 0x10, 0xFF); // #E08C10
+
+        // ─── 状态 class（文字颜色由 Clock.uss 维护）──────────────
+        private const string StateIdle      = "state-idle";
+        private const string StateFocus     = "state-focus";
+        private const string StateRest      = "state-rest";
+        private const string StatePaused    = "state-paused";
+        private const string StateCompleted = "state-completed";
 
         // ─── UXML 元素引用 ────────────────────────────────────────
+        private readonly VisualElement _clockRoot;
         private readonly VisualElement _ring;
         private readonly Label         _timeLabel;
         private readonly Label         _stateLabel;
@@ -67,6 +67,9 @@ namespace APP.Pomodoro.Controller
         private Color _trackColor    = OffRing;
         private Color _progressColor = OffRing;
         private float _progress;      // 0 ~ 1，1 = 全满
+
+        // 当前应用的状态 class（用于增量切换，避免重复 Add/Remove）
+        private string _currentStateClass;
 
         // ─── 构造 ─────────────────────────────────────────────────
 
@@ -82,6 +85,9 @@ namespace APP.Pomodoro.Controller
                 throw new ArgumentNullException(nameof(clockRoot));
             }
 
+            // Clock.uxml 根是 name="clock-root"；当通过 <ui:Instance> 嵌入时，
+            // 传入的是外层 TemplateContainer，需要再查一层。
+            _clockRoot  = clockRoot.Q<VisualElement>("clock-root") ?? clockRoot;
             _ring       = clockRoot.Q<VisualElement>("clock-ring");
             _timeLabel  = clockRoot.Q<Label>("clock-time");
             _stateLabel = clockRoot.Q<Label>("clock-state");
@@ -91,8 +97,8 @@ namespace APP.Pomodoro.Controller
                 _ring.generateVisualContent += DrawRing;
             }
 
-            // 初始渲染：idle 状态
-            ApplyTheme(OffRing, OffRing, OffValue, OffLabel, "未开始");
+            // 初始渲染：idle 状态（仅切换 class，不直接写样式）
+            ApplyState(StateIdle, OffRing, OffRing, "未开始");
         }
 
         // ─── 公开 API ─────────────────────────────────────────────
@@ -114,21 +120,21 @@ namespace APP.Pomodoro.Controller
             switch (displayState)
             {
                 case ClockDisplayState.Focus:
-                    ApplyTheme(FocusTrack, FocusProgress, FocusValue, FocusLabel, "专注中");
+                    ApplyState(StateFocus, FocusTrack, FocusProgress, "专注中");
                     break;
                 case ClockDisplayState.Rest:
-                    ApplyTheme(RestTrack, RestProgress, RestValue, RestLabel, "休息中");
+                    ApplyState(StateRest, RestTrack, RestProgress, "休息中");
                     break;
                 case ClockDisplayState.Paused:
-                    ApplyTheme(PausedTrack, PausedProgress, PausedValue, PausedLabel, "暂停中");
+                    ApplyState(StatePaused, PausedTrack, PausedProgress, "暂停中");
                     break;
                 case ClockDisplayState.Completed:
                     _progress = 0f;
-                    ApplyTheme(OffRing, OffRing, OffValue, OffLabel, "已完成");
+                    ApplyState(StateCompleted, OffRing, OffRing, "已完成");
                     break;
                 default: // Idle
                     _progress = 0f;
-                    ApplyTheme(OffRing, OffRing, OffValue, OffLabel, "未开始");
+                    ApplyState(StateIdle, OffRing, OffRing, "未开始");
                     break;
             }
 
@@ -151,17 +157,39 @@ namespace APP.Pomodoro.Controller
 
         // ─── 私有辅助 ─────────────────────────────────────────────
 
-        private void ApplyTheme(Color track, Color progress, Color valueColor, Color labelColor, string stateText)
+        /// <summary>
+        /// 切换到新的显示状态：
+        ///   1) Painter2D 环色（绘制参数，非样式）
+        ///   2) state-* class（文字颜色由 Clock.uss 维护）
+        ///   3) 状态文字内容
+        /// </summary>
+        private void ApplyState(string stateClass, Color track, Color progress, string stateText)
         {
             _trackColor    = track;
             _progressColor = progress;
 
-            if (_timeLabel  != null) _timeLabel.style.color  = new StyleColor(valueColor);
+            SetStateClass(stateClass);
+
             if (_stateLabel != null)
             {
-                _stateLabel.style.color = new StyleColor(labelColor);
-                _stateLabel.text        = stateText;
+                _stateLabel.text = stateText;
             }
+        }
+
+        private void SetStateClass(string newStateClass)
+        {
+            if (_clockRoot == null || _currentStateClass == newStateClass)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_currentStateClass))
+            {
+                _clockRoot.RemoveFromClassList(_currentStateClass);
+            }
+
+            _clockRoot.AddToClassList(newStateClass);
+            _currentStateClass = newStateClass;
         }
 
         private void UpdateTimeLabel(int totalSeconds)

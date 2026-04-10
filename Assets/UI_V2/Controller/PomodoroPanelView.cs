@@ -86,6 +86,10 @@ namespace APP.Pomodoro.Controller
         // ─── 公开方法（供 DeskWindowController 调用）────────────
 
         /// <summary>显示或隐藏整个面板。</summary>
+        /// <remarks>
+        /// 仅切换 <c>pp-hidden</c> class，不直接写 inline style。
+        /// 所有显示相关规则由 PomodoroPanel.uss 管理。
+        /// </remarks>
         public void SetVisible(bool visible)
         {
             if (_ppRoot == null)
@@ -93,7 +97,7 @@ namespace APP.Pomodoro.Controller
                 return;
             }
 
-            _ppRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            _ppRoot.EnableInClassList("pp-hidden", !visible);
         }
 
         /// <summary>从外部触发收纳。</summary>

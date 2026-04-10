@@ -1,0 +1,73 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775723200038,
+  "projectRoot": "/Users/xpy/Desktop/NanZhai/CPA/Server",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "npm test",
+    "lintCommand": null,
+    "devCommand": "npm run start",
+    "scripts": {
+      "start": "node src/index.js",
+      "test": "node --test test/*.js"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase/PascalCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "src",
+      "test"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1775723200023,
+      "keyFiles": [
+        "RoomManager.js",
+        "index.js",
+        "protocol.js"
+      ]
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 4,
+      "lastAccessed": 1775723200025,
+      "keyFiles": [
+        "integration.test.js",
+        "latency.test.js",
+        "protocol.test.js",
+        "room.test.js"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

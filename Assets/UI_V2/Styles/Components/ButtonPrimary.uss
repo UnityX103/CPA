@@ -1,0 +1,24 @@
+/*
+ * ButtonPrimary.uss
+ * Pencil 组件: Button/Primary (Za5wE)
+ * 圆角主按钮，$btn-primary-bg 背景，白色文字
+ */
+
+.comp-btn-primary {
+    border-radius: 9999px;
+    background-color: rgb(209, 95, 61); /* #D15F3D = $btn-primary-bg idle */
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow: hidden;
+}
+
+.comp-btn-primary:hover {
+    background-color: rgb(195, 82, 48);
+}
