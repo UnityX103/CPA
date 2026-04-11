@@ -4,12 +4,13 @@ using APP.Network.Model;
 using APP.Pomodoro;
 using QFramework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace APP.Pomodoro.Controller
 {
     /// <summary>
-    /// 玩家卡片管理器：订阅网络事件，管理 PlayerCardController 预制体实例的生命周期。
-    /// 每个远程玩家对应一个独立 GameObject（含 UIDocument），加入时 Instantiate，离开时 Destroy。
+    /// 玩家卡片管理器：订阅网络事件，管理嵌入式 PlayerCardController 的生命周期。
+    /// 每个远程玩家对应一个从 PlayerCard.uxml CloneTree 得到的 VisualElement。
     /// </summary>
     public sealed class PlayerCardManager : IController
     {
@@ -17,8 +18,8 @@ namespace APP.Pomodoro.Controller
 
         private readonly Dictionary<string, PlayerCardController> _cards = new Dictionary<string, PlayerCardController>();
 
-        private GameObject _cardPrefab;
-        private Transform _cardParent;
+        private VisualTreeAsset _cardTemplate;
+        private VisualElement _cardContainer;
         private bool _initialized;
 
         /// <summary>当前活跃的卡片（只读，供测试使用）。</summary>
@@ -27,19 +28,24 @@ namespace APP.Pomodoro.Controller
         /// <summary>
         /// 初始化：注册网络事件订阅。
         /// </summary>
-        /// <param name="cardPrefab">PlayerCard 预制体（含 UIDocument + PlayerCardController）</param>
-        /// <param name="cardParent">卡片实例的父 Transform（可为 null，默认放在场景根）</param>
+        /// <param name="cardTemplate">PlayerCard.uxml VisualTreeAsset</param>
+        /// <param name="cardContainer">卡片挂载的容器（ScrollView 的 contentContainer）</param>
         /// <param name="lifecycleOwner">用于自动反注册事件的 GameObject</param>
-        public void Initialize(GameObject cardPrefab, Transform cardParent, GameObject lifecycleOwner)
+        public void Initialize(VisualTreeAsset cardTemplate, VisualElement cardContainer, GameObject lifecycleOwner)
         {
             if (_initialized) return;
 
-            _cardPrefab = cardPrefab;
-            _cardParent = cardParent;
+            _cardTemplate = cardTemplate;
+            _cardContainer = cardContainer;
 
-            if (_cardPrefab == null)
+            if (_cardTemplate == null)
             {
-                Debug.LogError("[PlayerCardManager] PlayerCard 预制体未分配。");
+                Debug.LogError("[PlayerCardManager] PlayerCard.uxml 未分配。");
+            }
+
+            if (_cardContainer == null)
+            {
+                Debug.LogError("[PlayerCardManager] cardContainer 未分配。");
             }
 
             if (lifecycleOwner != null)
@@ -70,10 +76,10 @@ namespace APP.Pomodoro.Controller
         /// <summary>
         /// 测试专用：显式初始化但不订阅事件，允许调用方手动驱动 AddOrUpdate/Remove。
         /// </summary>
-        public void InitializeForTests(GameObject cardPrefab, Transform cardParent = null)
+        public void InitializeForTests(VisualTreeAsset cardTemplate, VisualElement cardContainer)
         {
-            _cardPrefab = cardPrefab;
-            _cardParent = cardParent;
+            _cardTemplate = cardTemplate;
+            _cardContainer = cardContainer;
             _initialized = true;
         }
 
@@ -131,25 +137,27 @@ namespace APP.Pomodoro.Controller
                 return;
             }
 
-            // 新建 → 实例化预制体
-            if (_cardPrefab == null)
+            // 新建 → CloneTree 创建卡片 VisualElement
+            if (_cardTemplate == null)
             {
-                Debug.LogError($"[PlayerCardManager] 无法创建卡片：PlayerCard 预制体未分配。" +
+                Debug.LogError($"[PlayerCardManager] 无法创建卡片：PlayerCard.uxml 未分配。" +
                     $" 玩家 '{data.PlayerName}' (id={data.PlayerId}) 被跳过。");
                 return;
             }
 
-            GameObject go = Object.Instantiate(_cardPrefab, _cardParent);
-            go.name = $"PlayerCard_{data.PlayerName}_{data.PlayerId}";
-
-            var controller = go.GetComponent<PlayerCardController>();
-            if (controller == null)
+            if (_cardContainer == null)
             {
-                Debug.LogError($"[PlayerCardManager] 预制体缺少 PlayerCardController 组件。");
-                Object.Destroy(go);
+                Debug.LogError($"[PlayerCardManager] 无法创建卡片：cardContainer 未分配。");
                 return;
             }
 
+            TemplateContainer tplContainer = _cardTemplate.CloneTree();
+            VisualElement pcRoot = tplContainer.Q<VisualElement>(className: "pc-root") ?? tplContainer;
+            pcRoot.style.width = 180;
+            pcRoot.style.flexShrink = 0;
+            _cardContainer.Add(tplContainer);
+
+            var controller = new PlayerCardController(pcRoot);
             controller.Setup(data);
             _cards[data.PlayerId] = controller;
         }
@@ -160,23 +168,14 @@ namespace APP.Pomodoro.Controller
 
             if (_cards.TryGetValue(playerId, out PlayerCardController card))
             {
-                if (card != null && card.gameObject != null)
-                {
-                    Object.Destroy(card.gameObject);
-                }
+                card.Root.parent?.Remove(card.Root);
                 _cards.Remove(playerId);
             }
         }
 
         public void Clear()
         {
-            foreach (var pair in _cards)
-            {
-                if (pair.Value != null && pair.Value.gameObject != null)
-                {
-                    Object.Destroy(pair.Value.gameObject);
-                }
-            }
+            _cardContainer?.Clear();
             _cards.Clear();
         }
 

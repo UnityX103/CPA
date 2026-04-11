@@ -27,20 +27,23 @@
  *   所有定位规则都在 USS 中声明，代码不再直写 root.style.*。
  */
 .dw-root-anchor {
-    justify-content: flex-end;
-    align-items: flex-end;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 /* ── 主容器（自适应尺寸，右下角锚定）────────────────────── */
 
 .dw-wrap {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     border-radius: 28px;
     border-width: 1px;
     border-color: rgb(241, 229, 216);
-    /* Pencil 84Qri 无 fill，不设背景色 */
     overflow: hidden;
     padding: 20px;
 }
@@ -55,7 +58,7 @@
     height: 48px;
     flex-direction: row;
     align-items: center;
-    border-radius: 24px; /* 9999px 在 Unity 中对非正方形元素会生成真椭圆；height=48px 故取 24px */
+    border-radius: 24px;
     border-width: 1px;
     border-color: rgb(242, 222, 195);
     background-color: rgb(255, 253, 242);
@@ -80,71 +83,133 @@
     -unity-text-align: middle-left;
 }
 
-/* ── 番茄钟面板（flex 子项，左侧）─────────────────────────── */
+/* ── 番茄钟面板（flex 子项）─────────────────────────── */
 
 .dw-pomodoro {
     flex-shrink: 0;
 }
 
-/* ── 右侧栏（Pencil: cont-right-column-component / F6wwF）───── */
+/* ── 设置按钮 ────────────────────────────────────────────── */
 
-.right-column {
-    flex-direction: column;
+.settings-btn {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 11px;
+    background-color: rgb(240, 224, 208);
     align-items: center;
-    flex-shrink: 0;
+    justify-content: center;
+    right: 20px;
+    top: 20px;
 }
 
-/* ── Tab 药丸按钮行（Pencil: settingsBtnRow / mVLgt）─────────── */
+.settings-btn-icon {
+    font-size: 16px;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+}
 
-.settings-tab-row {
+/* ── 卡片列表 ────────────────────────────────────────────── */
+
+.card-list {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.card-list .unity-scroll-view__content-container {
+    flex-direction: row;
+    gap: 12px;
+    padding-bottom: 4px;
+}
+
+/* ── 统一设置面板覆盖层 ──────────────────────────────────── */
+
+.settings-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    padding: 20px;
+    flex-direction: column;
+}
+
+.settings-header {
     flex-direction: row;
     align-items: center;
-    border-radius: 16px;
-    border-width: 1px;
-    border-color: rgb(239, 220, 205); /* #EFDCCD */
-    background-color: rgba(255, 253, 251, 0.93); /* #FFFDFBEE */
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-left: 12px;
-    padding-right: 12px;
-    margin-bottom: 12px; /* gap: 12 与 pet-placeholder 间距 */
+    margin-bottom: 16px;
 }
 
-/* Tab 按钮样式已迁移至 Components/ButtonTab.uss */
-/* TemplateContainer 间距（Pencil settingsBtnRow gap: 8） */
-.tab-instance {
-    margin-right: 8px;
+.settings-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
 }
 
-/* 最后一个 tab 无右间距 */
-.comp-btn-tab--pet {
-    margin-right: 0;
+.settings-spacer {
+    flex-grow: 1;
 }
 
-/* ── 宠物动画占位（Pencil: pet-animation-placeholder / 5ZlKI）── */
-
-.pet-placeholder {
-    width: 120px;
-    height: 140px;
-    border-radius: 20px;
-    background-color: rgb(255, 229, 217); /* #FFE5D9 渐变近似 */
-    flex-direction: column;
+.settings-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: rgb(243, 237, 231);
     align-items: center;
     justify-content: center;
 }
 
-.pet-placeholder-inner {
-    width: 60px;
-    height: 60px;
-    border-radius: 30px;
-    background-color: rgb(212, 134, 90); /* #D4865A 渐变近似 */
-}
-
-.pet-placeholder-label {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: rgb(162, 139, 121); /* #A28B79 */
+.settings-close-icon {
+    font-size: 14px;
+    color: rgb(162, 139, 121);
     -unity-text-align: middle-center;
-    margin-top: 8px;
 }
 
+.settings-body {
+    flex-direction: row;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.settings-sidebar {
+    width: 100px;
+    background-color: rgb(243, 237, 231);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    flex-direction: column;
+    border-radius: 12px 0 0 12px;
+    flex-shrink: 0;
+}
+
+.sidebar-tab {
+    padding: 10px 14px;
+}
+
+.sidebar-tab-label {
+    font-size: 13px;
+    color: rgb(158, 142, 128);
+    -unity-font-style: normal;
+}
+
+.sidebar-tab--active {
+    background-color: rgb(255, 255, 255);
+    border-radius: 0 12px 12px 0;
+}
+
+.sidebar-tab--active .sidebar-tab-label {
+    color: rgb(209, 95, 61);
+    -unity-font-style: bold;
+}
+
+.settings-content {
+    flex-grow: 1;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.settings-tab-content {
+    flex-direction: column;
+    gap: 16px;
+}

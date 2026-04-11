@@ -2,21 +2,44 @@
     <ui:Template name="PomodoroPanel" src="project://database/Assets/UI_V2/Documents/PomodoroPanel.uxml?fileID=9197481963319205126&amp;guid=cbf5638ad0ab048998be547920a9d8ca&amp;type=3#PomodoroPanel" />
     <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
     <Style src="project://database/Assets/UI_V2/Styles/DeskWindow.uss?fileID=7433441132597879392&amp;guid=1fd1c07e4450e431fad56cc90cc090fb&amp;type=3#DeskWindow" />
-    <!-- 组件 USS -->
-    <ui:Style src="project://database/Assets/UI_V2/Styles/Components/ButtonTab.uss"/>
+    <Style src="project://database/Assets/UI_V2/Styles/PlayerCard.uss" />
+    <Style src="project://database/Assets/UI_V2/Styles/PomodoroSettingsPanel.uss" />
+    <Style src="project://database/Assets/UI_V2/Styles/OnlineSettingsPanel.uss" />
+    <Style src="project://database/Assets/UI_V2/Styles/PetSettingsPanel.uss" />
     <ui:VisualElement name="dw-wrap" class="dw-wrap">
         <ui:Label name="drag-handle" text="•••" class="drag-handle" />
         <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
-        <!-- 右侧栏：Tab 药丸按钮 + 宠物占位（Pencil: cont-right-column-component / F6wwF） -->
-        <ui:VisualElement name="right-column" class="right-column">
-            <ui:VisualElement class="settings-tab-row">
-                <ui:Button name="btn-pomodoro" text="番茄钟" class="comp-btn-tab tab-instance" />
-                <ui:Button name="btn-online" text="联网" class="comp-btn-tab comp-btn-tab--online tab-instance" />
-                <ui:Button name="btn-pet" text="宠物" class="comp-btn-tab comp-btn-tab--pet" />
+        <ui:VisualElement name="settings-btn" class="settings-btn">
+            <ui:Label text="⚙" class="settings-btn-icon" />
+        </ui:VisualElement>
+        <ui:ScrollView name="card-list" class="card-list" mode="Horizontal"
+            horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
+        <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display:none;">
+            <ui:VisualElement class="settings-header">
+                <ui:Label text="设置" class="settings-title" />
+                <ui:VisualElement class="settings-spacer" />
+                <ui:VisualElement name="settings-close" class="settings-close">
+                    <ui:Label text="✕" class="settings-close-icon" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement class="pet-placeholder">
-                <ui:VisualElement class="pet-placeholder-inner" />
-                <ui:Label text="宠物" class="pet-placeholder-label" />
+            <ui:VisualElement class="settings-body">
+                <ui:VisualElement class="settings-sidebar">
+                    <ui:VisualElement name="tab-pomodoro" class="sidebar-tab sidebar-tab--active">
+                        <ui:Label text="番茄钟" class="sidebar-tab-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="tab-online" class="sidebar-tab">
+                        <ui:Label text="联机" class="sidebar-tab-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="tab-pet" class="sidebar-tab">
+                        <ui:Label text="宠物" class="sidebar-tab-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:ScrollView name="settings-content" class="settings-content"
+                    vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden">
+                    <ui:VisualElement name="content-pomodoro" class="settings-tab-content" />
+                    <ui:VisualElement name="content-online" class="settings-tab-content" style="display:none;" />
+                    <ui:VisualElement name="content-pet" class="settings-tab-content" style="display:none;" />
+                </ui:ScrollView>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -9,22 +9,19 @@ using UnityEngine.UIElements;
 namespace APP.Pomodoro.Controller
 {
     /// <summary>
-    /// 联机设置面板控制器（独立 UIDocument）。
-    /// 管理 OnlineSettingsPanel.uxml 的 UI 绑定与联机逻辑。
+    /// 联机设置面板控制器（纯 C# 类，无 MonoBehaviour）。
+    /// 接收 VisualElement 容器，管理联机设置的 UI 绑定与联机逻辑。
     /// 三个卡片根据房间状态互斥显示：
     ///   - osp-join-card + osp-hist-card：未加入房间时
     ///   - osp-room-card：已加入房间时
     /// </summary>
-    [RequireComponent(typeof(UIDocument))]
-    public sealed class OnlineSettingsPanelController : MonoBehaviour, IController, ISettingsPanel
+    public sealed class OnlineSettingsPanelController : IController
     {
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
         // ─── 私有字段 ────────────────────────────────────────────
-        private UIDocument _uiDocument;
         private IRoomModel _roomModel;
-        private bool _modelBound;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
         private VisualElement _joinCard;
@@ -37,97 +34,39 @@ namespace APP.Pomodoro.Controller
         private TextField _usernameField;
         private TextField _roomIdField;
 
-        // ─── ISettingsPanel ──────────────────────────────────────
-        public bool IsVisible => _uiDocument != null && _uiDocument.enabled;
+        // ─── 初始化 ──────────────────────────────────────────────
 
-        public void Show()
+        /// <summary>
+        /// 初始化面板。容器内已由 UnifiedSettingsPanelController 克隆好 UXML。
+        /// </summary>
+        public void Init(VisualElement container, IRoomModel roomModel, GameObject lifecycleOwner)
         {
-            if (_uiDocument == null)
-            {
-                return;
-            }
+            _roomModel = roomModel;
 
-            _uiDocument.enabled = true;
-            BindUI();
-            RefreshCardState();
-        }
-
-        public void Hide()
-        {
-            if (_uiDocument == null)
-            {
-                return;
-            }
-
-            _uiDocument.enabled = false;
-        }
-
-        // ─── Unity 生命周期 ──────────────────────────────────────
-
-        private void Awake()
-        {
-            _uiDocument = GetComponent<UIDocument>();
-        }
-
-        private void Start()
-        {
-            if (_uiDocument != null)
-            {
-                _uiDocument.enabled = false;
-            }
-        }
-
-        // ─── UI 绑定 ─────────────────────────────────────────────
-
-        private void BindUI()
-        {
-            if (_uiDocument == null)
-            {
-                return;
-            }
-
-            VisualElement root = _uiDocument.rootVisualElement;
-            if (root == null)
-            {
-                return;
-            }
-
-            // 关闭按钮
-            root.Q<Button>("back-btn")?.RegisterCallback<PointerUpEvent>(_ => Hide());
-
-            // 卡片容器
-            _joinCard   = root.Q<VisualElement>("osp-join-card");
-            _roomCard   = root.Q<VisualElement>("osp-room-card");
-            _histCard   = root.Q<VisualElement>("osp-hist-card");
-            _memberList = root.Q<VisualElement>("osp-member-list");
-            _roomName   = root.Q<Label>("osp-room-name");
-            _roomStatus = root.Q<Label>("osp-room-status");
-            _ospError   = root.Q<Label>("osp-error");
-
-            // 输入字段
-            _usernameField = root.Q<TextField>("osp-username");
-            _roomIdField   = root.Q<TextField>("osp-room-id");
+            // 查询 UI 元素
+            _joinCard      = container.Q<VisualElement>("osp-join-card");
+            _roomCard      = container.Q<VisualElement>("osp-room-card");
+            _histCard      = container.Q<VisualElement>("osp-hist-card");
+            _memberList    = container.Q<VisualElement>("osp-member-list");
+            _roomName      = container.Q<Label>("osp-room-name");
+            _roomStatus    = container.Q<Label>("osp-room-status");
+            _ospError      = container.Q<Label>("osp-error");
+            _usernameField = container.Q<TextField>("osp-username");
+            _roomIdField   = container.Q<TextField>("osp-room-id");
 
             // 按钮事件
-            root.Q<Button>("osp-join-btn")?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
-            root.Q<Button>("osp-exit-btn")?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
+            container.Q<Button>("osp-join-btn")?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
+            container.Q<Button>("osp-exit-btn")?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
 
-            // Model/Event 订阅（仅一次）
-            if (!_modelBound)
+            // Model/Event 订阅
+            if (_roomModel != null)
             {
-                _roomModel = this.GetModel<IRoomModel>();
-
-                if (_roomModel != null)
-                {
-                    _roomModel.IsInRoom.Register(_ => RefreshCardState())
-                        .UnRegisterWhenGameObjectDestroyed(gameObject);
-                }
-
-                this.RegisterEvent<E_NetworkError>(OnNetworkError)
-                    .UnRegisterWhenGameObjectDestroyed(gameObject);
-
-                _modelBound = true;
+                _roomModel.IsInRoom.Register(_ => RefreshCardState())
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
+
+            this.RegisterEvent<E_NetworkError>(OnNetworkError)
+                .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
 
             // 回填上次的用户名
             if (_usernameField != null && _roomModel != null)
@@ -138,11 +77,13 @@ namespace APP.Pomodoro.Controller
                     _usernameField.value = savedName;
                 }
             }
+
+            RefreshCardState();
         }
 
         // ─── 卡片状态切换 ────────────────────────────────────────
 
-        private void RefreshCardState()
+        public void RefreshCardState()
         {
             bool inRoom = _roomModel != null && _roomModel.IsInRoom.Value;
 

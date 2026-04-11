@@ -7,110 +7,47 @@ using UnityEngine.UIElements;
 namespace APP.Pomodoro.Controller
 {
     /// <summary>
-    /// 番茄钟设置面板控制器（独立 UIDocument）。
-    /// 管理 PomodoroSettingsPanel.uxml 的 UI 绑定与生命周期。
+    /// 番茄钟设置面板控制器（纯 C# 类，无 MonoBehaviour）。
+    /// 接收 VisualElement 容器，管理番茄钟设置的 UI 绑定与 Model 订阅。
     /// </summary>
-    [RequireComponent(typeof(UIDocument))]
-    public sealed class PomodoroSettingsPanelController : MonoBehaviour, IController, ISettingsPanel
+    public sealed class PomodoroSettingsPanelController : IController
     {
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
         // ─── 私有字段 ────────────────────────────────────────────
-        private UIDocument _uiDocument;
         private PomodoroSettingsPanelView _view;
         private IPomodoroModel _model;
-        private bool _modelBound;
 
-        // ─── ISettingsPanel ──────────────────────────────────────
-        public bool IsVisible => _uiDocument != null && _uiDocument.enabled;
-
-        public void Show()
-        {
-            if (_uiDocument == null)
-            {
-                return;
-            }
-
-            _uiDocument.enabled = true;
-            BindUI();
-            RefreshFromModel();
-        }
-
-        public void Hide()
-        {
-            if (_uiDocument == null)
-            {
-                return;
-            }
-
-            _uiDocument.enabled = false;
-        }
-
-        // ─── Unity 生命周期 ──────────────────────────────────────
-
-        private void Awake()
-        {
-            _uiDocument = GetComponent<UIDocument>();
-        }
-
-        private void Start()
-        {
-            // 默认隐藏
-            if (_uiDocument != null)
-            {
-                _uiDocument.enabled = false;
-            }
-        }
-
-        // ─── UI 绑定 ─────────────────────────────────────────────
+        // ─── 初始化 ──────────────────────────────────────────────
 
         /// <summary>
-        /// 每次 Show 时重新绑定 UI 元素。
-        /// UIDocument.enabled false→true 会重建 visual tree，旧回调全部失效。
+        /// 初始化面板。容器内已由 UnifiedSettingsPanelController 克隆好 UXML。
         /// </summary>
-        private void BindUI()
+        public void Init(VisualElement container, IPomodoroModel model, GameObject lifecycleOwner)
         {
-            if (_uiDocument == null)
-            {
-                return;
-            }
+            _model = model;
 
-            VisualElement root = _uiDocument.rootVisualElement;
-            if (root == null)
-            {
-                return;
-            }
-
-            // 返回按钮（每次重建都需重新绑定）
-            root.Q<Button>("back-btn")?.RegisterCallback<PointerUpEvent>(_ => Hide());
-
-            // 视图辅助类（每次重建都需重新创建，因为它持有旧 VisualElement 引用）
-            _view = new PomodoroSettingsPanelView(root);
+            _view = new PomodoroSettingsPanelView(container);
             _view.OnEnabledChanged += OnEnabledToggleChanged;
             _view.OnHintToggleChanged += OnHintToggleChanged;
 
-            // Model 订阅（仅一次，生命周期绑定 GameObject）
-            if (!_modelBound)
+            if (_model != null)
             {
-                _model = this.GetModel<IPomodoroModel>();
-                if (_model != null)
-                {
-                    _model.FocusDurationSeconds.Register(_ => RefreshFromModel())
-                        .UnRegisterWhenGameObjectDestroyed(gameObject);
-                    _model.BreakDurationSeconds.Register(_ => RefreshFromModel())
-                        .UnRegisterWhenGameObjectDestroyed(gameObject);
-                    _model.CompletionClipIndex.Register(_ => RefreshFromModel())
-                        .UnRegisterWhenGameObjectDestroyed(gameObject);
-                }
-
-                _modelBound = true;
+                _model.FocusDurationSeconds.Register(_ => RefreshFromModel())
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                _model.BreakDurationSeconds.Register(_ => RefreshFromModel())
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                _model.CompletionClipIndex.Register(_ => RefreshFromModel())
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
+
+            RefreshFromModel();
         }
 
         // ─── 数据刷新 ────────────────────────────────────────────
 
-        private void RefreshFromModel()
+        public void RefreshFromModel()
         {
             if (_view == null || _model == null)
             {

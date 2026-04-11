@@ -26,30 +26,23 @@ namespace APP.Pomodoro.Controller
         [Header("番茄钟子面板视图")]
         [SerializeField] private PomodoroPanelView _pomodoroPanelView;
 
-        [Header("玩家卡片预制体（多人番茄钟，含 UIDocument + PlayerCardController）")]
-        [SerializeField] private GameObject _playerCardPrefab;
+        [Header("玩家卡片 UXML 模板")]
+        [SerializeField] private VisualTreeAsset _playerCardTemplate;
 
-        [Header("远端玩家容器（运行时实例化 PlayerCard 的父物体）")]
-        [SerializeField] private Transform _remotePlayerContainer;
-
-        [Header("设置面板（独立 UIDocument）")]
-        [SerializeField] private PomodoroSettingsPanelController _pomodoroSettingsPanel;
-        [SerializeField] private OnlineSettingsPanelController _onlineSettingsPanel;
-        [SerializeField] private PetSettingsPanelController _petSettingsPanel;
+        [Header("设置面板 UXML 模板")]
+        [SerializeField] private VisualTreeAsset _pomodoroSettingsTemplate;
+        [SerializeField] private VisualTreeAsset _onlineSettingsTemplate;
+        [SerializeField] private VisualTreeAsset _petSettingsTemplate;
 
         // ─── 私有字段 ────────────────────────────────────────────
         private UIDocument     _uiDocument;
         private IPomodoroModel _model;
         private PlayerCardManager _playerCardManager;
+        private UnifiedSettingsPanelController _settingsPanel;
 
         // 主容器元素
         private VisualElement    _dwWrap;
         private TemplateContainer _pomodoroPanelContainer;
-
-        // Tab 按钮
-        private Button _btnPomodoro;
-        private Button _btnOnline;
-        private Button _btnPet;
 
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
@@ -94,9 +87,6 @@ namespace APP.Pomodoro.Controller
                 Debug.LogError("[DeskWindowController] 未找到 pomodoro-panel 节点，番茄钟面板无法初始化。");
             }
 
-            // 7. 多人番茄钟：卡片管理器（每个远程玩家一个独立 UIDocument 预制体）
-            _playerCardManager = new PlayerCardManager();
-            _playerCardManager.Initialize(_playerCardPrefab, _remotePlayerContainer, gameObject);
         }
 
         private void Update()
@@ -137,75 +127,38 @@ namespace APP.Pomodoro.Controller
             _dwWrap = root.Q<VisualElement>("dw-wrap");
             _pomodoroPanelContainer = root.Q<TemplateContainer>("pomodoro-panel");
 
-            // 拖拽手柄：需要等布局完成后，将 flex 定位转为 absolute 定位
+            // 拖拽手柄
             var dragHandle = root.Q<Label>("drag-handle");
             if (dragHandle != null && _dwWrap != null)
             {
-                _dwWrap.RegisterCallback<GeometryChangedEvent>(_ =>
-                {
-                    if (_dwWrap.resolvedStyle.position == Position.Absolute)
-                        return;
-
-                    // 读取 flex 布局计算出的实际位置
-                    var parentBound = _dwWrap.parent.worldBound;
-                    var wrapBound = _dwWrap.worldBound;
-                    float left = wrapBound.x - parentBound.x;
-                    float top = wrapBound.y - parentBound.y;
-
-                    // 切换为 absolute 定位，保持视觉位置不变
-                    _dwWrap.style.position = Position.Absolute;
-                    _dwWrap.style.left = left;
-                    _dwWrap.style.top = top;
-
-                    DraggableElement.MakeDraggable(_dwWrap, dragHandle);
-                });
+                DraggableElement.MakeDraggable(_dwWrap, dragHandle);
             }
 
-            // Tab 按钮
-            _btnPomodoro = root.Q<Button>("btn-pomodoro");
-            _btnOnline   = root.Q<Button>("btn-online");
-            _btnPet      = root.Q<Button>("btn-pet");
+            // 统一设置面板
+            var roomModel = this.GetModel<APP.Network.Model.IRoomModel>();
+            _settingsPanel = new UnifiedSettingsPanelController();
+            _settingsPanel.Init(
+                root,
+                _model,
+                roomModel,
+                _pomodoroSettingsTemplate,
+                _onlineSettingsTemplate,
+                _petSettingsTemplate,
+                gameObject);
 
-            // 点击 dw-wrap 外部的处理（玩家卡片已独立为单独 UIDocument，无需白名单）
-            root.RegisterCallback<PointerDownEvent>(evt =>
+            // 多人番茄钟：卡片管理器（嵌入 card-list ScrollView）
+            _playerCardManager = new PlayerCardManager();
+            var cardListScrollView = root.Q<ScrollView>("card-list");
+            _playerCardManager.Initialize(_playerCardTemplate, cardListScrollView.contentContainer, gameObject);
+
+            // 齿轮按钮切换设置面板
+            root.Q("settings-btn")?.RegisterCallback<PointerUpEvent>(_ =>
             {
-                bool clickInDwWrap = _dwWrap != null && _dwWrap.worldBound.Contains(evt.position);
-                if (!clickInDwWrap)
-                {
-                    // 点击面板外部（已移除收缩逻辑）
-                }
+                if (_settingsPanel.IsVisible)
+                    _settingsPanel.Hide();
+                else
+                    _settingsPanel.Show();
             });
-
-            // Tab 按钮事件 → 切换独立 UIDocument 面板
-            _btnPomodoro?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_pomodoroSettingsPanel));
-            _btnOnline?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_onlineSettingsPanel));
-            _btnPet?.RegisterCallback<PointerUpEvent>(_ => TogglePanel(_petSettingsPanel));
-        }
-
-        // ─── 面板切换 ────────────────────────────────────────────
-
-        private void TogglePanel(ISettingsPanel panel)
-        {
-            if (panel == null)
-            {
-                return;
-            }
-
-            if (panel.IsVisible)
-            {
-                panel.Hide();
-                return;
-            }
-
-            HideAllPanels();
-            panel.Show();
-        }
-
-        private void HideAllPanels()
-        {
-            _pomodoroSettingsPanel?.Hide();
-            _onlineSettingsPanel?.Hide();
-            _petSettingsPanel?.Hide();
         }
 
         // ─── 持久化 ──────────────────────────────────────────────
