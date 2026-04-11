@@ -44,7 +44,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    border-radius: 9999px;
+    border-radius: 39px;
     background-color: rgb(224, 217, 211); /* off: #E0D9D3 */
 }
 
@@ -59,7 +59,7 @@
     top: 9px;
     right: 9px;
     bottom: 9px;
-    border-radius: 9999px;
+    border-radius: 39px;
     background-color: rgb(255, 254, 253);
 }
 

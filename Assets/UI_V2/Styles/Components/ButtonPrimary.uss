@@ -5,7 +5,7 @@
  */
 
 .comp-btn-primary {
-    border-radius: 9999px;
+    border-radius: 13px;
     background-color: rgb(209, 95, 61); /* #D15F3D = $btn-primary-bg idle */
     border-width: 0;
     color: rgb(255, 255, 255);

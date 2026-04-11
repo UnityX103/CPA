@@ -35,7 +35,7 @@
 .comp-toggle-switch .unity-toggle__checkmark {
     width: 20px;
     height: 20px;
-    border-radius: 9999px;
+    border-radius: 10px;
     background-color: rgb(255, 255, 255); /* #FFFFFF */
     border-width: 0;
     -unity-background-image-tint-color: rgba(0, 0, 0, 0);

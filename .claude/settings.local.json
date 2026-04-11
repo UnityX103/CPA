@@ -12,7 +12,10 @@
       "WebFetch(domain:docs.pencil.dev)",
       "WebFetch(domain:pencil.dev)",
       "WebFetch(domain:dev.classmethod.jp)",
-      "mcp__pencil__get_editor_state"
+      "mcp__pencil__get_editor_state",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics",
+      "Skill(update-config)",
+      "mcp__plugin_oh-my-claudecode_t__notepad_read"
     ],
     "deny": [
       "Bash(rm *)",

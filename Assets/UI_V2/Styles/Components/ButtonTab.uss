@@ -5,7 +5,7 @@
  */
 
 .comp-btn-tab {
-    border-radius: 9999px;
+    border-radius: 12px;
     border-width: 0;
     font-size: 11px;
     -unity-font-style: bold;

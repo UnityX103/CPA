@@ -5,7 +5,7 @@
  */
 
 .comp-btn-secondary {
-    border-radius: 9999px;
+    border-radius: 13px;
     background-color: rgb(255, 255, 255);
     border-width: 1px;
     border-color: rgb(232, 196, 168); /* #E8C4A8 */

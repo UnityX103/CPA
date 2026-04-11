@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775702310708,
+  "lastScanned": 1775789240202,
   "projectRoot": "/Users/xpy/Desktop/NanZhai/CPA",
   "techStack": {
     "languages": [],
@@ -35,7 +35,7 @@
       "path": "AUI",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1775702310685,
+      "lastAccessed": 1775789240197,
       "keyFiles": [
         "MaokenAssortedSans.ttf",
         "PUI.pen"
@@ -44,28 +44,28 @@
     "Assets": {
       "path": "Assets",
       "purpose": "Static assets",
-      "fileCount": 16,
-      "lastAccessed": 1775702310689,
+      "fileCount": 15,
+      "lastAccessed": 1775789240197,
       "keyFiles": [
         "Editor.meta",
-        "FigmaTest.unity",
-        "FigmaTest.unity.meta",
         "Plugins.meta",
-        "Prefabs.meta"
+        "Prefabs.meta",
+        "Resources.meta",
+        "Scenes.meta"
       ]
     },
     "Builds": {
       "path": "Builds",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775702310689,
+      "lastAccessed": 1775789240197,
       "keyFiles": []
     },
     "Library": {
       "path": "Library",
       "purpose": null,
       "fileCount": 30,
-      "lastAccessed": 1775702310689,
+      "lastAccessed": 1775789240198,
       "keyFiles": [
         "AnnotationManager",
         "ArtifactDB",
@@ -77,19 +77,21 @@
     "Logs": {
       "path": "Logs",
       "purpose": null,
-      "fileCount": 3,
-      "lastAccessed": 1775702310689,
+      "fileCount": 7,
+      "lastAccessed": 1775789240198,
       "keyFiles": [
         "AssetImportWorker0-prev.log",
+        "AssetImportWorker0.log",
         "AssetImportWorker1-prev.log",
-        "shadercompiler-UnityShaderCompiler-0.log"
+        "AssetImportWorker1.log",
+        "shadercompiler-AssetImportWorker0-0.log"
       ]
     },
     "Packages": {
       "path": "Packages",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240198,
       "keyFiles": [
         "manifest.json",
         "packages-lock.json"
@@ -99,7 +101,7 @@
       "path": "ProjectSettings",
       "purpose": null,
       "fileCount": 24,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240198,
       "keyFiles": [
         "AudioManager.asset",
         "BurstAotSettings_StandaloneOSX.json",
@@ -108,13 +110,25 @@
         "EditorBuildSettings.asset"
       ]
     },
+    "Server": {
+      "path": "Server",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1775789240198,
+      "keyFiles": [
+        "README.md",
+        "package.json"
+      ]
+    },
     "Temp": {
       "path": "Temp",
       "purpose": null,
-      "fileCount": 3,
-      "lastAccessed": 1775702310690,
+      "fileCount": 5,
+      "lastAccessed": 1775789240198,
       "keyFiles": [
-        "FSTimeGet-4e29b163654b846ff96cf64bd553b2b4",
+        "FSTimeGet-30f521cee43174f0aa965a6587e90d67",
+        "FSTimeGet-7357977a5c65a4ad591338fa465e704c",
+        "FSTimeGet-995be9009fce140a6be00e8e7fca48fd",
         "UnityLockfile",
         "workerlic"
       ]
@@ -122,8 +136,8 @@
     "TestResults": {
       "path": "TestResults",
       "purpose": null,
-      "fileCount": 20,
-      "lastAccessed": 1775702310690,
+      "fileCount": 21,
+      "lastAccessed": 1775789240199,
       "keyFiles": [
         "CURRENT_STATUS.md",
         "FINAL_STATUS_REPORT.md",
@@ -136,7 +150,7 @@
       "path": "TestVideo",
       "purpose": null,
       "fileCount": 20,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240199,
       "keyFiles": [
         "AppMonitorVisualTest_20260307_173051.mp4",
         "AppMonitorVisualTest_20260307_173529.mp4",
@@ -149,7 +163,7 @@
       "path": "UIElementsSchema",
       "purpose": null,
       "fileCount": 17,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240199,
       "keyFiles": [
         "UIElements.xsd",
         "Unity.Profiling.Editor.UI.xsd",
@@ -162,7 +176,7 @@
       "path": "UserSettings",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240199,
       "keyFiles": [
         "EditorUserSettings.asset",
         "Search.index",
@@ -173,7 +187,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 2,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240200,
       "keyFiles": [
         "PACKAGE_CONFIG.md",
         "USAGE.md"
@@ -183,309 +197,320 @@
       "path": "localpackage",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240200,
       "keyFiles": []
     },
     "obj": {
       "path": "obj",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1775702310690,
+      "lastAccessed": 1775789240200,
       "keyFiles": []
     },
     "Builds/Build": {
       "path": "Builds/Build",
       "purpose": "Build output",
       "fileCount": 2,
-      "lastAccessed": 1775702310691,
+      "lastAccessed": 1775789240200,
       "keyFiles": [
         "build_single_exe.sh",
         "强制番茄钟.exe"
+      ]
+    },
+    "Server/node_modules": {
+      "path": "Server/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1775789240201,
+      "keyFiles": []
+    },
+    "Server/src": {
+      "path": "Server/src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1775789240201,
+      "keyFiles": [
+        "RoomManager.js",
+        "index.js",
+        "protocol.js"
+      ]
+    },
+    "Server/test": {
+      "path": "Server/test",
+      "purpose": "Test files",
+      "fileCount": 4,
+      "lastAccessed": 1775789240201,
+      "keyFiles": [
+        "integration.test.js",
+        "latency.test.js",
+        "protocol.test.js"
       ]
     }
   },
   "hotPaths": [
     {
-      "path": "Assets",
-      "accessCount": 10,
-      "lastAccessed": 1775719423572,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/DeskWindowController.cs",
-      "accessCount": 9,
-      "lastAccessed": 1775719408412,
+      "path": "Assets/UI_V2/Styles/PomodoroPanel.uss",
+      "accessCount": 16,
+      "lastAccessed": 1775867887536,
       "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/GameApp.cs",
-      "accessCount": 7,
-      "lastAccessed": 1775719411647,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2",
-      "accessCount": 5,
-      "lastAccessed": 1775719034804,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/System/PomodoroTimerSystem.cs",
-      "accessCount": 5,
-      "lastAccessed": 1775719409226,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Model/IPomodoroModel.cs",
-      "accessCount": 5,
-      "lastAccessed": 1775719411122,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Event/PomodoroEvents.cs",
-      "accessCount": 4,
-      "lastAccessed": 1775719409943,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 4,
-      "lastAccessed": 1775719420617,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro",
-      "accessCount": 4,
-      "lastAccessed": 1775719562656,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/UI_V2/Documents/DeskWindow.uxml",
-      "accessCount": 4,
-      "lastAccessed": 1775719562669,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Model/PomodoroEnums.cs",
-      "accessCount": 3,
-      "lastAccessed": 1775717949834,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Model/PomodoroModel.cs",
-      "accessCount": 3,
-      "lastAccessed": 1775717970774,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroControls.cs",
-      "accessCount": 3,
-      "lastAccessed": 1775719410336,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml",
-      "accessCount": 3,
-      "lastAccessed": 1775719562605,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Plugins/macOS/Info.plist",
-      "accessCount": 3,
-      "lastAccessed": 1775719562718,
-      "type": "file"
-    },
-    {
-      "path": "CLAUDE.md",
-      "accessCount": 2,
-      "lastAccessed": 1775010948562,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/QFramework.cs",
-      "accessCount": 2,
-      "lastAccessed": 1775717670558,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/System/WindowPositionSystem.cs",
-      "accessCount": 2,
-      "lastAccessed": 1775717678733,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Plugins/macOS/AppMonitor.entitlements",
-      "accessCount": 2,
-      "lastAccessed": 1775717930163,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Command",
-      "accessCount": 2,
-      "lastAccessed": 1775717948862,
-      "type": "directory"
     },
     {
       "path": "Assets/UI_V2/Styles/DeskWindow.uss",
-      "accessCount": 2,
-      "lastAccessed": 1775717957089,
+      "accessCount": 14,
+      "lastAccessed": 1775868183976,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts",
-      "accessCount": 2,
-      "lastAccessed": 1775717969478,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Model",
-      "accessCount": 2,
-      "lastAccessed": 1775719032107,
-      "type": "directory"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/PomodoroPanelView.cs",
-      "accessCount": 2,
-      "lastAccessed": 1775719418961,
+      "path": "Assets/UI_V2/Documents/DeskWindow.uxml",
+      "accessCount": 11,
+      "lastAccessed": 1775831174036,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/System/IPomodoroTimerSystem.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702855841,
+      "path": "Assets/UI_V2/Styles/PomodoroSettingsPanel.uss",
+      "accessCount": 10,
+      "lastAccessed": 1775830487409,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/System/IWindowPositionSystem.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702856471,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroInitialize.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702861276,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/ClockView.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702864918,
-      "type": "file"
-    },
-    {
-      "path": "Assets/Scripts/APP/Pomodoro/Config/PomodoroConfig.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702868813,
+      "path": "Assets/UI_V2/Controller/PomodoroSettingsPanelController.cs",
+      "accessCount": 10,
+      "lastAccessed": 1775831104594,
       "type": "file"
     },
     {
       "path": "Assets/UI_V2/Documents/PomodoroPanel.uxml",
-      "accessCount": 1,
-      "lastAccessed": 1775702869233,
+      "accessCount": 10,
+      "lastAccessed": 1775831173805,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroSetTopmost.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702872762,
+      "path": "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml",
+      "accessCount": 10,
+      "lastAccessed": 1775831174245,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroApplySettings.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702873145,
+      "path": "Assets/UI_V2/Controller/DeskWindowController.cs",
+      "accessCount": 9,
+      "lastAccessed": 1775831104186,
       "type": "file"
     },
     {
-      "path": "AUI/desk-window-next/package.json",
-      "accessCount": 1,
-      "lastAccessed": 1775702884824,
+      "path": "Assets/UI_V2/Controller/OnlineSettingsPanelController.cs",
+      "accessCount": 8,
+      "lastAccessed": 1775831104798,
       "type": "file"
     },
     {
-      "path": "AUI/desk-window-next/components/DeskWindow.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775702888693,
+      "path": "Assets/UI_V2/Controller/PetSettingsPanelController.cs",
+      "accessCount": 8,
+      "lastAccessed": 1775831105002,
       "type": "file"
     },
     {
-      "path": "AUI/desk-window-next/app/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775702888741,
+      "path": "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml",
+      "accessCount": 8,
+      "lastAccessed": 1775831174661,
       "type": "file"
     },
     {
-      "path": "AUI/desk-window-next/components/PomodoroSettingsPanel.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775702893065,
+      "path": "Assets/UI_V2/Documents/PetSettingsPanel.uxml",
+      "accessCount": 8,
+      "lastAccessed": 1775831174891,
       "type": "file"
     },
     {
-      "path": "AUI/desk-window-next/components/OnlineSettingsPanel.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775702893098,
+      "path": "Assets/UI_V2/Styles/Clock.uss",
+      "accessCount": 8,
+      "lastAccessed": 1775868183656,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroJumpToScreenTop.cs",
-      "accessCount": 1,
-      "lastAccessed": 1775702901339,
+      "path": "Assets/UI_V2/Styles/BackButton.uss",
+      "accessCount": 7,
+      "lastAccessed": 1775829755272,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroSetMonitor.cs",
+      "path": "Assets/UI_V2/Controller/PomodoroSettingsPanelView.cs",
+      "accessCount": 7,
+      "lastAccessed": 1775831104390,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/ButtonTab.uss",
+      "accessCount": 7,
+      "lastAccessed": 1775868183024,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/PetSettingsPanel.uss",
+      "accessCount": 6,
+      "lastAccessed": 1775830487820,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/OnlineSettingsPanel.uss",
+      "accessCount": 5,
+      "lastAccessed": 1775830487611,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/PomodoroPanelView.cs",
+      "accessCount": 5,
+      "lastAccessed": 1775831103974,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/PlayerCardManager.cs",
+      "accessCount": 4,
+      "lastAccessed": 1775828514810,
+      "type": "file"
+    },
+    {
+      "path": "Assets",
+      "accessCount": 4,
+      "lastAccessed": 1775829382758,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/BackButton.uxml",
+      "accessCount": 4,
+      "lastAccessed": 1775829747480,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/PlayerCard.uss",
+      "accessCount": 3,
+      "lastAccessed": 1775829755315,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/ButtonPrimary.uss",
+      "accessCount": 3,
+      "lastAccessed": 1775868009796,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/ButtonSecondary.uss",
+      "accessCount": 3,
+      "lastAccessed": 1775868175761,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/ToggleSwitch.uss",
+      "accessCount": 3,
+      "lastAccessed": 1775868183345,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/ClockView.cs",
+      "accessCount": 2,
+      "lastAccessed": 1775806085068,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Variables.uss",
+      "accessCount": 2,
+      "lastAccessed": 1775829755367,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2",
       "accessCount": 1,
-      "lastAccessed": 1775702901807,
+      "lastAccessed": 1775806091146,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/ISettingsPanel.cs",
+      "accessCount": 1,
+      "lastAccessed": 1775828869024,
       "type": "file"
     },
     {
       "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroApplyMetaSettings.cs",
       "accessCount": 1,
-      "lastAccessed": 1775702901873,
+      "lastAccessed": 1775828954683,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroRevertTopmost.cs",
+      "path": "Assets/UI_V2/Documents/PlayerCard.uxml",
       "accessCount": 1,
-      "lastAccessed": 1775702905415,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml",
-      "accessCount": 1,
-      "lastAccessed": 1775702906043,
+      "lastAccessed": 1775829747448,
       "type": "file"
     },
     {
       "path": "Assets/UI_V2/Documents/Clock.uxml",
       "accessCount": 1,
-      "lastAccessed": 1775702906094,
+      "lastAccessed": 1775829747498,
       "type": "file"
     },
     {
-      "path": "AppMonitor.csproj",
+      "path": "Assets/UI_V2/Controller",
       "accessCount": 1,
-      "lastAccessed": 1775703206215,
+      "lastAccessed": 1775829954999,
+      "type": "directory"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/ButtonIcon.uss",
+      "accessCount": 1,
+      "lastAccessed": 1775830172029,
       "type": "file"
     },
     {
-      "path": "Assets/Scripts/APP",
+      "path": "Assets/UI_V2/Styles/Components/PanelTitle.uss",
       "accessCount": 1,
-      "lastAccessed": 1775718579033,
-      "type": "directory"
+      "lastAccessed": 1775830172447,
+      "type": "file"
     },
     {
-      "path": "Assets/Editor/BuildScript.cs",
+      "path": "Assets/UI_V2/Documents/Components/ButtonPrimary.uxml",
       "accessCount": 1,
-      "lastAccessed": 1775719562633,
-      "type": "directory"
+      "lastAccessed": 1775830192454,
+      "type": "file"
     },
     {
-      "path": "Assets/Editor/MacOSBuildPostProcessor.cs",
+      "path": "Assets/UI_V2/Documents/Components/ButtonSecondary.uxml",
       "accessCount": 1,
-      "lastAccessed": 1775719562687,
-      "type": "directory"
+      "lastAccessed": 1775830192668,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Components/ButtonIcon.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775830192873,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Components/ButtonTab.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775830193079,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Components/PanelTitle.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775830193285,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Components/ToggleSwitch.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775830193492,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20260411-083825.png",
+      "accessCount": 1,
+      "lastAccessed": 1775867909281,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20260411-084019.png",
+      "accessCount": 1,
+      "lastAccessed": 1775868022616,
+      "type": "file"
     }
   ],
   "userDirectives": []

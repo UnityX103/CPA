@@ -1,0 +1,57 @@
+Unity Editor version:    6000.0.25f1 (4859ab7b5a49)
+Branch:                  6000.0/release
+Build type:              Release
+Batch mode:              YES
+macOS version:           Version 26.3 (Build 25D125)
+Darwin version:          25.3.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        24576 MB
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-xpy" at "2026-04-09T11:26:53.247119Z"
+[Licensing::Client] Error: Code 10 while verifying Licensing Client signature (process Id: 19943, path: "/Applications/Unity Hub.app/Contents/Frameworks/UnityLicensingClient_V1.app/Contents/MacOS/Unity.Licensing.Client")
+[Licensing::Module] Error: LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.17.4+4293ba1
+  Session Id:              e4e28e0778494b78a48d674643b612ff
+  Correlation Id:          7d72810811ba835ad9d919294b4a83e8
+  External correlation Id: 2301904573472892448
+  Machine Id:              SARLyqid3ozx6NV5SwTp3cVqqw0=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-xpy" (connect: 0.00s, validation: 0.01s, handshake: 0.21s)
+[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-xpy-notifications" at "2026-04-09T11:26:53.475569Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully updated license
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Serial number assigned to: "ewogICJzdWJzR3JvdXAiIDogInVuaXR5IGVkaXRvciIsCiAgIm5hbWVzcGFjZSIgOiAidW5pdHlfZWRpdG9yIiwKICAidHlwZSIgOiAiRURJVE9SIiwKICAidGFnIiA6ICJVbml0eVBlcnNvbmFsXXXX"
+Pro License: NO
+[Licensing::Client] Successfully resolved entitlement details
+Launching external process: /Applications/Unity6/Unity/Unity.app/Contents/Resources/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity6/Unity/Unity.app/Contents/MacOS/Unity
+-batchmode
+-projectPath
+/Users/xpy/Desktop/NanZhai/CPA
+-runTests
+-testPlatform
+EditMode
+-testFilter
+APP.Pomodoro.Tests.PlayerCardManagerTests
+-testResults
+/Users/xpy/Desktop/NanZhai/CPA/TestResults/worker2-playercard.xml
+-logFile
+/Users/xpy/Desktop/NanZhai/CPA/TestResults/worker2-playercard.log
+-quit
+Successfully changed project path to: /Users/xpy/Desktop/NanZhai/CPA
+/Users/xpy/Desktop/NanZhai/CPA
+It looks like another Unity instance is running with this project open.
+
+Multiple Unity instances cannot open the same project.
+
+Project: /Users/xpy/Desktop/NanZhai/CPA
+Fatal Error! It looks like another Unity instance is running with this project open.
+
+Multiple Unity instances cannot open the same project.
+
+Project: /Users/xpy/Desktop/NanZhai/CPA
+[Package Manager] Server process was shutdown
