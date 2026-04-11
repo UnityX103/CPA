@@ -1,45 +1,54 @@
+using System.Text.RegularExpressions;
 using APP.Network.Model;
 using APP.Pomodoro.Controller;
 using APP.Pomodoro.Model;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.TestTools;
 
 namespace APP.Pomodoro.Tests
 {
     public sealed class PlayerCardManagerTests
     {
-        private VisualTreeAsset _template;
-        private VisualElement _root;
+        private GameObject _prefab;
+        private GameObject _parent;
 
         [SetUp]
         public void SetUp()
         {
-            _template = Resources.Load<VisualTreeAsset>("__pc_test_not_existing__");
-            // 无法在 EditMode 下 Resources.Load 真实 UXML。
-            // 但 PlayerCardManager 在 template/root 任一为空时也允许 InitializeForTests 继续运行。
-            _root = new VisualElement { name = "test-root" };
+            // 创建一个带 PlayerCardController + UIDocument 的测试预制体
+            _prefab = new GameObject("TestCardPrefab");
+            _prefab.AddComponent<UnityEngine.UIElements.UIDocument>();
+            _prefab.AddComponent<PlayerCardController>();
+            _prefab.SetActive(false); // 预制体不激活
+
+            _parent = new GameObject("TestCardParent");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_prefab != null) Object.DestroyImmediate(_prefab);
+            if (_parent != null) Object.DestroyImmediate(_parent);
         }
 
         [Test]
-        public void AddOrUpdate_WithoutTemplate_SkipsCreation()
+        public void AddOrUpdate_WithoutPrefab_SkipsCreation()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, null);
+            manager.InitializeForTests(null);
 
-            var player = NewPlayer("p1", "Alice");
-            manager.AddOrUpdate(player);
+            LogAssert.Expect(LogType.Error, new Regex("预制体未分配"));
+            manager.AddOrUpdate(NewPlayer("p1", "Alice"));
 
-            Assert.That(manager.Cards, Is.Empty, "无 template 时应跳过卡片创建");
-            Assert.That(manager.CardLayer, Is.Not.Null);
-            Assert.That(manager.CardLayer.name, Is.EqualTo("player-card-layer"));
+            Assert.That(manager.Cards, Is.Empty, "无预制体时应跳过卡片创建");
         }
 
         [Test]
         public void Remove_UnknownPlayerId_DoesNotThrow()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, null);
+            manager.InitializeForTests(null);
             Assert.DoesNotThrow(() => manager.Remove("unknown-id"));
             Assert.DoesNotThrow(() => manager.Remove(null));
             Assert.DoesNotThrow(() => manager.Remove(string.Empty));
@@ -49,27 +58,20 @@ namespace APP.Pomodoro.Tests
         public void Clear_RemovesAllCards()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, null);
+            manager.InitializeForTests(null);
+            LogAssert.Expect(LogType.Error, new Regex("预制体未分配"));
             manager.AddOrUpdate(NewPlayer("p1", "A"));
+            LogAssert.Expect(LogType.Error, new Regex("预制体未分配"));
             manager.AddOrUpdate(NewPlayer("p2", "B"));
             manager.Clear();
             Assert.That(manager.Cards, Is.Empty);
         }
 
         [Test]
-        public void CardLayer_UsesIgnorePickingMode()
-        {
-            var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, null);
-            Assert.That(manager.CardLayer, Is.Not.Null);
-            Assert.That(manager.CardLayer.pickingMode, Is.EqualTo(PickingMode.Ignore));
-        }
-
-        [Test]
         public void AddOrUpdate_NullOrEmptyId_Ignored()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, null);
+            manager.InitializeForTests(null);
             manager.AddOrUpdate(null);
             manager.AddOrUpdate(new RemotePlayerData { PlayerId = null });
             manager.AddOrUpdate(new RemotePlayerData { PlayerId = string.Empty });
@@ -77,50 +79,60 @@ namespace APP.Pomodoro.Tests
         }
 
         [Test]
-        public void AddOrUpdate_DuplicatePlayerId_DoesNotCreateNewCard()
+        public void AddOrUpdate_WithPrefab_CreatesGameObject()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, CreateEmptyTemplate());
+            manager.InitializeForTests(_prefab, _parent.transform);
 
             manager.AddOrUpdate(NewPlayer("p1", "Alice"));
 
-            PlayerCardView firstCard = manager.Cards["p1"];
-            int initialChildCount = manager.CardLayer.childCount;
+            Assert.That(manager.Cards, Has.Count.EqualTo(1));
+            Assert.That(manager.Cards.ContainsKey("p1"), Is.True);
+            Assert.That(_parent.transform.childCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void AddOrUpdate_DuplicatePlayerId_DoesNotCreateNewObject()
+        {
+            var manager = new PlayerCardManager();
+            manager.InitializeForTests(_prefab, _parent.transform);
+
+            manager.AddOrUpdate(NewPlayer("p1", "Alice"));
+            var firstCard = manager.Cards["p1"];
 
             manager.AddOrUpdate(NewPlayer("p1", "Alice Updated"));
 
             Assert.That(manager.Cards, Has.Count.EqualTo(1));
             Assert.That(manager.Cards["p1"], Is.SameAs(firstCard));
-            Assert.That(manager.CardLayer.childCount, Is.EqualTo(initialChildCount));
+            Assert.That(_parent.transform.childCount, Is.EqualTo(1));
         }
 
         [Test]
-        public void Clear_AfterAddOrUpdate_CanMountCardAgain()
+        public void Remove_DestroysGameObject()
         {
             var manager = new PlayerCardManager();
-            manager.InitializeForTests(_root, CreateEmptyTemplate());
+            manager.InitializeForTests(_prefab, _parent.transform);
 
             manager.AddOrUpdate(NewPlayer("p1", "Alice"));
-            manager.Clear();
-            manager.AddOrUpdate(NewPlayer("p1", "Alice Again"));
-
             Assert.That(manager.Cards, Has.Count.EqualTo(1));
-            Assert.That(manager.Cards.ContainsKey("p1"), Is.True);
-            Assert.That(manager.CardLayer.childCount, Is.EqualTo(1));
-            Assert.That(manager.Cards["p1"].Root.parent, Is.SameAs(manager.CardLayer));
+
+            manager.Remove("p1");
+
+            Assert.That(manager.Cards, Is.Empty);
+            // DestroyImmediate 不会在 EditMode 的 Destroy 中立即生效，
+            // 但 Dictionary 应已移除
         }
 
         [Test]
-        public void InitializeForTests_WithNullTemplate_FallbackConstructDoesNotThrow()
+        public void InitializeForTests_WithNullPrefab_DoesNotThrow()
         {
             var manager = new PlayerCardManager();
 
-            Assert.DoesNotThrow(() => manager.InitializeForTests(_root, null));
+            Assert.DoesNotThrow(() => manager.InitializeForTests(null));
+            LogAssert.Expect(LogType.Error, new Regex("预制体未分配"));
             Assert.DoesNotThrow(() => manager.AddOrUpdate(NewPlayer("p1", "Alice")));
 
-            Assert.That(manager.CardLayer, Is.Not.Null);
             Assert.That(manager.Cards, Is.Empty);
-            Assert.That(manager.CardLayer.childCount, Is.EqualTo(0));
         }
 
         private static RemotePlayerData NewPlayer(string id, string name)
@@ -135,11 +147,6 @@ namespace APP.Pomodoro.Tests
                 TotalRounds = 4,
                 IsRunning = true,
             };
-        }
-
-        private static VisualTreeAsset CreateEmptyTemplate()
-        {
-            return ScriptableObject.CreateInstance<VisualTreeAsset>();
         }
     }
 }

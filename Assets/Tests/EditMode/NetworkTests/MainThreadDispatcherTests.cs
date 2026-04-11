@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using APP.Network.System;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace APP.Network.Tests
 {
@@ -37,6 +39,7 @@ namespace APP.Network.Tests
             queue.Enqueue(() => throw new InvalidOperationException("boom"));
             queue.Enqueue(() => executionOrder.Add(3));
 
+            LogAssert.Expect(LogType.Exception, "InvalidOperationException: boom");
             Assert.DoesNotThrow(system.DrainMainThreadQueue);
             Assert.That(executionOrder, Is.EqualTo(new[] { 1, 3 }));
         }

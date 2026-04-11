@@ -26,8 +26,8 @@ namespace APP.Pomodoro.Controller
         [Header("番茄钟子面板视图")]
         [SerializeField] private PomodoroPanelView _pomodoroPanelView;
 
-        [Header("玩家卡片 UXML（多人番茄钟）")]
-        [SerializeField] private VisualTreeAsset _playerCardUxml;
+        [Header("玩家卡片预制体（多人番茄钟，含 UIDocument + PlayerCardController）")]
+        [SerializeField] private GameObject _playerCardPrefab;
 
         [Header("设置面板（独立 UIDocument）")]
         [SerializeField] private PomodoroSettingsPanelController _pomodoroSettingsPanel;
@@ -91,9 +91,9 @@ namespace APP.Pomodoro.Controller
                 Debug.LogError("[DeskWindowController] 未找到 pomodoro-panel 节点，番茄钟面板无法初始化。");
             }
 
-            // 7. 多人番茄钟：卡片管理器
+            // 7. 多人番茄钟：卡片管理器（每个远程玩家一个独立 UIDocument 预制体）
             _playerCardManager = new PlayerCardManager();
-            _playerCardManager.Initialize(_uiDocument.rootVisualElement, _playerCardUxml, gameObject);
+            _playerCardManager.Initialize(_playerCardPrefab, transform, gameObject);
         }
 
         private void Update()
@@ -139,27 +139,11 @@ namespace APP.Pomodoro.Controller
             _btnOnline   = root.Q<Button>("btn-online");
             _btnPet      = root.Q<Button>("btn-pet");
 
-            // 点击 dw-wrap 外部 → 收纳番茄钟面板
+            // 点击 dw-wrap 外部的处理（玩家卡片已独立为单独 UIDocument，无需白名单）
             root.RegisterCallback<PointerDownEvent>(evt =>
             {
                 bool clickInDwWrap = _dwWrap != null && _dwWrap.worldBound.Contains(evt.position);
-
-                bool clickInCardLayer = false;
-                if (evt.target is VisualElement target)
-                {
-                    VisualElement node = target;
-                    while (node != null)
-                    {
-                        if (node.name == "player-card-layer" || node.ClassListContains("pc-root"))
-                        {
-                            clickInCardLayer = true;
-                            break;
-                        }
-                        node = node.parent;
-                    }
-                }
-
-                if (!clickInDwWrap && !clickInCardLayer)
+                if (!clickInDwWrap)
                 {
                     // 点击面板外部（已移除收缩逻辑）
                 }

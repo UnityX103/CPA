@@ -250,8 +250,38 @@
   "hotPaths": [
     {
       "path": "Assets/UI_V2/Styles/PomodoroPanel.uss",
+      "accessCount": 18,
+      "lastAccessed": 1775868988542,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml",
       "accessCount": 16,
-      "lastAccessed": 1775867887536,
+      "lastAccessed": 1775872357625,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/PomodoroSettingsPanelView.cs",
+      "accessCount": 16,
+      "lastAccessed": 1775872377720,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/PomodoroSettingsPanel.uss",
+      "accessCount": 16,
+      "lastAccessed": 1775872389085,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/PomodoroPanelView.cs",
+      "accessCount": 15,
+      "lastAccessed": 1775869027744,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/DeskWindowController.cs",
+      "accessCount": 15,
+      "lastAccessed": 1775873090912,
       "type": "file"
     },
     {
@@ -261,45 +291,57 @@
       "type": "file"
     },
     {
+      "path": "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml",
+      "accessCount": 14,
+      "lastAccessed": 1775873090877,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/BackButton.uss",
+      "accessCount": 13,
+      "lastAccessed": 1775869995440,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Controller/OnlineSettingsPanelController.cs",
+      "accessCount": 13,
+      "lastAccessed": 1775873090965,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/OnlineSettingsPanel.uss",
+      "accessCount": 13,
+      "lastAccessed": 1775873091069,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/PomodoroPanel.uxml",
+      "accessCount": 12,
+      "lastAccessed": 1775868988221,
+      "type": "file"
+    },
+    {
       "path": "Assets/UI_V2/Documents/DeskWindow.uxml",
       "accessCount": 11,
       "lastAccessed": 1775831174036,
       "type": "file"
     },
     {
-      "path": "Assets/UI_V2/Styles/PomodoroSettingsPanel.uss",
-      "accessCount": 10,
-      "lastAccessed": 1775830487409,
-      "type": "file"
-    },
-    {
       "path": "Assets/UI_V2/Controller/PomodoroSettingsPanelController.cs",
-      "accessCount": 10,
-      "lastAccessed": 1775831104594,
+      "accessCount": 11,
+      "lastAccessed": 1775871305913,
       "type": "file"
     },
     {
-      "path": "Assets/UI_V2/Documents/PomodoroPanel.uxml",
+      "path": "Assets/UI_V2/Documents/PetSettingsPanel.uxml",
       "accessCount": 10,
-      "lastAccessed": 1775831173805,
+      "lastAccessed": 1775869607988,
       "type": "file"
     },
     {
-      "path": "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml",
-      "accessCount": 10,
-      "lastAccessed": 1775831174245,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/DeskWindowController.cs",
+      "path": "Assets/UI_V2/Styles/PetSettingsPanel.uss",
       "accessCount": 9,
-      "lastAccessed": 1775831104186,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/OnlineSettingsPanelController.cs",
-      "accessCount": 8,
-      "lastAccessed": 1775831104798,
+      "lastAccessed": 1775869645239,
       "type": "file"
     },
     {
@@ -309,33 +351,9 @@
       "type": "file"
     },
     {
-      "path": "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml",
-      "accessCount": 8,
-      "lastAccessed": 1775831174661,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Documents/PetSettingsPanel.uxml",
-      "accessCount": 8,
-      "lastAccessed": 1775831174891,
-      "type": "file"
-    },
-    {
       "path": "Assets/UI_V2/Styles/Clock.uss",
       "accessCount": 8,
       "lastAccessed": 1775868183656,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Styles/BackButton.uss",
-      "accessCount": 7,
-      "lastAccessed": 1775829755272,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/PomodoroSettingsPanelView.cs",
-      "accessCount": 7,
-      "lastAccessed": 1775831104390,
       "type": "file"
     },
     {
@@ -345,27 +363,15 @@
       "type": "file"
     },
     {
-      "path": "Assets/UI_V2/Styles/PetSettingsPanel.uss",
-      "accessCount": 6,
-      "lastAccessed": 1775830487820,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Styles/OnlineSettingsPanel.uss",
-      "accessCount": 5,
-      "lastAccessed": 1775830487611,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Controller/PomodoroPanelView.cs",
-      "accessCount": 5,
-      "lastAccessed": 1775831103974,
+      "path": "Assets/UI_V2/Documents/BackButton.uxml",
+      "accessCount": 7,
+      "lastAccessed": 1775869569932,
       "type": "file"
     },
     {
       "path": "Assets/UI_V2/Controller/PlayerCardManager.cs",
-      "accessCount": 4,
-      "lastAccessed": 1775828514810,
+      "accessCount": 5,
+      "lastAccessed": 1775873091017,
       "type": "file"
     },
     {
@@ -375,15 +381,9 @@
       "type": "directory"
     },
     {
-      "path": "Assets/UI_V2/Documents/BackButton.uxml",
-      "accessCount": 4,
-      "lastAccessed": 1775829747480,
-      "type": "file"
-    },
-    {
       "path": "Assets/UI_V2/Styles/PlayerCard.uss",
-      "accessCount": 3,
-      "lastAccessed": 1775829755315,
+      "accessCount": 4,
+      "lastAccessed": 1775873090837,
       "type": "file"
     },
     {
@@ -405,6 +405,12 @@
       "type": "file"
     },
     {
+      "path": "Assets/Scripts/APP/Network/Model/IRoomModel.cs",
+      "accessCount": 3,
+      "lastAccessed": 1775873092312,
+      "type": "directory"
+    },
+    {
       "path": "Assets/UI_V2/Controller/ClockView.cs",
       "accessCount": 2,
       "lastAccessed": 1775806085068,
@@ -415,6 +421,24 @@
       "accessCount": 2,
       "lastAccessed": 1775829755367,
       "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/InputTextSuffix.uss",
+      "accessCount": 2,
+      "lastAccessed": 1775872413956,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/PlayerCard.uxml",
+      "accessCount": 2,
+      "lastAccessed": 1775873091173,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Scripts/APP/Pomodoro/Model/PomodoroEnums.cs",
+      "accessCount": 2,
+      "lastAccessed": 1775873096267,
+      "type": "directory"
     },
     {
       "path": "Assets/UI_V2",
@@ -432,12 +456,6 @@
       "path": "Assets/Scripts/APP/Pomodoro/Command/Cmd_PomodoroApplyMetaSettings.cs",
       "accessCount": 1,
       "lastAccessed": 1775828954683,
-      "type": "file"
-    },
-    {
-      "path": "Assets/UI_V2/Documents/PlayerCard.uxml",
-      "accessCount": 1,
-      "lastAccessed": 1775829747448,
       "type": "file"
     },
     {
@@ -510,6 +528,24 @@
       "path": "Assets/Screenshots/screenshot-20260411-084019.png",
       "accessCount": 1,
       "lastAccessed": 1775868022616,
+      "type": "file"
+    },
+    {
+      "path": "Assets/Screenshots/screenshot-20260411-090019.png",
+      "accessCount": 1,
+      "lastAccessed": 1775869223313,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Documents/Components/InputText.uxml",
+      "accessCount": 1,
+      "lastAccessed": 1775871991235,
+      "type": "file"
+    },
+    {
+      "path": "Assets/UI_V2/Styles/Components/InputText.uss",
+      "accessCount": 1,
+      "lastAccessed": 1775872002231,
       "type": "file"
     }
   ],
