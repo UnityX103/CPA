@@ -27,14 +27,12 @@ namespace APP.Pomodoro.Controller
         private Label         _ppStreakValue;
         private Button        _ppBtnPrimary;
         private Button        _ppBtnSecondary;
-        private Button        _ppBtnCollapse;
 
         // ─── 子视图 ───────────────────────────────────────────────
         private ClockView _clockView;
 
         // ─── 缓存 ─────────────────────────────────────────────────
         private IPomodoroModel _model;
-        private bool           _isCollapsed = true;
         private bool           _isInitialized;
 
         // ─── QFramework ──────────────────────────────────────────
@@ -76,10 +74,6 @@ namespace APP.Pomodoro.Controller
             SubscribeModel();
             SubscribeEvents();
 
-            // 默认收纳状态
-            _isCollapsed = true;
-            _ppRoot?.AddToClassList("pp-collapsed");
-
             _isInitialized = true;
         }
 
@@ -100,33 +94,6 @@ namespace APP.Pomodoro.Controller
             _ppRoot.EnableInClassList("pp-hidden", !visible);
         }
 
-        /// <summary>从外部触发收纳。</summary>
-        public void Collapse()
-        {
-            if (_isCollapsed || _ppRoot == null)
-            {
-                return;
-            }
-
-            _isCollapsed = true;
-            _ppRoot.AddToClassList("pp-collapsed");
-        }
-
-        /// <summary>从外部触发展开。</summary>
-        public void Expand()
-        {
-            if (!_isCollapsed || _ppRoot == null)
-            {
-                return;
-            }
-
-            _isCollapsed = false;
-            _ppRoot.RemoveFromClassList("pp-collapsed");
-        }
-
-        /// <summary>当前是否处于展开状态。</summary>
-        public bool IsExpanded => !_isCollapsed;
-
         // ─── UI 绑定 ─────────────────────────────────────────────
 
         private void BindElements(VisualElement pomodoroTemplateContainer)
@@ -135,15 +102,12 @@ namespace APP.Pomodoro.Controller
             _ppStreakValue = pomodoroTemplateContainer.Q<Label>("pp-streak-value");
             _ppBtnPrimary   = pomodoroTemplateContainer.Q<Button>("pp-btn-primary");
             _ppBtnSecondary = pomodoroTemplateContainer.Q<Button>("pp-btn-secondary");
-            _ppBtnCollapse  = pomodoroTemplateContainer.Q<Button>("pp-btn-collapse");
-
             // 查找 Clock TemplateContainer 并初始化 ClockView
             var ppClockContainer = pomodoroTemplateContainer.Q<TemplateContainer>("pp-clock");
             if (ppClockContainer != null)
             {
                 _clockView = new ClockView(ppClockContainer);
-                // 点击时钟区域 → 展开面板
-                ppClockContainer.RegisterCallback<PointerUpEvent>(_ => OnClockClicked());
+                // Clock 初始化完成
             }
             else
             {
@@ -153,7 +117,6 @@ namespace APP.Pomodoro.Controller
             // 注册按钮事件
             _ppBtnPrimary?.RegisterCallback<PointerUpEvent>(_ => OnPrimaryButtonClicked());
             _ppBtnSecondary?.RegisterCallback<PointerUpEvent>(_ => OnSecondaryButtonClicked());
-            _ppBtnCollapse?.RegisterCallback<PointerUpEvent>(_ => Collapse());
         }
 
         // ─── Model 订阅 ──────────────────────────────────────────
@@ -269,11 +232,6 @@ namespace APP.Pomodoro.Controller
         private void OnSecondaryButtonClicked()
         {
             this.SendCommand(new Cmd_PomodoroSkipCurrentPhase());
-        }
-
-        private void OnClockClicked()
-        {
-            Expand();
         }
 
         // ─── 时钟刷新 ────────────────────────────────────────────

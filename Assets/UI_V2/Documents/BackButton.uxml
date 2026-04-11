@@ -7,16 +7,15 @@
     <ui:Style src="../Styles/BackButton.uss"/>
 
     <!--
-      BackButton — 统一的返回按钮
-      对应 Pencil 组件: Button/Back (id = UAbZg)
+      CloseButton — 统一的关闭按钮
+      对应 Pencil 组件: Button/Close (id = UAbZg)
 
       C# 绑定名称：
-        #back-btn        — 根 Button，点击后关闭覆盖层
-        #back-btn-icon   — 图标 Label（chevron-left，文字为 "‹"）
-        #back-btn-label  — 文字 Label（"返回"）
+        #back-btn        — 根 Button，点击后关闭面板
+        #back-btn-icon   — 图标 Label（×）
+        #back-btn-label  — 文字 Label（"关闭"）
     -->
     <ui:Button name="back-btn" class="back-btn">
-        <ui:Label name="back-btn-icon" class="back-btn-icon" text="‹"/>
-        <ui:Label name="back-btn-label" class="back-btn-label" text="返回"/>
+        <ui:Label name="back-btn-icon" class="back-btn-icon" text="×"/>
     </ui:Button>
 </ui:UXML>

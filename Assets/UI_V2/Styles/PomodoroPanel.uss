@@ -97,40 +97,6 @@
     margin-bottom: 8px;
 }
 
-/* ── 收纳状态 ────────────────────────────────────────────── */
-
-.pp-collapsed .pp-header {
-    display: none;
-}
-
-.pp-collapsed .pp-actions {
-    display: none;
-}
-
-/* 收纳时背景仅包裹时钟本体，去除所有额外空间 */
-.pp-collapsed.pp-root {
-    width: auto;
-    padding-top: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-    padding-left: 0;
-}
-
-.pp-collapsed .pp-body {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.pp-collapsed .pp-clock {
-    margin-right: 0;
-}
-
-/* ── 收纳按钮（样式已迁移至 Components/ButtonIcon.uss）── */
-/* 收纳模式下隐藏收纳按钮 TemplateContainer */
-.pp-collapsed #pp-btn-collapse {
-    display: none;
-}
-
 /* ── 通用隐藏（由 C# class 切换，不写 inline style）─────── */
 .pp-hidden {
     display: none;

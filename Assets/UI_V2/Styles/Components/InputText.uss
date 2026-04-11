@@ -1,0 +1,36 @@
+/*
+ * InputText.uss
+ * 对应 Pencil 组件: Input/Text (id = brmHc)
+ * 视觉: 圆角输入框，浅色背景 + 细边框
+ */
+
+.comp-input-text {
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(229, 231, 235); /* #E5E7EB */
+    background-color: rgba(255, 255, 255, 0.8); /* #FFFFFFCC */
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 14px;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+}
+
+.comp-input-text:focus {
+    border-color: rgb(99, 102, 241); /* #6366F1 */
+}
+
+/* Unity TextField 内部结构：隐藏默认 Label，重置 TextInput 样式 */
+.comp-input-text > .unity-text-field__label {
+    display: none;
+}
+
+.comp-input-text > .unity-text-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    color: rgb(26, 26, 26);
+}

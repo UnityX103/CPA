@@ -14,4 +14,12 @@
     overflow: hidden;
 }
 
-/* Panel Title 样式已迁移至 Components/PanelTitle.uss */
+/* ── Header: 标题 + 关闭按钮 ──────────────────────────────── */
+.pet-head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.pet-head-spacer {
+    flex-grow: 1;
+}

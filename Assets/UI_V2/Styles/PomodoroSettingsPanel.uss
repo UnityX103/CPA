@@ -1,15 +1,6 @@
 /*
  * PomodoroSettingsPanel.uss
- * 对应 TSX: components/PomodoroSettingsPanel.tsx
- *
- * 不支持特性处理：
- *   display: grid grid-cols-2  → flex-direction: row，每列 width:50%
- *   gap-3 (12px)               → margin-right: 12px 在第一列
- *   gap-4 (16px)               → margin-bottom: 16px
- *   gap-[10px]                 → margin-bottom: 10px
- *   gap-[2px]                  → margin-bottom: 2px
- *   box-shadow                 → border 模拟
- *   backdrop-blur              → 移除
+ * 对应 Pencil 组件: Pomodoro Settings Panel (id = gs1Tv)
  */
 
 /* ── 根容器 ──────────────────────────────────────────────── */
@@ -30,41 +21,15 @@
 .psp-header {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     margin-bottom: 16px;
 }
 
-/* 标题文字（已迁移至 Components/PanelTitle.uss，此处仅保留布局） */
-.psp-title-instance {
-    flex: 1;
-    margin-right: 12px;
+.psp-header-spacer {
+    flex-grow: 1;
 }
-
-/* 状态开关区域 */
-.psp-status-switch {
-    flex-direction: row;
-    align-items: center;
-    border-radius: 14px; /* 9999px 在 Unity 对非正方形元素生成真椭圆；内容高约 28px 故取 14px */
-    background-color: rgb(238, 242, 255);
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-}
-
-.psp-status-text {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: rgb(79, 70, 229);
-    -unity-text-align: middle-left;
-    margin-right: 8px;
-}
-
-/* Toggle 样式已迁移至 Components/ToggleSwitch.uss */
 
 /* ── 指标卡片区（两列）────────────────────────────────────── */
 
-/* grid grid-cols-2 gap-3 → flex row + 每列 50% */
 .psp-metrics {
     flex-direction: row;
     margin-bottom: 16px;
@@ -153,16 +118,12 @@
     margin-bottom: 10px;
 }
 
-/* :last-child 不支持；PomodoroSettingsPanel.uxml 最后一个 psp-row 用 style="margin-bottom:0" */
-
 .psp-row-label {
     font-size: 14px;
     color: rgb(26, 26, 26);
     -unity-text-align: middle-left;
     flex: 1;
 }
-
-/* Toggle 行内样式已迁移至 Components/ToggleSwitch.uss */
 
 .psp-row-value {
     font-size: 12px;

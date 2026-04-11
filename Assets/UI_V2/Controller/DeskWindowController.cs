@@ -161,7 +161,7 @@ namespace APP.Pomodoro.Controller
 
                 if (!clickInDwWrap && !clickInCardLayer)
                 {
-                    _pomodoroPanelView?.Collapse();
+                    // 点击面板外部（已移除收缩逻辑）
                 }
             });
 

@@ -22,14 +22,12 @@
       #pp-clock         — Clock TemplateContainer
       #pp-btn-primary   — 主操作按钮（开始/暂停）
       #pp-btn-secondary — 次操作按钮（跳过）
-      #pp-btn-collapse  — 收纳按钮
   -->
   <ui:VisualElement name="pp-root" class="pp-root">
 
-    <!-- 顶部：标题 + 收纳按钮 + 连续专注（Pencil head/S3Nbk: space-between） -->
+    <!-- 顶部：标题 + 连续专注（Pencil head/S3Nbk: space-between） -->
     <ui:VisualElement class="pp-header">
       <ui:Label name="pp-title" class="pp-title" text="番茄钟"/>
-      <ui:Button name="pp-btn-collapse" class="comp-btn-icon" text="−"/>
       <ui:VisualElement class="pp-streak">
         <ui:Label class="pp-streak-label" text="连续专注"/>
         <ui:Label name="pp-streak-value" class="pp-streak-value" text="3 次"/>

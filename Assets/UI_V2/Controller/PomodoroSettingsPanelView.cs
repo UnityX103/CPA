@@ -23,7 +23,7 @@ namespace APP.Pomodoro.Controller
         private readonly Label  _focusValue;     // name="psp-focus-value"
         private readonly Label  _breakValue;     // name="psp-break-value"
         private readonly Label  _soundLabel;     // name="psp-sound-label"
-        private readonly Label  _statusText;     // class="psp-status-text"（已启用/已禁用文字）
+        // _statusText 已移除（toggle 改为独立行，无需文字标签）
 
         // ─── 构造 ─────────────────────────────────────────────────
 
@@ -44,8 +44,6 @@ namespace APP.Pomodoro.Controller
             _focusValue   = panelRoot.Q<Label>("psp-focus-value");
             _breakValue   = panelRoot.Q<Label>("psp-break-value");
             _soundLabel   = panelRoot.Q<Label>("psp-sound-label");
-            _statusText   = panelRoot.Q<Label>(className: "psp-status-text");
-
             RegisterToggleCallbacks();
         }
 
@@ -79,8 +77,6 @@ namespace APP.Pomodoro.Controller
             // Toggle 用 SetValueWithoutNotify 避免触发回调循环
             _enableToggle?.SetValueWithoutNotify(isEnabled);
             _hintToggle?.SetValueWithoutNotify(hintEnabled);
-
-            UpdateStatusText(isEnabled);
         }
 
         // ─── 私有辅助 ─────────────────────────────────────────────
@@ -89,7 +85,6 @@ namespace APP.Pomodoro.Controller
         {
             _enableToggle?.RegisterValueChangedCallback(evt =>
             {
-                UpdateStatusText(evt.newValue);
                 OnEnabledChanged?.Invoke(evt.newValue);
             });
 
@@ -99,14 +94,5 @@ namespace APP.Pomodoro.Controller
             });
         }
 
-        private void UpdateStatusText(bool isEnabled)
-        {
-            if (_statusText == null)
-            {
-                return;
-            }
-
-            _statusText.text = isEnabled ? "已启用" : "已禁用";
-        }
     }
 }

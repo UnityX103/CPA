@@ -1,11 +1,12 @@
 /*
  * OnlineSettingsPanel.uss
  * 对应 Pencil 组件: Online Settings Panel (id = 8Le5R)
- * 当前为开发中占位状态。
  */
 
+/* ── 根容器 ──────────────────────────────────────────────── */
+
 .osp-root {
-    width: 572px; /* Pencil: fill_container(572) */
+    width: 572px;
     flex-direction: column;
     border-radius: 20px;
     border-width: 1px;
@@ -13,48 +14,216 @@
     background-color: rgb(255, 255, 255);
     padding: 20px;
     overflow: hidden;
+    flex-shrink: 0; /* 内容自适应，不被压缩 */
 }
 
-/* ── Panel Title（样式已迁移至 Components/PanelTitle.uss）─── */
-.osp-title-instance {
-    margin-bottom: 16px; /* gap: 16 */
+/* ── Header: 标题 + 关闭按钮 ──────────────────────────────── */
+
+.osp-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-/* ── 开发中占位卡片（Pencil: onlDevCard / 6p0SI）─────────── */
+.osp-header-spacer {
+    flex-grow: 1;
+}
 
-.osp-dev-card {
-    flex-direction: column;
+/* ── 通用设置行（自动联网等）──────────────────────────────── */
+
+.osp-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     border-radius: 16px;
     background-color: rgb(246, 247, 248); /* #F6F7F8 */
-    padding: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
 }
 
-.osp-dev-label {
-    font-size: 12px;
-    -unity-font-style: bold;
-    color: rgb(156, 163, 175); /* #9CA3AF */
-    -unity-text-align: middle-left;
-    margin-bottom: 8px; /* gap: 8 */
-}
-
-.osp-dev-text {
-    font-size: 24px;
-    -unity-font-style: bold;
+.osp-row-label {
+    font-size: 14px;
     color: rgb(26, 26, 26); /* #1A1A1A */
     -unity-text-align: middle-left;
-    margin-bottom: 8px; /* gap: 8 */
+    flex: 1;
 }
 
-.osp-dev-sub {
-    font-size: 13px;
+/* ── 通用卡片容器 ────────────────────────────────────────── */
+
+.osp-card {
+    flex-direction: column;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    flex-shrink: 0; /* 防止卡片被压缩 */
+}
+
+.osp-card-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+    margin-bottom: 12px;
+}
+
+/* ── 加入房间卡片 ────────────────────────────────────────── */
+
+.osp-join-card {
+    background-color: rgb(246, 247, 248); /* #F6F7F8 */
+}
+
+.osp-field {
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.osp-field-label {
+    font-size: 12px;
+    -unity-font-style: bold;
     color: rgb(107, 114, 128); /* #6B7280 */
-    -unity-text-align: middle-left;
-    white-space: normal;
+    margin-bottom: 6px;
 }
 
-/* ── 错误提示 ──────────────────────────────────────────────
- *   默认隐藏；C# 通过 EnableInClassList("is-visible", bool) 切换显示。
- */
+/* 输入框样式已迁移至 Components/InputText.uss (.comp-input-text) */
+
+/* ── 当前房间卡片 ────────────────────────────────────────── */
+
+.osp-room-card {
+    background-color: rgb(240, 253, 244); /* #F0FDF4 */
+    border-width: 1px;
+    border-color: rgb(187, 247, 208); /* #BBF7D0 */
+}
+
+.osp-room-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.osp-room-info {
+    flex-direction: column;
+}
+
+.osp-room-name {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(22, 101, 52); /* #166534 */
+    margin-bottom: 2px;
+}
+
+.osp-room-status {
+    font-size: 12px;
+    color: rgb(74, 222, 128); /* #4ADE80 */
+}
+
+/* ── 成员列表 ────────────────────────────────────────────── */
+
+.osp-member-list {
+    flex-direction: column;
+}
+
+.osp-member-item {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+}
+
+.osp-member-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.osp-member-dot--online {
+    background-color: rgb(74, 222, 128); /* #4ADE80 */
+}
+
+.osp-member-dot--offline {
+    background-color: rgb(209, 213, 219); /* #D1D5DB */
+}
+
+.osp-member-name {
+    font-size: 13px;
+    color: rgb(26, 26, 26);
+    flex: 1;
+}
+
+.osp-member-status {
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.osp-member-status--focus {
+    color: rgb(99, 102, 241); /* #6366F1 */
+}
+
+.osp-member-status--break {
+    color: rgb(217, 119, 6); /* #D97706 */
+}
+
+.osp-member-status--idle {
+    color: rgb(156, 163, 175); /* #9CA3AF */
+}
+
+/* ── 历史房间卡片 ────────────────────────────────────────── */
+
+.osp-hist-card {
+    background-color: rgb(246, 247, 248); /* #F6F7F8 */
+}
+
+.osp-hist-list {
+    flex-direction: column;
+}
+
+.osp-hist-item {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+}
+
+.osp-hist-item-name {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+    flex: 1;
+}
+
+.osp-hist-item-time {
+    font-size: 12px;
+    color: rgb(156, 163, 175); /* #9CA3AF */
+    margin-right: 8px;
+}
+
+.osp-hist-item-icon {
+    font-size: 14px;
+    color: rgb(99, 102, 241); /* #6366F1 */
+    -unity-text-align: middle-center;
+}
+
+/* ── 状态切换（C# 通过 EnableInClassList 控制）──────────── */
+
+.osp-hidden {
+    display: none;
+}
+
+/* ── 错误提示 ────────────────────────────────────────────── */
 
 .osp-error {
     margin-top: 4px;

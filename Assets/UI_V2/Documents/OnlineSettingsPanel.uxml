@@ -1,29 +1,80 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="BackButton" src="BackButton.uxml"/>
-    <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
-    <Style src="project://database/Assets/UI_V2/Styles/OnlineSettingsPanel.uss?fileID=7433441132597879392&amp;guid=3549485af0add4718a0e181438a7522a&amp;type=3#OnlineSettingsPanel" />
+    <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/OnlineSettingsPanel.uss"/>
     <!-- 组件 USS -->
     <ui:Style src="../Styles/Components/PanelTitle.uss"/>
+    <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
+    <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
+    <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
+    <ui:Style src="../Styles/Components/InputText.uss"/>
+    <ui:Style src="../Styles/BackButton.uss"/>
+
     <!--
       OnlineSettingsPanel — 联机设置面板
       对应 Pencil 组件: Online Settings Panel (id = 8Le5R)
-      当前为开发中占位状态，联机功能将在后续版本开放。
+      三个卡片通过 C# class 切换显示/隐藏：
+        osp-join-card  — 未加入时显示
+        osp-room-card  — 已加入时显示
+        osp-hist-card  — 未加入时显示
     -->
     <ui:VisualElement name="osp-root" class="osp-root">
-        <!-- 统一返回按钮（Pencil 组件: Button/Back） -->
-        <ui:Instance name="osp-back" template="BackButton" class="panel-back-instance"/>
-        <!-- Pencil: Panel Title 组件 (ztG6B) -->
-        <ui:VisualElement class="osp-title-instance">
+
+        <!-- Pencil: onlHead — 标题 + spacer + 关闭按钮 -->
+        <ui:VisualElement class="osp-header">
             <ui:Label text="联机模式" class="comp-panel-title__title" />
-            <ui:Label text="连接、同步与隐私选项。" class="comp-panel-title__subtitle" />
+            <ui:VisualElement class="osp-header-spacer" />
+            <ui:Instance name="osp-back" template="BackButton" class="panel-back-instance"/>
         </ui:VisualElement>
-        <!-- Pencil: onlDevCard — 开发中占位卡片 -->
-        <ui:VisualElement class="osp-dev-card">
-            <ui:Label text="联机模式" class="osp-dev-label" />
-            <ui:Label text="还在开发中" class="osp-dev-text" />
-            <ui:Label text="该面板当前仅展示开发状态，联机相关设置将在后续版本开放。" class="osp-dev-sub" />
+
+        <!-- Pencil: onlAutoRow — 自动联网开关 -->
+        <ui:VisualElement class="osp-row">
+            <ui:Label text="自动联网" class="osp-row-label" />
+            <ui:Toggle name="osp-auto-toggle" value="true" class="comp-toggle-switch" />
         </ui:VisualElement>
-        <!-- 错误提示（C# 通过 EnableInClassList("is-visible") 切换显示） -->
+
+        <!-- ══ 加入房间卡片（未加入时显示）══ -->
+        <ui:VisualElement name="osp-join-card" class="osp-card osp-join-card">
+            <ui:Label text="加入房间" class="osp-card-title" />
+            <!-- 用户名 -->
+            <ui:VisualElement class="osp-field">
+                <ui:Label text="用户名" class="osp-field-label" />
+                <ui:TextField name="osp-username" value="我的昵称" class="comp-input-text" />
+            </ui:VisualElement>
+            <!-- 房间号 -->
+            <ui:VisualElement class="osp-field">
+                <ui:Label text="房间号" class="osp-field-label" />
+                <ui:TextField name="osp-room-id" value="ROOM-001" class="comp-input-text" />
+            </ui:VisualElement>
+            <!-- 加入按钮 -->
+            <ui:Button name="osp-join-btn" text="加入房间" class="comp-btn-primary" />
+        </ui:VisualElement>
+
+        <!-- ══ 当前房间卡片（已加入时显示）══ -->
+        <ui:VisualElement name="osp-room-card" class="osp-card osp-room-card">
+            <!-- 房间头部：房间信息 + 退出按钮 -->
+            <ui:VisualElement class="osp-room-head">
+                <ui:VisualElement class="osp-room-info">
+                    <ui:Label name="osp-room-name" text="ROOM-001" class="osp-room-name" />
+                    <ui:Label name="osp-room-status" text="已连接 · 3 位成员" class="osp-room-status" />
+                </ui:VisualElement>
+                <ui:Button name="osp-exit-btn" text="退出房间" class="comp-btn-secondary" />
+            </ui:VisualElement>
+            <!-- 成员列表 -->
+            <ui:VisualElement name="osp-member-list" class="osp-member-list">
+                <!-- 成员项由 C# 动态生成 -->
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ 历史房间卡片（未加入时显示）══ -->
+        <ui:VisualElement name="osp-hist-card" class="osp-card osp-hist-card">
+            <ui:Label text="历史房间" class="osp-card-title" />
+            <!-- 历史项由 C# 动态生成 -->
+            <ui:VisualElement name="osp-hist-list" class="osp-hist-list" />
+        </ui:VisualElement>
+
+        <!-- 错误提示 -->
         <ui:Label name="osp-error" text="" class="osp-error" />
+
     </ui:VisualElement>
 </ui:UXML>
