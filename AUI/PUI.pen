@@ -4,60 +4,18 @@
     {
       "type": "frame",
       "id": "gs1Tv",
-      "x": 701,
-      "y": -145,
+      "x": 2719,
+      "y": 561,
       "name": "Pomodoro Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
-      "fill": "#FFFFFF",
-      "cornerRadius": 20,
+      "fill": "#FFFFFF00",
       "stroke": {
-        "thickness": 1,
-        "fill": "#F1E5D8"
+        "thickness": 0
       },
       "layout": "vertical",
       "gap": 16,
-      "padding": 20,
       "children": [
-        {
-          "type": "frame",
-          "id": "wpCU1",
-          "name": "pomoHead",
-          "width": "fill_container",
-          "gap": 8,
-          "alignItems": "center",
-          "children": [
-            {
-              "id": "8SfNj",
-              "type": "ref",
-              "ref": "ztG6B",
-              "name": "titleRef",
-              "x": 0,
-              "width": "fit_content",
-              "height": "fit_content",
-              "y": 6,
-              "descendants": {
-                "NkQs8": {
-                  "y": 20,
-                  "enabled": false
-                }
-              }
-            },
-            {
-              "type": "frame",
-              "id": "knUTC",
-              "name": "spacer",
-              "width": "fill_container",
-              "height": 1
-            },
-            {
-              "id": "d8Mwj",
-              "type": "ref",
-              "ref": "UAbZg",
-              "name": "pspClose"
-            }
-          ]
-        },
         {
           "type": "frame",
           "id": "BYfx5",
@@ -92,7 +50,7 @@
               "height": 26,
               "padding": 4,
               "width": 44,
-              "x": 472,
+              "x": 512,
               "y": 14,
               "descendants": {
                 "hTGM9": {
@@ -238,7 +196,7 @@
                   "fill": "#6366F1",
                   "height": 26,
                   "padding": 4,
-                  "x": 472,
+                  "x": 512,
                   "y": 14,
                   "descendants": {
                     "hTGM9": {
@@ -303,60 +261,18 @@
     {
       "type": "frame",
       "id": "8Le5R",
-      "x": 701,
-      "y": 295,
+      "x": 2719,
+      "y": 1001,
       "name": "Online Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
-      "fill": "#FFFFFF",
-      "cornerRadius": 20,
+      "fill": "#FFFFFF00",
       "stroke": {
-        "thickness": 1,
-        "fill": "#F1E5D8"
+        "thickness": 0
       },
       "layout": "vertical",
       "gap": 16,
-      "padding": 20,
       "children": [
-        {
-          "type": "frame",
-          "id": "HYNQW",
-          "name": "onlHead",
-          "width": "fill_container",
-          "gap": 8,
-          "alignItems": "center",
-          "children": [
-            {
-              "id": "CL3u0",
-              "type": "ref",
-              "ref": "ztG6B",
-              "name": "titleRef",
-              "width": "fit_content",
-              "height": "fit_content",
-              "descendants": {
-                "EmxQf": {
-                  "content": "联机模式"
-                },
-                "NkQs8": {
-                  "enabled": false
-                }
-              }
-            },
-            {
-              "type": "frame",
-              "id": "gi47C",
-              "name": "spacer",
-              "width": "fill_container",
-              "height": 1
-            },
-            {
-              "id": "gaEYp",
-              "type": "ref",
-              "ref": "UAbZg",
-              "name": "ospClose"
-            }
-          ]
-        },
         {
           "type": "frame",
           "id": "FUrip",
@@ -479,6 +395,7 @@
               "type": "ref",
               "ref": "Za5wE",
               "name": "onlJoinBtn",
+              "width": "fill_container",
               "descendants": {
                 "oNDTH": {
                   "content": "加入房间"
@@ -545,6 +462,7 @@
                   "type": "ref",
                   "ref": "RPLJq",
                   "name": "onlExitBtn",
+                  "width": "fit_content",
                   "descendants": {
                     "zgOkx": {
                       "content": "退出房间"
@@ -658,63 +576,18 @@
     {
       "type": "frame",
       "id": "v2ZgA",
-      "x": 701,
-      "y": 1345,
+      "x": 2719,
+      "y": 1812,
       "name": "Pet Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
-      "fill": "#FFFFFF",
-      "cornerRadius": 20,
+      "height": "fit_content(70)",
+      "fill": "#FFFFFF00",
       "stroke": {
-        "thickness": 1,
-        "fill": "#F1E5D8"
+        "thickness": 0
       },
       "layout": "vertical",
-      "gap": 16,
-      "padding": 20,
-      "children": [
-        {
-          "type": "frame",
-          "id": "g1YnN",
-          "name": "petHead",
-          "width": "fill_container",
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "id": "wl47l",
-              "type": "ref",
-              "ref": "ztG6B",
-              "name": "newTitle",
-              "width": "fit_content",
-              "height": "fit_content",
-              "descendants": {
-                "EmxQf": {
-                  "content": "宠物设置"
-                },
-                "NkQs8": {
-                  "content": "开发中。。。",
-                  "y": 20,
-                  "enabled": false
-                }
-              }
-            },
-            {
-              "type": "frame",
-              "id": "m4Uk1",
-              "name": "spacer",
-              "width": "fill_container",
-              "height": 1
-            },
-            {
-              "id": "75Oi6",
-              "type": "ref",
-              "ref": "UAbZg",
-              "name": "petClose"
-            }
-          ]
-        }
-      ]
+      "gap": 16
     },
     {
       "type": "frame",
@@ -729,16 +602,6 @@
       "stroke": {
         "thickness": 1,
         "fill": "#EFDCCD"
-      },
-      "effect": {
-        "type": "shadow",
-        "shadowType": "outer",
-        "color": "#C7855430",
-        "offset": {
-          "x": 0,
-          "y": 16
-        },
-        "blur": 24
       },
       "layout": "vertical",
       "gap": 18,
@@ -1251,166 +1114,17 @@
       "y": -145,
       "name": "cont - desk-window - preview",
       "reusable": true,
-      "width": 564,
-      "height": 284,
+      "width": 593,
+      "height": 325,
       "cornerRadius": 28,
       "stroke": {
         "thickness": 1
       },
-      "gap": 20,
+      "layout": "vertical",
+      "gap": 12,
       "padding": 20,
-      "justifyContent": "center",
       "alignItems": "center",
       "children": [
-        {
-          "id": "iUCdM",
-          "type": "ref",
-          "ref": "YRqeB",
-          "x": 62.5,
-          "y": 64,
-          "width": "fit_content(230)",
-          "name": "pomodoro",
-          "flipX": false,
-          "flipY": false,
-          "height": "fit_content",
-          "textGrowth": "auto",
-          "justifyContent": "end",
-          "alignItems": "end",
-          "padding": 18,
-          "descendants": {
-            "S3Nbk": {
-              "width": "fill_container",
-              "height": "fit_content",
-              "x": 18,
-              "y": 18
-            },
-            "TqjjH": {
-              "y": 2
-            },
-            "XcJUF": {
-              "width": "fit_content",
-              "height": "fit_content",
-              "x": 158
-            },
-            "90Tqv": {
-              "x": 9,
-              "y": 10
-            },
-            "DiaNW": {
-              "width": "fill_container",
-              "height": "fit_content",
-              "x": 18,
-              "y": 60
-            },
-            "p4kgU": {
-              "width": "fill_container",
-              "height": "fit_content",
-              "x": 116,
-              "y": 9
-            },
-            "xBxOF": {
-              "width": "fill_container",
-              "height": "fit_content"
-            },
-            "xBxOF/oNDTH": {
-              "x": 19,
-              "y": 7
-            },
-            "14BjF": {
-              "width": "fill_container",
-              "height": "fit_content",
-              "y": 34
-            },
-            "14BjF/zgOkx": {
-              "x": 19,
-              "y": 7
-            }
-          }
-        },
-        {
-          "id": "8KQei",
-          "type": "ref",
-          "ref": "F6wwF",
-          "name": "rightColRef",
-          "x": 312.5,
-          "y": 46.5,
-          "width": "fit_content",
-          "height": "fit_content",
-          "descendants": {
-            "mVLgt": {
-              "width": "fit_content",
-              "x": 0,
-              "height": "fit_content"
-            },
-            "kQDRe": {
-              "x": 12,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content"
-            },
-            "kQDRe/Z8Bzt": {
-              "x": 12,
-              "y": 6
-            },
-            "kddG2": {
-              "x": 77,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content"
-            },
-            "kddG2/Z8Bzt": {
-              "x": 12,
-              "y": 6
-            },
-            "L55Yj": {
-              "x": 131,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content"
-            },
-            "L55Yj/Z8Bzt": {
-              "x": 12,
-              "y": 6
-            },
-            "5ZlKI": {
-              "x": 34.5,
-              "fill": {
-                "type": "gradient",
-                "gradientType": "radial",
-                "enabled": true,
-                "rotation": 0,
-                "size": {
-                  "width": 1,
-                  "height": 1
-                },
-                "colors": [
-                  {
-                    "color": "#FFE5D9",
-                    "position": 0
-                  },
-                  {
-                    "color": "#FCEADE",
-                    "position": 0.37
-                  },
-                  {
-                    "color": "#F5D5C0",
-                    "position": 1
-                  }
-                ]
-              },
-              "y": 51
-            },
-            "I18kh": {
-              "x": 30,
-              "y": 34
-            },
-            "vMeEe": {
-              "content": "这是一只宠物",
-              "x": 24,
-              "y": 94
-            }
-          }
-        },
         {
           "type": "text",
           "id": "dragHandle1",
@@ -1426,6 +1140,152 @@
           "fontFamily": "Inter",
           "fontSize": 14,
           "fontWeight": "700"
+        },
+        {
+          "type": "frame",
+          "id": "contentRow",
+          "name": "contentRow",
+          "width": "fill_container",
+          "gap": 20,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "iUCdM",
+              "type": "ref",
+              "ref": "YRqeB",
+              "x": 161.5,
+              "y": 0,
+              "width": "fit_content(230)",
+              "name": "pomodoro",
+              "flipX": false,
+              "flipY": false,
+              "height": "fit_content",
+              "textGrowth": "auto",
+              "justifyContent": "end",
+              "alignItems": "end",
+              "padding": 18,
+              "descendants": {
+                "S3Nbk": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 18,
+                  "y": 18
+                },
+                "TqjjH": {
+                  "y": 2
+                },
+                "XcJUF": {
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "x": 158
+                },
+                "90Tqv": {
+                  "x": 9,
+                  "y": 10
+                },
+                "DiaNW": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 18,
+                  "y": 60
+                },
+                "p4kgU": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "x": 116,
+                  "y": 9
+                },
+                "xBxOF": {
+                  "width": "fill_container",
+                  "height": "fit_content"
+                },
+                "xBxOF/oNDTH": {
+                  "x": 19,
+                  "y": 7
+                },
+                "14BjF": {
+                  "width": "fill_container",
+                  "height": "fit_content",
+                  "y": 34
+                },
+                "14BjF/zgOkx": {
+                  "x": 19,
+                  "y": 7
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "n39SS",
+              "layoutPosition": "absolute",
+              "x": 263,
+              "y": 12,
+              "name": "settingsBtn",
+              "width": 28,
+              "height": 28,
+              "fill": "#F0E0D0",
+              "cornerRadius": 11,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "qZQnY",
+                  "name": "icon",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "settings",
+                  "iconFontFamily": "lucide",
+                  "fill": "#A28B79"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "wBNtq",
+          "name": "cardListWrap",
+          "clip": true,
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "id": "64ubA",
+              "type": "ref",
+              "ref": "drqFB",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "pwNdl",
+              "type": "ref",
+              "ref": "drqFB",
+              "x": 165,
+              "y": 0
+            },
+            {
+              "id": "kCX4h",
+              "type": "ref",
+              "ref": "drqFB",
+              "x": 330,
+              "y": 0
+            },
+            {
+              "id": "dJeQV",
+              "type": "ref",
+              "ref": "drqFB",
+              "x": 495,
+              "y": 0
+            }
+          ]
         }
       ]
     },
@@ -1498,293 +1358,6 @@
           "content": "重置",
           "x": 19,
           "y": 7
-        }
-      }
-    },
-    {
-      "type": "frame",
-      "id": "F6wwF",
-      "x": 1416,
-      "y": -749,
-      "name": "cont - right-column - component",
-      "reusable": true,
-      "layout": "vertical",
-      "gap": 12,
-      "alignItems": "center",
-      "children": [
-        {
-          "type": "frame",
-          "id": "mVLgt",
-          "name": "settingsBtnRow",
-          "fill": "#FFFDFBEE",
-          "cornerRadius": 16,
-          "stroke": {
-            "thickness": 1,
-            "fill": "#EFDCCD"
-          },
-          "gap": 8,
-          "padding": [
-            8,
-            12
-          ],
-          "alignItems": "center",
-          "children": [
-            {
-              "id": "kQDRe",
-              "type": "ref",
-              "ref": "JZ0T6",
-              "fill": "#FFF1EE",
-              "name": "tab1",
-              "x": 12,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content",
-              "descendants": {
-                "Z8Bzt": {
-                  "content": "番茄钟",
-                  "fill": "#D15F3D",
-                  "x": 12,
-                  "y": 6
-                }
-              }
-            },
-            {
-              "id": "kddG2",
-              "type": "ref",
-              "ref": "JZ0T6",
-              "fill": "#EEF2FF",
-              "name": "tab2",
-              "x": 77,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content",
-              "descendants": {
-                "Z8Bzt": {
-                  "content": "联网",
-                  "fill": "#6366F1",
-                  "x": 12,
-                  "y": 6
-                }
-              }
-            },
-            {
-              "id": "L55Yj",
-              "type": "ref",
-              "ref": "JZ0T6",
-              "fill": "#FFF7D9",
-              "name": "tab3",
-              "x": 131,
-              "y": 8,
-              "width": "fit_content",
-              "height": "fit_content",
-              "descendants": {
-                "Z8Bzt": {
-                  "content": "宠物",
-                  "fill": "#D97706",
-                  "x": 12,
-                  "y": 6
-                }
-              }
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "5ZlKI",
-          "name": "pet-animation-placeholder",
-          "width": 120,
-          "height": 140,
-          "fill": {
-            "type": "gradient",
-            "gradientType": "radial",
-            "enabled": true,
-            "rotation": 0,
-            "size": {
-              "width": 1,
-              "height": 1
-            },
-            "colors": [
-              {
-                "color": "#FFE5D9",
-                "position": 0
-              },
-              {
-                "color": "#FCEADE",
-                "position": 0.5
-              },
-              {
-                "color": "#F5D5C0",
-                "position": 1
-              }
-            ]
-          },
-          "cornerRadius": 20,
-          "layout": "vertical",
-          "justifyContent": "center",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "ellipse",
-              "id": "I18kh",
-              "name": "petInner",
-              "fill": {
-                "type": "gradient",
-                "gradientType": "radial",
-                "enabled": true,
-                "rotation": 0,
-                "size": {
-                  "width": 1,
-                  "height": 1
-                },
-                "colors": [
-                  {
-                    "color": "#E8A878",
-                    "position": 0
-                  },
-                  {
-                    "color": "#D4865A",
-                    "position": 1
-                  }
-                ]
-              },
-              "width": 60,
-              "height": 60
-            },
-            {
-              "type": "text",
-              "id": "vMeEe",
-              "name": "petLabel",
-              "fill": "#A28B79",
-              "content": "宠物",
-              "fontFamily": "MaokenAssortedSans",
-              "fontSize": 12,
-              "fontWeight": "600"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "a0Vlr",
-      "type": "ref",
-      "ref": "F6wwF",
-      "name": "rightColumn/show",
-      "x": 1680,
-      "y": -749,
-      "theme": {
-        "settingsBtnState": "show"
-      },
-      "width": "fit_content",
-      "height": "fit_content",
-      "descendants": {
-        "mVLgt": {
-          "width": "fit_content",
-          "x": 0,
-          "height": "fit_content"
-        },
-        "kQDRe": {
-          "x": 12,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "kQDRe/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "kddG2": {
-          "x": 77,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "kddG2/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "L55Yj": {
-          "x": 131,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "L55Yj/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "5ZlKI": {
-          "x": 34.5,
-          "y": 51
-        },
-        "I18kh": {
-          "x": 30,
-          "y": 34
-        },
-        "vMeEe": {
-          "x": 48,
-          "y": 94
-        }
-      }
-    },
-    {
-      "id": "sEGVg",
-      "type": "ref",
-      "ref": "F6wwF",
-      "name": "rightColumn/hide",
-      "x": 1937,
-      "y": -714,
-      "theme": {
-        "settingsBtnState": "hide"
-      },
-      "width": "fit_content",
-      "height": "fit_content",
-      "descendants": {
-        "mVLgt": {
-          "enabled": false,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "kQDRe": {
-          "x": 12,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "kQDRe/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "kddG2": {
-          "x": 77,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "kddG2/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "L55Yj": {
-          "x": 131,
-          "y": 8,
-          "width": "fit_content",
-          "height": "fit_content"
-        },
-        "L55Yj/Z8Bzt": {
-          "x": 12,
-          "y": 6
-        },
-        "5ZlKI": {
-          "x": 0,
-          "y": 0
-        },
-        "I18kh": {
-          "x": 30,
-          "y": 34
-        },
-        "vMeEe": {
-          "x": 48,
-          "y": 94
         }
       }
     },
@@ -2373,6 +1946,7 @@
           "id": "ixVy7",
           "name": "RoomMemberItem",
           "reusable": true,
+          "width": "fill_container",
           "fill": "#FFFFFF",
           "cornerRadius": 10,
           "gap": 10,
@@ -2424,6 +1998,7 @@
           "id": "brmHc",
           "name": "Input/Text",
           "reusable": true,
+          "width": "fill_container",
           "fill": "#FFFFFFCC",
           "cornerRadius": 12,
           "stroke": {
@@ -2453,6 +2028,7 @@
           "id": "0cT2B",
           "name": "Input/TextSuffix",
           "reusable": true,
+          "width": "fill_container",
           "fill": "#FFFFFFCC",
           "cornerRadius": 12,
           "stroke": {
@@ -2575,27 +2151,17 @@
     {
       "type": "frame",
       "id": "drqFB",
-      "x": 1429,
-      "y": 1128,
+      "x": 1409,
+      "y": 301,
       "name": "PlayerCard",
       "reusable": true,
-      "width": 226,
-      "height": 99,
+      "width": 153,
+      "height": 97,
       "fill": "#FFFDFBF2",
       "cornerRadius": 20,
       "stroke": {
         "thickness": 1,
         "fill": "#EFDCCD"
-      },
-      "effect": {
-        "type": "shadow",
-        "shadowType": "outer",
-        "color": "#C7855430",
-        "offset": {
-          "x": 0,
-          "y": 14
-        },
-        "blur": 24
       },
       "layout": "vertical",
       "gap": 12,
@@ -2605,7 +2171,7 @@
           "type": "frame",
           "id": "tyyE3",
           "name": "head",
-          "width": 201,
+          "width": "fill_container",
           "gap": 10,
           "alignItems": "center",
           "children": [
@@ -2669,25 +2235,6 @@
               "justifyContent": "space_between",
               "alignItems": "center",
               "children": [
-                {
-                  "type": "frame",
-                  "id": "5lTZx",
-                  "name": "timeWrap",
-                  "gap": 8,
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "pMVUl",
-                      "name": "time",
-                      "fill": "#D15F3D",
-                      "content": "24:38",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 24,
-                      "fontWeight": "700"
-                    }
-                  ]
-                },
                 {
                   "type": "frame",
                   "id": "eGfPq",
@@ -2764,8 +2311,8 @@
     {
       "type": "frame",
       "id": "hwZs8",
-      "x": 1439,
-      "y": 1345,
+      "x": 1409,
+      "y": 452,
       "name": "PlayerCard/States",
       "fill": "#F7ECE0",
       "cornerRadius": 16,
@@ -2865,8 +2412,8 @@
       "type": "ref",
       "ref": "8Le5R",
       "name": "onlPanel/not-joined",
-      "x": 1313,
-      "y": 295,
+      "x": 3332,
+      "y": 1003,
       "descendants": {
         "EK2CF": {
           "enabled": false
@@ -2878,8 +2425,8 @@
       "type": "ref",
       "ref": "8Le5R",
       "name": "onlPanel/joined",
-      "x": 1937,
-      "y": 295,
+      "x": 3956,
+      "y": 1003,
       "descendants": {
         "ArRDI": {
           "enabled": false
@@ -2888,6 +2435,160 @@
           "enabled": false
         }
       }
+    },
+    {
+      "type": "frame",
+      "id": "vnYnS",
+      "x": 2719,
+      "y": -321,
+      "name": "Unified Settings Panel",
+      "reusable": true,
+      "width": 460,
+      "height": 394,
+      "fill": "#FFFFFF",
+      "cornerRadius": 20,
+      "stroke": {
+        "thickness": 1,
+        "fill": "#F1E5D8"
+      },
+      "layout": "vertical",
+      "gap": 16,
+      "padding": 20,
+      "children": [
+        {
+          "type": "frame",
+          "id": "8QyVE",
+          "name": "head",
+          "width": "fill_container",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "5cQ0e",
+              "name": "title",
+              "fill": "#5B4636",
+              "content": "设置",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "0TTLX",
+              "name": "spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "id": "mNjRm",
+              "type": "ref",
+              "ref": "UAbZg",
+              "name": "closeBtn"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "3kLAl",
+          "name": "body",
+          "clip": true,
+          "width": "fill_container",
+          "height": "fill_container",
+          "children": [
+            {
+              "type": "frame",
+              "id": "qvEam",
+              "name": "sidebar",
+              "width": 71,
+              "height": 318,
+              "fill": "#f6f7f8ff",
+              "cornerRadius": 5,
+              "layout": "vertical",
+              "padding": [
+                8,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ajiBx",
+                  "name": "tab-pomodoro",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "padding": [
+                    10,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pojoX",
+                      "name": "lbl1",
+                      "fill": "#D15F3D",
+                      "content": "番茄钟",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "8jjqe",
+                  "name": "tab-online",
+                  "width": "fill_container",
+                  "padding": [
+                    10,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HMMzj",
+                      "name": "lbl2",
+                      "fill": "#9E8E80",
+                      "content": "联机",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Cz9E3",
+                  "name": "tab-pet",
+                  "width": "fill_container",
+                  "padding": [
+                    10,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "3zssm",
+                      "name": "lbl3",
+                      "fill": "#9E8E80",
+                      "content": "宠物",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "2RdBk",
+              "type": "ref",
+              "ref": "gs1Tv",
+              "width": "fill_container",
+              "name": "contentArea",
+              "padding": 16
+            }
+          ]
+        }
+      ]
     }
   ],
   "themes": {
