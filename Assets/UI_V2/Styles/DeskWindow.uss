@@ -10,11 +10,28 @@
  *   blur-3xl 背景     → 移除（装饰性，Unity 不支持 filter）
  */
 
+/* ── handleBar: 拖拽栏（三个点居中 + 设置按钮靠右）──── */
+
+.handle-bar {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.handle-spacer {
+    flex-grow: 1;
+    height: 28px;
+}
+
+.handle-right {
+    flex-grow: 1;
+    height: 28px;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
 .drag-handle {
-    position: absolute;
-    top: 5px;
-    left: 0;
-    right: 0;
     -unity-text-align: middle-center;
     font-size: 14px;
     color: rgb(196, 181, 168);
@@ -39,7 +56,7 @@
 .dw-wrap {
     flex-grow: 1;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     justify-content: flex-start;
     border-radius: 28px;
     border-width: 1px;
@@ -83,6 +100,15 @@
     -unity-text-align: middle-left;
 }
 
+/* ── contentRow 居中容器 ────────────────────────────────── */
+
+.content-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
 /* ── 番茄钟面板（flex 子项）─────────────────────────── */
 
 .dw-pomodoro {
@@ -92,15 +118,12 @@
 /* ── 设置按钮 ────────────────────────────────────────────── */
 
 .settings-btn {
-    position: absolute;
     width: 28px;
     height: 28px;
     border-radius: 11px;
     background-color: rgb(240, 224, 208);
     align-items: center;
     justify-content: center;
-    right: 20px;
-    top: 20px;
 }
 
 .settings-btn-icon {
@@ -174,12 +197,12 @@
 }
 
 .settings-sidebar {
-    width: 100px;
+    width: 71px;
     background-color: rgb(243, 237, 231);
     padding-top: 8px;
     padding-bottom: 8px;
     flex-direction: column;
-    border-radius: 12px 0 0 12px;
+    border-radius: 5px;
     flex-shrink: 0;
 }
 
@@ -195,7 +218,10 @@
 
 .sidebar-tab--active {
     background-color: rgb(255, 255, 255);
-    border-radius: 0 12px 12px 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 0;
 }
 
 .sidebar-tab--active .sidebar-tab-label {

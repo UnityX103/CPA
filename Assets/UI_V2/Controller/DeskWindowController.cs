@@ -147,9 +147,21 @@ namespace APP.Pomodoro.Controller
                 gameObject);
 
             // 多人番茄钟：卡片管理器（嵌入 card-list ScrollView）
+            if (_playerCardTemplate == null)
+            {
+#if UNITY_EDITOR
+                _playerCardTemplate = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/UI_V2/Documents/PlayerCard.uxml");
+#endif
+                if (_playerCardTemplate == null)
+                {
+                    Debug.LogWarning("[DeskWindowController] PlayerCard.uxml 未在 Inspector 赋值，请检查 DeskWindowController 的 Inspector 设置。");
+                }
+            }
+
             _playerCardManager = new PlayerCardManager();
             var cardListScrollView = root.Q<ScrollView>("card-list");
-            _playerCardManager.Initialize(_playerCardTemplate, cardListScrollView.contentContainer, gameObject);
+            _playerCardManager.Initialize(_playerCardTemplate, cardListScrollView?.contentContainer, gameObject);
 
             // 齿轮按钮切换设置面板
             root.Q("settings-btn")?.RegisterCallback<PointerUpEvent>(_ =>

@@ -7,11 +7,21 @@
     <Style src="project://database/Assets/UI_V2/Styles/OnlineSettingsPanel.uss" />
     <Style src="project://database/Assets/UI_V2/Styles/PetSettingsPanel.uss" />
     <ui:VisualElement name="dw-wrap" class="dw-wrap">
-        <ui:Label name="drag-handle" text="•••" class="drag-handle" />
-        <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
-        <ui:VisualElement name="settings-btn" class="settings-btn">
-            <ui:Label text="⚙" class="settings-btn-icon" />
+        <!-- handleBar: 三个点居中 + 设置按钮靠右 -->
+        <ui:VisualElement name="handle-bar" class="handle-bar">
+            <ui:VisualElement class="handle-spacer" />
+            <ui:Label name="drag-handle" text="•••" class="drag-handle" />
+            <ui:VisualElement class="handle-right">
+                <ui:VisualElement name="settings-btn" class="settings-btn">
+                    <ui:Label text="⚙" class="settings-btn-icon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
+        <!-- contentRow: 番茄钟面板居中 -->
+        <ui:VisualElement name="content-row" class="content-row">
+            <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
+        </ui:VisualElement>
+        <!-- cardListWrap: 远端玩家卡片横向滚动列表 -->
         <ui:ScrollView name="card-list" class="card-list" mode="Horizontal"
             horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" />
         <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display:none;">
