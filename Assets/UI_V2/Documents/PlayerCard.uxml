@@ -2,30 +2,53 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
-    <Style src="project://database/Assets/UI_V2/Styles/PlayerCard.uss" />
+    <ui:Style src="../Styles/PlayerCard.uss"/>
 
+    <!-- drqFB: PlayerCard 153×97  cornerRadius:20  padding:14  gap:12 vertical -->
     <ui:VisualElement class="pc-root">
-        <!-- head: nameCol + roundsPill -->
+
+        <!-- tyyE3: head  row  align-center  gap:10 -->
         <ui:VisualElement class="pc-head">
+
+            <!-- MHhxc: nameCol  vertical  gap:4  flex-grow -->
             <ui:VisualElement class="pc-name-col">
-                <ui:Label name="pc-name" text="远端玩家" class="pc-name" />
+
+                <!-- 1JKIJ: name  fontSize:14  bold  #5B4636 -->
+                <ui:Label name="pc-name" class="pc-name" text="远端玩家"/>
+
+                <!-- jtlhD: phaseBadge  row  align-center  padding:[3,8]  cornerRadius:999→8px  #D15F3D -->
                 <ui:VisualElement class="pc-phase-badge">
-                    <ui:VisualElement class="pc-phase-dot" />
-                    <ui:Label name="pc-phase" text="专注中" class="pc-phase" />
+                    <!-- bI6eO: dot  6×6  cornerRadius:3  white -->
+                    <ui:VisualElement class="pc-phase-dot"/>
+                    <!-- qfQSq: phase label  fontSize:10  bold  white -->
+                    <ui:Label name="pc-phase" class="pc-phase" text="专注中"/>
                 </ui:VisualElement>
+
             </ui:VisualElement>
+
+            <!-- CjhcN: timeRow  row  align-center  margin-left:10 -->
             <ui:VisualElement class="pc-time-row">
+
+                <!-- eGfPq: roundsPill  row  align-center  padding:[5,10]  cornerRadius:999→10px  #FFF3EA  border:#EFDCCD -->
                 <ui:VisualElement class="pc-rounds-pill">
-                    <ui:Label name="pc-rounds" text="3/4 轮" class="pc-rounds" />
+                    <!-- 7XQkG: rounds  fontSize:11  bold  #A28B79 -->
+                    <ui:Label name="pc-rounds" class="pc-rounds" text="3/4 轮"/>
                 </ui:VisualElement>
+
             </ui:VisualElement>
+
         </ui:VisualElement>
-        <!-- divider -->
-        <ui:VisualElement class="pc-divider" />
-        <!-- footer: icon + app name -->
+
+        <!-- cnbrI: divider  1px  #F3E3D3  margin-top:12 -->
+        <ui:VisualElement class="pc-divider"/>
+
+        <!-- cwbeK: footer  row  align-center  margin-top:12  gap:6 -->
         <ui:VisualElement class="pc-footer">
-            <ui:VisualElement class="pc-foot-icon" />
-            <ui:Label name="pc-app" text="VS Code" class="pc-app" />
+            <!-- KN0dX: footIcon 13×13  lucide app-window → 色块占位  #B5A49A -->
+            <ui:VisualElement class="pc-foot-icon"/>
+            <!-- rFcKx: footText  fontSize:11  weight:500→normal  #A28B79 -->
+            <ui:Label name="pc-app" class="pc-app" text="VS Code"/>
         </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>

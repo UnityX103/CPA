@@ -20,11 +20,13 @@
 
 .handle-spacer {
     flex-grow: 1;
+    flex-shrink: 1;
     height: 28px;
 }
 
 .handle-right {
     flex-grow: 1;
+    flex-shrink: 1;
     height: 28px;
     flex-direction: row;
     justify-content: flex-end;
@@ -36,7 +38,9 @@
     font-size: 14px;
     color: rgb(196, 181, 168);
     -unity-font-style: bold;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
     cursor: move-arrow;
+    flex-shrink: 0;
 }
 
 /* ── UIDocument root 锚定（右下角，全屏透明窗口坐标系）──
@@ -52,6 +56,7 @@
 }
 
 /* ── 主容器（自适应尺寸，右下角锚定）────────────────────── */
+/* 84Qri padding: [5, 20, 20, 20] → top:5, right/bottom/left:20 */
 
 .dw-wrap {
     flex-grow: 1;
@@ -62,7 +67,10 @@
     border-width: 1px;
     border-color: rgb(241, 229, 216);
     overflow: hidden;
-    padding: 20px;
+    padding-top: 5px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
 }
 
 /* ── 悬停提示气泡（absolute left:303 top:30）──────────────── */
@@ -107,6 +115,8 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    gap: 20px;
+    margin-top: 12px;
 }
 
 /* ── 番茄钟面板（flex 子项）─────────────────────────── */
@@ -127,21 +137,26 @@
 }
 
 .settings-btn-icon {
+    width: 16px;
+    height: 16px;
     font-size: 16px;
     color: rgb(162, 139, 121);
     -unity-text-align: middle-center;
 }
 
-/* ── 卡片列表 ────────────────────────────────────────────── */
+/* ── 卡片列表 wBNtq: fill_container×101, gap:12, padding-bottom:4 ── */
+/* gap:12 → 由 pc-root 的 margin-right:12px 实现（USS 不支持 gap）     */
 
 .card-list {
     flex-direction: row;
     overflow: hidden;
+    margin-top: 12px;
+    height: 101px;
+    width: 100%;
 }
 
 .card-list .unity-scroll-view__content-container {
     flex-direction: row;
-    gap: 12px;
     padding-bottom: 4px;
 }
 

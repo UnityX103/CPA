@@ -153,8 +153,7 @@ namespace APP.Pomodoro.Controller
 
             TemplateContainer tplContainer = _cardTemplate.CloneTree();
             VisualElement pcRoot = tplContainer.Q<VisualElement>(className: "pc-root") ?? tplContainer;
-            pcRoot.style.width = 180;
-            pcRoot.style.flexShrink = 0;
+            tplContainer.style.flexShrink = 0;
             _cardContainer.Add(tplContainer);
 
             var controller = new PlayerCardController(pcRoot);

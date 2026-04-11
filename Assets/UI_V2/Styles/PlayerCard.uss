@@ -1,83 +1,66 @@
 /*
  * PlayerCard.uss
- * 远端玩家卡片样式（由 Pencil 设计稿 drqFB 转译而来）
- * 保留既有 Controller/View 查询约定：
- *   - .pc-root 为绝对定位根节点，叠加 pc-phase-* 切换阶段配色
- *   - Label#pc-name / #pc-phase / #pc-time / #pc-rounds / #pc-app
+ * 严格对齐 Pencil 设计稿 drqFB（153×97）
+ * snapshot_layout + batch_get 精确还原
+ *
+ * 圆角规则（cornerRadius:999）：
+ *   jtlhD  phaseBadge  h=16  → 16/2  = 8px
+ *   eGfPq  roundsPill  h=21  → 21/2  = 10.5 → 取 10px（向下取整）
+ *   bI6eO  dot         6×6   → 6/2   = 3px（正圆）
  */
 
-/* ── 卡片层（全屏覆盖，由 PlayerCardManager 动态创建）── */
-.player-card-layer {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-}
-
-/* ── 根容器 ──────────────────────────────────────────── */
+/* ── drqFB: 根容器 153×97 ──────────────────────────────── */
+/* cornerRadius: 20（设计稿显式值）                          */
+/* fill: #FFFDFBF2 → F2=242 → 242/255≈0.95                 */
+/* padding: 14（四边）                                       */
+/* gap: 12 → divider/footer 分别用 margin-top:12px 实现     */
+/* margin-right: 12 → cardListWrap gap 替代（USS 不支持 gap）*/
 .pc-root {
-    position: absolute;
-    width: 232px;
+    width: 153px;
+    height: 97px;
     padding: 14px;
-    padding-top: 24px;
     border-radius: 20px;
     background-color: rgba(255, 253, 251, 0.95);
     border-width: 1px;
     border-color: rgb(239, 220, 205);
     flex-direction: column;
     overflow: hidden;
+    flex-shrink: 0;
+    margin-right: 12px;
 }
 
-/* ── 拖拽手柄 ────────────────────────────────────────── */
-.drag-handle {
-    position: absolute;
-    top: 3px;
-    left: 0;
-    right: 0;
-    -unity-text-align: middle-center;
-    font-size: 14px;
-    color: rgb(196, 181, 168);
-    -unity-font-style: bold;
-    cursor: move-arrow;
-}
-
-/* ── 顶部：头像 + 名字列 ─────────────────────────────── */
+/* ── tyyE3: head row align-center fill ─────────────────── */
+/* gap: 10 → pc-time-row margin-left:10px                   */
 .pc-head {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 12px;
+    width: 100%;
 }
 
-.pc-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 19px;
-    background-color: rgb(250, 221, 202);
-    border-width: 1px;
-    border-color: rgb(239, 220, 205);
-    flex-shrink: 0;
-    margin-right: 10px;
-    overflow: hidden;
-}
-
+/* ── MHhxc: nameCol vertical fill gap:4 ─────────────────── */
+/* gap: 4 → pc-name margin-bottom:4px                        */
 .pc-name-col {
     flex-direction: column;
     flex-grow: 1;
     flex-shrink: 1;
 }
 
+/* ── 1JKIJ: name 56×14  fontSize:14 bold #5B4636 ────────── */
 .pc-name {
     font-size: 14px;
     -unity-font-style: bold;
     color: rgb(91, 70, 54);
-    -unity-text-align: middle-left;
+    -unity-text-align: upper-left;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
     margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* ── 阶段徽章：胶囊 ──────────────────────────────────── */
+/* ── jtlhD: phaseBadge 57×16  cornerRadius:999 → 16/2=8px ── */
+/* padding: [3,8] → top/bottom:3px, left/right:8px            */
+/* gap: 5 → dot margin-right:5px                              */
 .pc-phase-badge {
     flex-direction: row;
     align-items: center;
@@ -85,11 +68,13 @@
     padding-top: 3px;
     padding-bottom: 3px;
     padding-left: 8px;
-    padding-right: 10px;
-    border-radius: 10px;
-    background-color: rgb(181, 164, 154);
+    padding-right: 8px;
+    border-radius: 8px;
+    background-color: rgb(209, 95, 61);
+    overflow: hidden;
 }
 
+/* ── bI6eO: dot 6×6 ellipse white  cornerRadius:6/2=3px ── */
 .pc-phase-dot {
     width: 6px;
     height: 6px;
@@ -99,43 +84,28 @@
     flex-shrink: 0;
 }
 
+/* ── qfQSq: label 30×10  fontSize:10 bold white ─────────── */
 .pc-phase {
     font-size: 10px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-left;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
+    white-space: nowrap;
 }
 
-/* ── 时间行：时间 + 运行点 + 轮次胶囊 ──────────────── */
+/* ── CjhcN: timeRow 53×21 align-center ──────────────────── */
+/* tyyE3 gap:10 → margin-left:10px                           */
 .pc-time-row {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.pc-time-wrap {
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 1;
-}
-
-.pc-time {
-    font-size: 34px;
-    -unity-font-style: bold;
-    color: rgb(181, 164, 154);
-    -unity-text-align: middle-left;
-    margin-right: 8px;
-}
-
-.pc-run-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: rgb(181, 164, 154);
     flex-shrink: 0;
+    margin-left: 10px;
 }
 
+/* ── eGfPq: roundsPill 53×21  cornerRadius:999 → 21/2=10px ─ */
+/* padding: [5,10] → top/bottom:5px, left/right:10px           */
+/* stroke: #EFDCCD 1px                                         */
 .pc-rounds-pill {
     flex-direction: row;
     align-items: center;
@@ -143,33 +113,45 @@
     padding-bottom: 5px;
     padding-left: 10px;
     padding-right: 10px;
-    border-radius: 12px;
+    border-radius: 10px;
     background-color: rgb(255, 243, 234);
     border-width: 1px;
     border-color: rgb(239, 220, 205);
     flex-shrink: 0;
+    overflow: hidden;
 }
 
+/* ── 7XQkG: rounds 33×11  fontSize:11 bold #A28B79 ──────── */
 .pc-rounds {
     font-size: 11px;
     -unity-font-style: bold;
     color: rgb(162, 139, 121);
     -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
 }
 
-/* ── 分割线 ─────────────────────────────────────────── */
+/* ── cnbrI: divider 1px #F3E3D3 ──────────────────────────── */
+/* head 结束 y:48，gap:12 → margin-top:12px                   */
 .pc-divider {
     height: 1px;
+    width: 100%;
     background-color: rgb(243, 227, 211);
-    margin-bottom: 12px;
+    flex-shrink: 0;
+    margin-top: 12px;
 }
 
-/* ── 底部：图标 + 应用/状态描述 ─────────────────────── */
+/* ── cwbeK: footer row align-center fill ─────────────────── */
+/* divider 结束 y:61，gap:12 → margin-top:12px                */
+/* gap: 6 → footIcon margin-right:6px                         */
 .pc-footer {
     flex-direction: row;
     align-items: center;
+    width: 100%;
+    margin-top: 12px;
 }
 
+/* ── KN0dX: footIcon 13×13 #B5A49A ─────────────────────── */
+/* icon_font lucide app-window → 色块占位（USS 不支持 icon_font）*/
 .pc-foot-icon {
     width: 13px;
     height: 13px;
@@ -177,72 +159,40 @@
     background-color: rgb(181, 164, 154);
     margin-right: 6px;
     flex-shrink: 0;
-    opacity: 0.55;
 }
 
+/* ── rFcKx: footText fontSize:11 weight:500 #A28B79 ─────── */
+/* fontWeight:500 → Unity 无 medium，normal 最近似             */
 .pc-app {
     font-size: 11px;
     -unity-font-style: normal;
     color: rgb(162, 139, 121);
     -unity-text-align: middle-left;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* ── 阶段配色：仅切换时间/徽章/运行点的颜色 ─────────── */
+/* ── 阶段配色：切换 .pc-root 上的 class 驱动 badge 背景 ──── */
 
-/* idle —— 灰调（默认基色已是 idle） */
 .pc-phase-idle .pc-phase-badge {
     background-color: rgb(181, 164, 154);
 }
-.pc-phase-idle .pc-time {
-    color: rgb(181, 164, 154);
-}
-.pc-phase-idle .pc-run-dot {
-    background-color: rgb(181, 164, 154);
-}
 
-/* focus —— 番茄橙 */
 .pc-phase-focus .pc-phase-badge {
     background-color: rgb(209, 95, 61);
 }
-.pc-phase-focus .pc-time {
-    color: rgb(209, 95, 61);
-}
-.pc-phase-focus .pc-run-dot {
-    background-color: rgb(209, 95, 61);
-}
 
-/* rest —— 抹茶绿 */
 .pc-phase-rest .pc-phase-badge {
     background-color: rgb(52, 168, 83);
 }
-.pc-phase-rest .pc-time {
-    color: rgb(52, 168, 83);
-}
-.pc-phase-rest .pc-run-dot {
-    background-color: rgb(52, 168, 83);
-}
 
-/* paused —— 琥珀 */
 .pc-phase-paused .pc-phase-badge {
     background-color: rgb(224, 140, 16);
 }
-.pc-phase-paused .pc-time {
-    color: rgb(224, 140, 16);
-}
-.pc-phase-paused .pc-run-dot {
-    background-color: rgba(224, 140, 16, 0);
-}
 
-/* completed —— 靛紫 */
 .pc-phase-completed .pc-phase-badge {
     background-color: rgb(99, 102, 241);
-}
-.pc-phase-completed .pc-time {
-    color: rgb(99, 102, 241);
-}
-.pc-phase-completed .pc-run-dot {
-    background-color: rgba(99, 102, 241, 0);
 }
