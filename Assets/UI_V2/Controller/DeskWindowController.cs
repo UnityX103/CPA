@@ -29,6 +29,9 @@ namespace APP.Pomodoro.Controller
         [Header("玩家卡片预制体（多人番茄钟，含 UIDocument + PlayerCardController）")]
         [SerializeField] private GameObject _playerCardPrefab;
 
+        [Header("远端玩家容器（运行时实例化 PlayerCard 的父物体）")]
+        [SerializeField] private Transform _remotePlayerContainer;
+
         [Header("设置面板（独立 UIDocument）")]
         [SerializeField] private PomodoroSettingsPanelController _pomodoroSettingsPanel;
         [SerializeField] private OnlineSettingsPanelController _onlineSettingsPanel;
@@ -93,7 +96,7 @@ namespace APP.Pomodoro.Controller
 
             // 7. 多人番茄钟：卡片管理器（每个远程玩家一个独立 UIDocument 预制体）
             _playerCardManager = new PlayerCardManager();
-            _playerCardManager.Initialize(_playerCardPrefab, transform, gameObject);
+            _playerCardManager.Initialize(_playerCardPrefab, _remotePlayerContainer, gameObject);
         }
 
         private void Update()
@@ -133,6 +136,30 @@ namespace APP.Pomodoro.Controller
 
             _dwWrap = root.Q<VisualElement>("dw-wrap");
             _pomodoroPanelContainer = root.Q<TemplateContainer>("pomodoro-panel");
+
+            // 拖拽手柄：需要等布局完成后，将 flex 定位转为 absolute 定位
+            var dragHandle = root.Q<Label>("drag-handle");
+            if (dragHandle != null && _dwWrap != null)
+            {
+                _dwWrap.RegisterCallback<GeometryChangedEvent>(_ =>
+                {
+                    if (_dwWrap.resolvedStyle.position == Position.Absolute)
+                        return;
+
+                    // 读取 flex 布局计算出的实际位置
+                    var parentBound = _dwWrap.parent.worldBound;
+                    var wrapBound = _dwWrap.worldBound;
+                    float left = wrapBound.x - parentBound.x;
+                    float top = wrapBound.y - parentBound.y;
+
+                    // 切换为 absolute 定位，保持视觉位置不变
+                    _dwWrap.style.position = Position.Absolute;
+                    _dwWrap.style.left = left;
+                    _dwWrap.style.top = top;
+
+                    DraggableElement.MakeDraggable(_dwWrap, dragHandle);
+                });
+            }
 
             // Tab 按钮
             _btnPomodoro = root.Q<Button>("btn-pomodoro");

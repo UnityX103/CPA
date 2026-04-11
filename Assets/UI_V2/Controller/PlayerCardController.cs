@@ -30,6 +30,9 @@ namespace APP.Pomodoro.Controller
         private Label _roundsLabel;
         private Label _appLabel;
 
+        private RemotePlayerData _pendingData;
+        private bool _uiBound;
+
         /// <summary>该卡片对应的远端玩家 ID。</summary>
         public string PlayerId { get; private set; }
 
@@ -38,16 +41,38 @@ namespace APP.Pomodoro.Controller
             _uiDocument = GetComponent<UIDocument>();
         }
 
+        private void OnEnable()
+        {
+            // UIDocument.rootVisualElement 在 OnEnable 时可能已就绪
+            TryBindAndApply();
+        }
+
+        private void Update()
+        {
+            // 如果 OnEnable 时 UI 还没就绪，每帧尝试直到绑定成功
+            if (!_uiBound && _pendingData != null)
+            {
+                TryBindAndApply();
+            }
+
+            // 绑定成功后不再需要 Update
+            if (_uiBound)
+            {
+                enabled = false; // 停止 Update，节省性能
+            }
+        }
+
         /// <summary>
         /// 初始化卡片数据。在 Instantiate 后由 PlayerCardManager 调用。
+        /// 如果 UI 尚未就绪，数据会被缓存并在就绪后自动应用。
         /// </summary>
         public void Setup(RemotePlayerData data)
         {
             if (data == null) return;
 
             PlayerId = data.PlayerId;
-            BindUI();
-            Refresh(data);
+            _pendingData = data;
+            TryBindAndApply();
         }
 
         /// <summary>根据最新远端数据刷新视图。</summary>
@@ -55,10 +80,57 @@ namespace APP.Pomodoro.Controller
         {
             if (data == null) return;
 
-            // 延迟绑定：首帧 UIDocument 可能还没准备好
-            if (_root == null) BindUI();
-            if (_root == null) return;
+            _pendingData = data;
 
+            if (_uiBound)
+            {
+                ApplyData(data);
+            }
+            // 未绑定时 _pendingData 已更新，TryBindAndApply 会在之后应用
+        }
+
+        private void TryBindAndApply()
+        {
+            if (_uiBound) return;
+            if (!BindUI()) return;
+
+            _uiBound = true;
+
+            if (_pendingData != null)
+            {
+                ApplyData(_pendingData);
+            }
+        }
+
+        private bool BindUI()
+        {
+            if (_uiDocument == null)
+                _uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null) return false;
+
+            VisualElement docRoot = _uiDocument.rootVisualElement;
+            if (docRoot == null) return false;
+            if (docRoot.childCount == 0) return false; // UXML 还没加载
+
+            _root = docRoot.Q<VisualElement>(className: "pc-root") ?? docRoot;
+
+            var dragHandle = _root.Q<Label>("drag-handle");
+            if (dragHandle != null)
+            {
+                DraggableElement.MakeDraggable(_root, dragHandle);
+            }
+
+            _nameLabel = _root.Q<Label>("pc-name");
+            _phaseLabel = _root.Q<Label>("pc-phase");
+            _timeLabel = _root.Q<Label>("pc-time");
+            _roundsLabel = _root.Q<Label>("pc-rounds");
+            _appLabel = _root.Q<Label>("pc-app");
+
+            return _nameLabel != null; // 至少找到一个元素才算绑定成功
+        }
+
+        private void ApplyData(RemotePlayerData data)
+        {
             if (_nameLabel != null)
                 _nameLabel.text = string.IsNullOrEmpty(data.PlayerName) ? "玩家" : data.PlayerName;
 
@@ -75,20 +147,6 @@ namespace APP.Pomodoro.Controller
                 _appLabel.text = string.IsNullOrEmpty(data.ActiveAppName) ? "—" : data.ActiveAppName;
 
             ApplyPhaseClass(data.Phase, data.IsRunning);
-        }
-
-        private void BindUI()
-        {
-            if (_uiDocument == null) return;
-            VisualElement docRoot = _uiDocument.rootVisualElement;
-            if (docRoot == null) return;
-
-            _root = docRoot.Q<VisualElement>(className: "pc-root") ?? docRoot;
-            _nameLabel = _root.Q<Label>("pc-name");
-            _phaseLabel = _root.Q<Label>("pc-phase");
-            _timeLabel = _root.Q<Label>("pc-time");
-            _roundsLabel = _root.Q<Label>("pc-rounds");
-            _appLabel = _root.Q<Label>("pc-app");
         }
 
         private void ApplyPhaseClass(PomodoroPhase phase, bool isRunning)

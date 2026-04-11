@@ -5,6 +5,7 @@
     <!-- 组件 USS -->
     <ui:Style src="project://database/Assets/UI_V2/Styles/Components/ButtonTab.uss"/>
     <ui:VisualElement name="dw-wrap" class="dw-wrap">
+        <ui:Label name="drag-handle" text="•••" class="drag-handle" />
         <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
         <!-- 右侧栏：Tab 药丸按钮 + 宠物占位（Pencil: cont-right-column-component / F6wwF） -->
         <ui:VisualElement name="right-column" class="right-column">

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 183578049}
   - component: {fileID: 183578050}
   m_Layer: 5
-  m_Name: UIDocument
+  m_Name: MainUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -189,7 +189,8 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: 58a2df877f43b485fb4ee3d13a93a1de, type: 2}
   _uwc: {fileID: 0}
   _pomodoroPanelView: {fileID: 183578049}
-  _playerCardUxml: {fileID: 9197481963319205126, guid: 29186224ae6024713aab7af6b8291689, type: 3}
+  _playerCardPrefab: {fileID: 1447399573750372387, guid: e0a43342365144847b1d80e5bf6e6b7d, type: 3}
+  _remotePlayerContainer: {fileID: 2136198809}
   _pomodoroSettingsPanel: {fileID: 1146790140}
   _onlineSettingsPanel: {fileID: 1938229331}
   _petSettingsPanel: {fileID: 461852459}
@@ -327,7 +328,7 @@ GameObject:
   - component: {fileID: 461852461}
   - component: {fileID: 461852460}
   - component: {fileID: 461852459}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: PetSettingsPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -580,7 +581,7 @@ GameObject:
   - component: {fileID: 1146790142}
   - component: {fileID: 1146790141}
   - component: {fileID: 1146790140}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: PomodoroSettingsPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -644,7 +645,7 @@ GameObject:
   - component: {fileID: 1938229333}
   - component: {fileID: 1938229332}
   - component: {fileID: 1938229331}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: OnlineSettingsPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -697,6 +698,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2136198808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2136198809}
+  m_Layer: 0
+  m_Name: RemotePlayerPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2136198809
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136198808}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -707,3 +739,4 @@ SceneRoots:
   - {fileID: 1146790142}
   - {fileID: 1938229333}
   - {fileID: 461852461}
+  - {fileID: 2136198809}

@@ -10,6 +10,18 @@
  *   blur-3xl 背景     → 移除（装饰性，Unity 不支持 filter）
  */
 
+.drag-handle {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    color: rgb(196, 181, 168);
+    -unity-font-style: bold;
+    cursor: move-arrow;
+}
+
 /* ── UIDocument root 锚定（右下角，全屏透明窗口坐标系）──
  *   controller 在 BindUI() 时 AddToClassList("dw-root-anchor")。
  *   所有定位规则都在 USS 中声明，代码不再直写 root.style.*。

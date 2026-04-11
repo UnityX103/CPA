@@ -134,45 +134,11 @@
                   "fontWeight": "600"
                 },
                 {
-                  "type": "frame",
-                  "id": "pnNWi",
+                  "id": "INPgi",
+                  "type": "ref",
+                  "ref": "0cT2B",
                   "name": "pomoWorkInput",
-                  "width": "fill_container",
-                  "fill": "#FFFFFFCC",
-                  "cornerRadius": 12,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#E5E7EB"
-                  },
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "EMbWd",
-                      "name": "pomoWorkInputValue",
-                      "fill": "#1A1A1A",
-                      "content": "25",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 24,
-                      "fontWeight": "800"
-                    },
-                    {
-                      "type": "text",
-                      "id": "WdPYc",
-                      "name": "pomoWorkInputSuffix",
-                      "fill": "#6B7280",
-                      "content": "分钟",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 13,
-                      "fontWeight": "600"
-                    }
-                  ]
+                  "width": "fill_container"
                 }
               ]
             },
@@ -198,45 +164,25 @@
                   "fontWeight": "600"
                 },
                 {
-                  "type": "frame",
-                  "id": "ZQsn7",
+                  "id": "QwKzL",
+                  "type": "ref",
+                  "ref": "0cT2B",
                   "name": "pomoBreakInput",
                   "width": "fill_container",
                   "fill": "#FFFFFFB8",
-                  "cornerRadius": 12,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1,
                     "fill": "#F3D28B"
                   },
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "zyJUq",
-                      "name": "pomoBreakInputValue",
-                      "fill": "#1A1A1A",
-                      "content": "5",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 24,
-                      "fontWeight": "800"
+                  "descendants": {
+                    "OQv34": {
+                      "content": "5"
                     },
-                    {
-                      "type": "text",
-                      "id": "8Nc2K",
-                      "name": "pomoBreakInputSuffix",
-                      "fill": "#A16207",
-                      "content": "分钟",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 13,
-                      "fontWeight": "600"
+                    "zpqfK": {
+                      "fill": "#A16207"
                     }
-                  ]
+                  }
                 }
               ]
             }
@@ -483,33 +429,16 @@
                   "fontWeight": "600"
                 },
                 {
-                  "type": "frame",
-                  "id": "tQsRz",
+                  "id": "xsdHs",
+                  "type": "ref",
+                  "ref": "brmHc",
                   "name": "onlNameInput",
                   "width": "fill_container",
-                  "fill": "#FFFFFFCC",
-                  "cornerRadius": 12,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#E5E7EB"
-                  },
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Z2lJK",
-                      "name": "onlNameValue",
-                      "fill": "#1A1A1A",
-                      "content": "我的昵称",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 14,
-                      "fontWeight": "500"
+                  "descendants": {
+                    "nYjoR": {
+                      "content": "我的昵称"
                     }
-                  ]
+                  }
                 }
               ]
             },
@@ -532,33 +461,16 @@
                   "fontWeight": "600"
                 },
                 {
-                  "type": "frame",
-                  "id": "2HOpF",
+                  "id": "C4auU",
+                  "type": "ref",
+                  "ref": "brmHc",
                   "name": "onlRoomInput",
                   "width": "fill_container",
-                  "fill": "#FFFFFFCC",
-                  "cornerRadius": 12,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#E5E7EB"
-                  },
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "KDNpF",
-                      "name": "onlRoomValue",
-                      "fill": "#1A1A1A",
-                      "content": "ROOM-001",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 14,
-                      "fontWeight": "500"
+                  "descendants": {
+                    "nYjoR": {
+                      "content": "ROOM-001"
                     }
-                  ]
+                  }
                 }
               ]
             },
@@ -1335,10 +1247,12 @@
     {
       "type": "frame",
       "id": "84Qri",
-      "x": 1416,
+      "x": 1406,
       "y": -145,
       "name": "cont - desk-window - preview",
       "reusable": true,
+      "width": 564,
+      "height": 284,
       "cornerRadius": 28,
       "stroke": {
         "thickness": 1
@@ -1352,8 +1266,8 @@
           "id": "iUCdM",
           "type": "ref",
           "ref": "YRqeB",
-          "x": 20,
-          "y": 37.5,
+          "x": 62.5,
+          "y": 64,
           "width": "fit_content(230)",
           "name": "pomodoro",
           "flipX": false,
@@ -1418,8 +1332,8 @@
           "type": "ref",
           "ref": "F6wwF",
           "name": "rightColRef",
-          "x": 270,
-          "y": 20,
+          "x": 312.5,
+          "y": 46.5,
           "width": "fit_content",
           "height": "fit_content",
           "descendants": {
@@ -1496,6 +1410,22 @@
               "y": 94
             }
           }
+        },
+        {
+          "type": "text",
+          "id": "dragHandle1",
+          "layoutPosition": "absolute",
+          "x": 214,
+          "y": 5,
+          "name": "dragHandle",
+          "fill": "#C4B5A8",
+          "textGrowth": "fixed-width",
+          "width": 50,
+          "content": "•••",
+          "textAlign": "center",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "700"
         }
       ]
     },
@@ -2488,6 +2418,76 @@
               "fontWeight": "600"
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "brmHc",
+          "name": "Input/Text",
+          "reusable": true,
+          "fill": "#FFFFFFCC",
+          "cornerRadius": 12,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#E5E7EB"
+          },
+          "padding": [
+            12,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "nYjoR",
+              "name": "value",
+              "fill": "#1A1A1A",
+              "content": "请输入...",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 14,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "0cT2B",
+          "name": "Input/TextSuffix",
+          "reusable": true,
+          "fill": "#FFFFFFCC",
+          "cornerRadius": 12,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#E5E7EB"
+          },
+          "padding": [
+            12,
+            14
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "OQv34",
+              "name": "value",
+              "fill": "#1A1A1A",
+              "content": "25",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 24,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "zpqfK",
+              "name": "suffix",
+              "fill": "#6B7280",
+              "content": "分钟",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 13,
+              "fontWeight": "600"
+            }
+          ]
         }
       ]
     },
@@ -2575,11 +2575,12 @@
     {
       "type": "frame",
       "id": "drqFB",
-      "x": 1439,
-      "y": 1126,
+      "x": 1429,
+      "y": 1128,
       "name": "PlayerCard",
       "reusable": true,
-      "width": 232,
+      "width": 226,
+      "height": 99,
       "fill": "#FFFDFBF2",
       "cornerRadius": 20,
       "stroke": {
@@ -2604,41 +2605,10 @@
           "type": "frame",
           "id": "tyyE3",
           "name": "head",
-          "width": "fill_container",
+          "width": 201,
           "gap": 10,
           "alignItems": "center",
           "children": [
-            {
-              "type": "ellipse",
-              "id": "faUx5",
-              "name": "avatar",
-              "fill": {
-                "type": "gradient",
-                "gradientType": "radial",
-                "enabled": true,
-                "rotation": 0,
-                "size": {
-                  "width": 1,
-                  "height": 1
-                },
-                "colors": [
-                  {
-                    "color": "#FFE5D9",
-                    "position": 0
-                  },
-                  {
-                    "color": "#F5D5C0",
-                    "position": 1
-                  }
-                ]
-              },
-              "width": 38,
-              "height": 38,
-              "stroke": {
-                "thickness": 1,
-                "fill": "#EFDCCD"
-              }
-            },
             {
               "type": "frame",
               "id": "MHhxc",
@@ -2691,70 +2661,61 @@
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "CjhcN",
-          "name": "timeRow",
-          "width": "fill_container",
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "frame",
-              "id": "5lTZx",
-              "name": "timeWrap",
-              "gap": 8,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "pMVUl",
-                  "name": "time",
-                  "fill": "#D15F3D",
-                  "content": "24:38",
-                  "fontFamily": "MaokenAssortedSans",
-                  "fontSize": 36,
-                  "fontWeight": "700"
-                },
-                {
-                  "type": "ellipse",
-                  "id": "t5189",
-                  "name": "runDot",
-                  "fill": "#D15F3D",
-                  "width": 8,
-                  "height": 8
-                }
-              ]
             },
             {
               "type": "frame",
-              "id": "eGfPq",
-              "name": "roundsPill",
-              "fill": "#FFF3EA",
-              "cornerRadius": 999,
-              "stroke": {
-                "thickness": 1,
-                "fill": "#EFDCCD"
-              },
-              "gap": 3,
-              "padding": [
-                5,
-                10
-              ],
+              "id": "CjhcN",
+              "name": "timeRow",
+              "justifyContent": "space_between",
               "alignItems": "center",
               "children": [
                 {
-                  "type": "text",
-                  "id": "7XQkG",
-                  "name": "rounds",
-                  "fill": "#A28B79",
-                  "content": "3/4 轮",
-                  "fontFamily": "MaokenAssortedSans",
-                  "fontSize": 11,
-                  "fontWeight": "700"
+                  "type": "frame",
+                  "id": "5lTZx",
+                  "name": "timeWrap",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pMVUl",
+                      "name": "time",
+                      "fill": "#D15F3D",
+                      "content": "24:38",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eGfPq",
+                  "name": "roundsPill",
+                  "fill": "#FFF3EA",
+                  "cornerRadius": 999,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#EFDCCD"
+                  },
+                  "gap": 3,
+                  "padding": [
+                    5,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "7XQkG",
+                      "name": "rounds",
+                      "fill": "#A28B79",
+                      "content": "3/4 轮",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
                 }
               ]
             }
@@ -2832,15 +2793,6 @@
             "qfQSq": {
               "content": "休息中"
             },
-            "pMVUl": {
-              "fill": "#34A853"
-            },
-            "t5189": {
-              "fill": "#34A853"
-            },
-            "7XQkG": {
-              "content": "2/4 轮"
-            },
             "rFcKx": {
               "content": "放空中"
             }
@@ -2860,16 +2812,6 @@
             },
             "qfQSq": {
               "content": "已暂停"
-            },
-            "pMVUl": {
-              "fill": "#E08C10"
-            },
-            "t5189": {
-              "fill": "#E08C10",
-              "enabled": false
-            },
-            "7XQkG": {
-              "content": "1/4 轮"
             },
             "rFcKx": {
               "content": "Figma"
@@ -2891,17 +2833,6 @@
             "qfQSq": {
               "content": "已完成"
             },
-            "pMVUl": {
-              "fill": "#6366F1",
-              "content": "00:00"
-            },
-            "t5189": {
-              "fill": "#6366F1",
-              "enabled": false
-            },
-            "7XQkG": {
-              "content": "4/4 轮"
-            },
             "rFcKx": {
               "content": "今日目标达成"
             }
@@ -2921,17 +2852,6 @@
             },
             "qfQSq": {
               "content": "未开始"
-            },
-            "pMVUl": {
-              "fill": "#B5A49A",
-              "content": "25:00"
-            },
-            "t5189": {
-              "fill": "#B5A49A",
-              "enabled": false
-            },
-            "7XQkG": {
-              "content": "0/4 轮"
             },
             "rFcKx": {
               "content": "待机中"
@@ -2958,7 +2878,7 @@
       "type": "ref",
       "ref": "8Le5R",
       "name": "onlPanel/joined",
-      "x": 1933,
+      "x": 1937,
       "y": 295,
       "descendants": {
         "ArRDI": {

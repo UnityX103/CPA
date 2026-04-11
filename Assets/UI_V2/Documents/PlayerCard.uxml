@@ -2,6 +2,7 @@
     <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
     <Style src="project://database/Assets/UI_V2/Styles/PlayerCard.uss?fileID=7433441132597879392&amp;type=3#PlayerCard" />
     <ui:VisualElement class="pc-root pc-phase-idle">
+        <ui:Label name="drag-handle" text="•••" class="drag-handle" />
         <ui:VisualElement class="pc-head">
             <ui:VisualElement class="pc-avatar" />
             <ui:VisualElement class="pc-name-col">

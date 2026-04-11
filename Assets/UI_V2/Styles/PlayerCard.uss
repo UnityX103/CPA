@@ -20,12 +20,26 @@
     position: absolute;
     width: 232px;
     padding: 14px;
+    padding-top: 24px;
     border-radius: 20px;
     background-color: rgba(255, 253, 251, 0.95);
     border-width: 1px;
     border-color: rgb(239, 220, 205);
     flex-direction: column;
     overflow: hidden;
+}
+
+/* ── 拖拽手柄 ────────────────────────────────────────── */
+.drag-handle {
+    position: absolute;
+    top: 3px;
+    left: 0;
+    right: 0;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    color: rgb(196, 181, 168);
+    -unity-font-style: bold;
+    cursor: move-arrow;
 }
 
 /* ── 顶部：头像 + 名字列 ─────────────────────────────── */

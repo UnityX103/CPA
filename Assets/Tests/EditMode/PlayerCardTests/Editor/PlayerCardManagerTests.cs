@@ -116,11 +116,11 @@ namespace APP.Pomodoro.Tests
             manager.AddOrUpdate(NewPlayer("p1", "Alice"));
             Assert.That(manager.Cards, Has.Count.EqualTo(1));
 
+            // EditMode 下 Object.Destroy 会产生错误日志，需要预期
+            LogAssert.Expect(LogType.Error, new Regex("Destroy may not be called from edit mode"));
             manager.Remove("p1");
 
             Assert.That(manager.Cards, Is.Empty);
-            // DestroyImmediate 不会在 EditMode 的 Destroy 中立即生效，
-            // 但 Dictionary 应已移除
         }
 
         [Test]
