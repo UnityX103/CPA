@@ -5,6 +5,7 @@
     <!-- 组件 USS -->
     <ui:Style src="../Styles/Components/PanelTitle.uss"/>
     <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
+    <ui:Style src="../Styles/Components/InputTextSuffix.uss"/>
     <ui:Style src="../Styles/BackButton.uss"/>
 
     <ui:VisualElement name="psp-root" class="psp-root">
@@ -26,16 +27,16 @@
         <ui:VisualElement class="psp-metrics">
             <ui:VisualElement class="psp-metric psp-metric--neutral">
                 <ui:Label text="专注时长" class="psp-metric-label psp-metric-label--neutral" />
-                <ui:VisualElement class="psp-metric-input psp-metric-input--neutral">
-                    <ui:Label name="psp-focus-value" text="25" class="psp-metric-value" />
-                    <ui:Label text="分钟" class="psp-metric-suffix psp-metric-suffix--neutral" />
+                <ui:VisualElement class="comp-input-suffix">
+                    <ui:TextField name="psp-focus-value" value="25" class="comp-input-suffix__field" />
+                    <ui:Label text="分钟" class="comp-input-suffix__hint" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="psp-metric psp-metric--warm">
                 <ui:Label text="休息时长" class="psp-metric-label psp-metric-label--warm" />
-                <ui:VisualElement class="psp-metric-input psp-metric-input--warm">
-                    <ui:Label name="psp-break-value" text="5" class="psp-metric-value" />
-                    <ui:Label text="分钟" class="psp-metric-suffix psp-metric-suffix--warm" />
+                <ui:VisualElement class="comp-input-suffix comp-input-suffix--warm">
+                    <ui:TextField name="psp-break-value" value="5" class="comp-input-suffix__field" />
+                    <ui:Label text="分钟" class="comp-input-suffix__hint" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -61,43 +61,7 @@
 .psp-metric-label--neutral { color: rgb(156, 163, 175); }
 .psp-metric-label--warm    { color: rgb(217, 119, 6); }
 
-.psp-metric-input {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 12px;
-    border-width: 1px;
-    padding-left: 14px;
-    padding-right: 14px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-}
-
-.psp-metric-input--neutral {
-    border-color: rgb(229, 231, 235);
-    background-color: rgba(255, 255, 255, 0.8);
-}
-
-.psp-metric-input--warm {
-    border-color: rgb(243, 210, 139);
-    background-color: rgba(255, 255, 255, 0.72);
-}
-
-.psp-metric-value {
-    font-size: 24px;
-    -unity-font-style: bold;
-    color: rgb(26, 26, 26);
-    -unity-text-align: middle-left;
-}
-
-.psp-metric-suffix {
-    font-size: 13px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-right;
-}
-
-.psp-metric-suffix--neutral { color: rgb(107, 114, 128); }
-.psp-metric-suffix--warm    { color: rgb(161, 98, 7); }
+/* 输入框样式已迁移至 Components/InputTextSuffix.uss (.comp-input-suffix) */
 
 /* ── 设置行 ──────────────────────────────────────────────── */
 

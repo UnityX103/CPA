@@ -20,8 +20,8 @@ namespace APP.Pomodoro.Controller
         // ─── UXML 元素引用 ────────────────────────────────────────
         private readonly Toggle _enableToggle;   // name="psp-toggle"
         private readonly Toggle _hintToggle;     // name="psp-hint-toggle"
-        private readonly Label  _focusValue;     // name="psp-focus-value"
-        private readonly Label  _breakValue;     // name="psp-break-value"
+        private readonly TextField _focusValue;  // name="psp-focus-value"
+        private readonly TextField _breakValue;  // name="psp-break-value"
         private readonly Label  _soundLabel;     // name="psp-sound-label"
         // _statusText 已移除（toggle 改为独立行，无需文字标签）
 
@@ -41,8 +41,8 @@ namespace APP.Pomodoro.Controller
 
             _enableToggle = panelRoot.Q<Toggle>("psp-toggle");
             _hintToggle   = panelRoot.Q<Toggle>("psp-hint-toggle");
-            _focusValue   = panelRoot.Q<Label>("psp-focus-value");
-            _breakValue   = panelRoot.Q<Label>("psp-break-value");
+            _focusValue   = panelRoot.Q<TextField>("psp-focus-value");
+            _breakValue   = panelRoot.Q<TextField>("psp-break-value");
             _soundLabel   = panelRoot.Q<Label>("psp-sound-label");
             RegisterToggleCallbacks();
         }
@@ -61,12 +61,12 @@ namespace APP.Pomodoro.Controller
         {
             if (_focusValue != null)
             {
-                _focusValue.text = focusMinutes.ToString();
+                _focusValue.value = focusMinutes.ToString();
             }
 
             if (_breakValue != null)
             {
-                _breakValue.text = breakMinutes.ToString();
+                _breakValue.value = breakMinutes.ToString();
             }
 
             if (_soundLabel != null)

@@ -1,0 +1,64 @@
+/*
+ * InputTextSuffix.uss
+ * 对应 Pencil 组件: Input/TextSuffix (id = 0cT2B)
+ * 视觉: 左侧输入值 + 右侧后缀提示（如"分钟"）
+ */
+
+.comp-input-suffix {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(229, 231, 235); /* #E5E7EB */
+    background-color: rgba(255, 255, 255, 0.8); /* #FFFFFFCC */
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+/* Unity TextField 内部：隐藏默认 Label，重置 TextInput */
+.comp-input-suffix > .unity-text-field__label {
+    display: none;
+}
+
+.comp-input-suffix__field {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+}
+
+.comp-input-suffix__field > .unity-text-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+}
+
+.comp-input-suffix__hint {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(107, 114, 128); /* #6B7280 */
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+/* ── 暖色变体（休息时长）──────────────────────────────────── */
+
+.comp-input-suffix--warm {
+    background-color: rgba(255, 255, 255, 0.72); /* #FFFFFFB8 */
+    border-color: rgb(243, 210, 139); /* #F3D28B */
+}
+
+.comp-input-suffix--warm .comp-input-suffix__hint {
+    color: rgb(161, 98, 7); /* #A16207 */
+}
