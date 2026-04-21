@@ -242,3 +242,29 @@
     background-color: #FFD4D4;
     color: #8A1A1A;
 }
+
+/* ── 历史列表项新增样式（Phase 3） ─────────────────────────── */
+
+.osp-hist-code {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+    width: 80px;
+}
+
+.osp-hist-join-btn,
+.osp-hist-del-btn {
+    width: 36px;
+    height: 24px;
+    margin-left: 4px;
+    padding: 0;
+    font-size: 11px;
+}
+
+.osp-hist-empty {
+    padding: 16px;
+    -unity-text-align: middle-center;
+    color: rgb(153, 153, 153);
+    font-size: 12px;
+    white-space: normal;
+}
