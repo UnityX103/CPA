@@ -34,7 +34,7 @@ namespace APP.Network.Command
             network.Send(new OutboundJoinRoom
             {
                 type = "join_room",
-                code = _code,
+                roomCode = _code,
                 playerName = _playerName,
             });
         }

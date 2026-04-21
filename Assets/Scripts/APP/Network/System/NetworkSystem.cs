@@ -338,7 +338,7 @@ namespace APP.Network.System
             var rejoinMessage = new OutboundJoinRoom
             {
                 type = "join_room",
-                code = room.RoomCode.Value,
+                roomCode = room.RoomCode.Value,
                 playerName = room.LocalPlayerName.Value,
             };
 
@@ -369,7 +369,7 @@ namespace APP.Network.System
                 case "player_left":
                     HandlePlayerLeft(inbound);
                     break;
-                case "state_update":
+                case "player_state_broadcast":
                     HandleStateUpdated(inbound);
                     break;
                 case "error":
@@ -383,39 +383,38 @@ namespace APP.Network.System
         private void HandleRoomCreated(InboundMessage inbound)
         {
             IRoomModel room = this.GetModel<IRoomModel>();
-            room.SetRoomCode(inbound.code);
+            room.SetRoomCode(inbound.roomCode);
             room.SetLocalPlayerId(inbound.playerId);
             room.SetConnectionFlags(true, true);
             room.SetStatus(ConnectionStatus.InRoom);
 
-            List<RemotePlayerData> players = BuildRemotePlayers(inbound.snapshot, inbound.playerId);
-            room.ApplySnapshot(players);
+            // room_created 不含 players，等随后的 room_snapshot 补齐
+            room.ApplySnapshot(new List<RemotePlayerData>());
 
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
-            this.SendEvent(new E_RoomCreated(inbound.code));
-            this.SendEvent(new E_RoomSnapshot(ClonePlayers(players)));
+            this.SendEvent(new E_RoomCreated(inbound.roomCode));
+            this.SendEvent(new E_RoomSnapshot(new List<RemotePlayerData>()));
         }
 
         private void HandleRoomJoined(InboundMessage inbound)
         {
             IRoomModel room = this.GetModel<IRoomModel>();
-            room.SetRoomCode(inbound.code);
+            room.SetRoomCode(inbound.roomCode);
             room.SetLocalPlayerId(inbound.playerId);
             room.SetConnectionFlags(true, true);
             room.SetStatus(ConnectionStatus.InRoom);
 
-            List<RemotePlayerData> players = BuildRemotePlayers(inbound.snapshot, inbound.playerId);
-            room.ApplySnapshot(players);
+            room.ApplySnapshot(new List<RemotePlayerData>());
 
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
-            this.SendEvent(new E_RoomJoined(inbound.code, ClonePlayers(players)));
-            this.SendEvent(new E_RoomSnapshot(ClonePlayers(players)));
+            this.SendEvent(new E_RoomJoined(inbound.roomCode, new List<RemotePlayerData>()));
+            this.SendEvent(new E_RoomSnapshot(new List<RemotePlayerData>()));
         }
 
         private void HandleRoomSnapshot(InboundMessage inbound)
         {
             IRoomModel room = this.GetModel<IRoomModel>();
-            List<RemotePlayerData> players = BuildRemotePlayers(inbound.snapshot, room.LocalPlayerId.Value);
+            List<RemotePlayerData> players = BuildRemotePlayers(inbound.players, room.LocalPlayerId.Value);
             room.ApplySnapshot(players);
             this.SendEvent(new E_RoomSnapshot(ClonePlayers(players)));
         }
@@ -423,12 +422,18 @@ namespace APP.Network.System
         private void HandlePlayerJoined(InboundMessage inbound)
         {
             IRoomModel room = this.GetModel<IRoomModel>();
-            if (string.IsNullOrWhiteSpace(inbound.playerId) || inbound.playerId == room.LocalPlayerId.Value)
+            if (inbound.players == null || inbound.players.Count == 0)
             {
                 return;
             }
 
-            RemotePlayerData player = ToRemotePlayerData(inbound.playerId, inbound.playerName, inbound.state);
+            SnapshotEntry entry = inbound.players[0];
+            if (string.IsNullOrWhiteSpace(entry.playerId) || entry.playerId == room.LocalPlayerId.Value)
+            {
+                return;
+            }
+
+            RemotePlayerData player = ToRemotePlayerData(entry.playerId, entry.playerName, entry.state);
             room.AddOrUpdateRemotePlayer(player);
 
             this.SendEvent(new E_PlayerJoined(player.Clone()));
@@ -459,8 +464,9 @@ namespace APP.Network.System
         {
             IRoomModel room = this.GetModel<IRoomModel>();
             room.SetStatus(ConnectionStatus.Error);
+            string code = string.IsNullOrEmpty(inbound.error) ? "UNKNOWN" : inbound.error;
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Error));
-            this.SendEvent(new E_NetworkError(inbound.errorCode, inbound.message));
+            this.SendEvent(new E_NetworkError(code, code));
         }
 
         private List<RemotePlayerData> BuildRemotePlayers(IList<SnapshotEntry> snapshot, string localPlayerId)
