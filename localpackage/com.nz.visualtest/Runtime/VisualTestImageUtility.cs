@@ -169,6 +169,24 @@ namespace NZ.VisualTest
             }
         }
 
+        public static void CaptureFullScreenToFile(string outputPath)
+        {
+            Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+            if (screenshot == null)
+            {
+                throw new InvalidOperationException("无法捕获屏幕截图。");
+            }
+
+            try
+            {
+                SaveTextureToFile(screenshot, outputPath);
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(screenshot);
+            }
+        }
+
         public static void SaveTextureToFile(Texture2D texture, string outputPath)
         {
             if (texture == null)
