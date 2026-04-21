@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 
 import { WebSocketServer } from 'ws';
 
+import { IconCache, IconCacheError } from './IconCache.js';
 import {
     RoomManager,
     RoomManagerError
@@ -10,6 +11,8 @@ import {
 import {
     ProtocolError,
     createErrorMessage,
+    createIconBroadcastMessage,
+    createIconNeedMessage,
     createPlayerJoinedMessage,
     createPlayerLeftMessage,
     createPlayerStateBroadcastMessage,
@@ -35,6 +38,10 @@ export async function createPomodoroServer(options = {})
     const heartbeatTimeoutMs = options.heartbeatTimeoutMs ?? DEFAULT_HEARTBEAT_TIMEOUT_MS;
     const logger = options.logger ?? console;
     const roomManager = options.roomManager ?? new RoomManager();
+    const iconCache = options.iconCache ?? new IconCache({
+        maxEntries: options.iconCacheMaxEntries ?? 100,
+        maxBase64Bytes: options.iconCacheMaxBase64Bytes ?? 1_048_576
+    });
     const connections = new Map();
     const webSocketServer = new WebSocketServer({
         port
@@ -67,6 +74,7 @@ export async function createPomodoroServer(options = {})
                     rawMessage,
                     connection,
                     roomManager,
+                    iconCache,
                     logger,
                     clearInitTimeout: () => clearConnectionInitTimeout(connection),
                     broadcastToRoom: (roomCode, message, excludedPlayerId) =>
@@ -137,6 +145,7 @@ export async function createPomodoroServer(options = {})
     return {
         port: actualPort,
         roomManager,
+        iconCache,
         server: webSocketServer,
         url: `ws://127.0.0.1:${actualPort}`,
         async close()
@@ -204,6 +213,14 @@ function handleMessage(context)
 
         case 'player_state_update':
             handlePlayerStateUpdate(message, context);
+            return;
+
+        case 'icon_upload':
+            handleIconUpload(message, context);
+            return;
+
+        case 'icon_request':
+            handleIconRequest(message, context);
             return;
 
         case 'ping':
@@ -317,6 +334,56 @@ function handlePlayerStateUpdate(message, context)
         }),
         context.connection.playerId
     );
+
+    const bundleId = result.player.latestState?.activeApp?.bundleId;
+    if (bundleId && !context.iconCache.has(bundleId))
+    {
+        safeSend(context.connection.socket, createIconNeedMessage({ bundleId }));
+    }
+}
+
+function handleIconUpload(message, context)
+{
+    if (!context.connection.roomCode || !context.connection.playerId)
+    {
+        throw new ProtocolError('NOT_IN_ROOM', '当前未加入房间');
+    }
+
+    try
+    {
+        context.iconCache.set(message.bundleId, message.iconBase64);
+    }
+    catch (error)
+    {
+        if (error instanceof IconCacheError)
+        {
+            safeSend(context.connection.socket, createErrorMessage(error.code));
+            return;
+        }
+        throw error;
+    }
+
+    context.broadcastToRoom(
+        context.connection.roomCode,
+        createIconBroadcastMessage({
+            bundleId: message.bundleId,
+            iconBase64: message.iconBase64
+        }),
+        null     // 不排除发送者 —— 本地也要有图
+    );
+}
+
+function handleIconRequest(message, context)
+{
+    for (const bundleId of message.bundleIds)
+    {
+        const iconBase64 = context.iconCache.get(bundleId);
+        if (!iconBase64) continue;
+        safeSend(
+            context.connection.socket,
+            createIconBroadcastMessage({ bundleId, iconBase64 })
+        );
+    }
 }
 
 function leaveCurrentRoom({ connection, roomManager, notifyOthers })
