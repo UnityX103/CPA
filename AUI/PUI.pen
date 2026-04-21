@@ -1,5 +1,5 @@
 {
-  "version": "2.10",
+  "version": "2.11",
   "children": [
     {
       "type": "frame",
@@ -1115,8 +1115,7 @@
       "name": "cont - desk-window - preview",
       "reusable": true,
       "clip": true,
-      "width": 518,
-      "height": 335,
+      "width": "fit_content(518)",
       "fill": {
         "type": "gradient",
         "gradientType": "linear",
