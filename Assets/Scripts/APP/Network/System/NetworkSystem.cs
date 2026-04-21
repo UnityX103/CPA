@@ -474,6 +474,12 @@ namespace APP.Network.System
             IRoomModel room = this.GetModel<IRoomModel>();
             room.SetStatus(ConnectionStatus.Error);
             string code = string.IsNullOrEmpty(inbound.error) ? "UNKNOWN" : inbound.error;
+
+            if (code == "ROOM_NOT_FOUND")
+            {
+                this.GetModel<ISessionMemoryModel>().ForgetLastRoom();
+            }
+
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Error));
             this.SendEvent(new E_NetworkError(code, string.Empty));
         }
