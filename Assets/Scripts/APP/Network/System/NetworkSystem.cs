@@ -376,6 +376,12 @@ namespace APP.Network.System
                 case "error":
                     HandleNetworkError(inbound);
                     break;
+                case "icon_need":
+                    HandleIconNeed(inbound);
+                    break;
+                case "icon_broadcast":
+                    HandleIconBroadcast(inbound);
+                    break;
                 case "pong":
                     break;
             }
@@ -426,6 +432,8 @@ namespace APP.Network.System
             List<RemotePlayerData> players = BuildRemotePlayers(inbound.players, room.LocalPlayerId.Value);
             room.ApplySnapshot(players);
             this.SendEvent(new E_RoomSnapshot(ClonePlayers(players)));
+
+            RequestMissingIcons(players);
         }
 
         private void HandlePlayerJoined(InboundMessage inbound)
@@ -482,6 +490,59 @@ namespace APP.Network.System
 
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Error));
             this.SendEvent(new E_NetworkError(code, string.Empty));
+        }
+
+        private void HandleIconNeed(InboundMessage inbound)
+        {
+            if (string.IsNullOrEmpty(inbound.bundleId)) return;
+
+            IActiveAppSystem appSys = this.GetSystem<IActiveAppSystem>();
+            ActiveAppSnapshot snap = appSys.Current;
+            if (snap.BundleId != inbound.bundleId || snap.IconPngBytes == null)
+            {
+                // 当前已切到别的 App 了，忽略（服务端下次再问）
+                return;
+            }
+
+            IIconCacheSystem iconCache = this.GetSystem<IIconCacheSystem>();
+            string base64 = iconCache.EncodeBase64FromPngBytes(snap.IconPngBytes);
+            if (string.IsNullOrEmpty(base64)) return;
+
+            Send(new OutboundIconUpload
+            {
+                type = "icon_upload",
+                bundleId = inbound.bundleId,
+                iconBase64 = base64,
+            });
+        }
+
+        private void HandleIconBroadcast(InboundMessage inbound)
+        {
+            if (string.IsNullOrEmpty(inbound.bundleId) || string.IsNullOrEmpty(inbound.iconBase64)) return;
+            IIconCacheSystem iconCache = this.GetSystem<IIconCacheSystem>();
+            iconCache.StoreFromBase64(inbound.bundleId, inbound.iconBase64);
+            this.SendEvent(new E_IconUpdated(inbound.bundleId));
+        }
+
+        private void RequestMissingIcons(List<RemotePlayerData> players)
+        {
+            if (players == null || players.Count == 0) return;
+            IIconCacheSystem iconCache = this.GetSystem<IIconCacheSystem>();
+
+            var missing = new HashSet<string>();
+            foreach (RemotePlayerData p in players)
+            {
+                if (!string.IsNullOrEmpty(p.ActiveAppBundleId) && !iconCache.HasIconFor(p.ActiveAppBundleId))
+                {
+                    missing.Add(p.ActiveAppBundleId);
+                }
+            }
+
+            if (missing.Count == 0) return;
+
+            var arr = new string[missing.Count];
+            missing.CopyTo(arr);
+            Send(new OutboundIconRequest { type = "icon_request", bundleIds = arr });
         }
 
         private List<RemotePlayerData> BuildRemotePlayers(IList<SnapshotEntry> snapshot, string localPlayerId)
