@@ -2,7 +2,8 @@
     "name": "APP.Runtime",
     "rootNamespace": "",
     "references": [
-        "Kirurobo.UniWindowController"
+        "Kirurobo.UniWindowController",
+        "NZ.AppMonitor.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
