@@ -4,7 +4,8 @@
     "references": [
         "APP.Runtime",
         "APP.UI_V2",
-        "NZ.VisualTest"
+        "NZ.VisualTest",
+        "UnityEngine.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

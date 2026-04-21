@@ -45,12 +45,16 @@ namespace MCPForUnity.Editor.Services
                 var metadata = ExtractToolMetadata(type, toolAttr);
                 if (metadata != null)
                 {
+                    if (_cachedTools.ContainsKey(metadata.Name))
+                    {
+                        McpLog.Warn($"Duplicate tool name '{metadata.Name}' from {type.FullName}; overwriting previous registration.");
+                    }
                     _cachedTools[metadata.Name] = metadata;
                     EnsurePreferenceInitialized(metadata);
                 }
             }
 
-            McpLog.Info($"Discovered {_cachedTools.Count} MCP tools via reflection");
+            McpLog.Info($"Discovered {_cachedTools.Count} MCP tools via reflection", false);
             return _cachedTools.Values.ToList();
         }
 
@@ -128,10 +132,13 @@ namespace MCPForUnity.Editor.Services
                     AssemblyName = type.Assembly.GetName().Name,
                     AutoRegister = toolAttr.AutoRegister,
                     RequiresPolling = toolAttr.RequiresPolling,
-                    PollAction = string.IsNullOrEmpty(toolAttr.PollAction) ? "status" : toolAttr.PollAction
+                    PollAction = string.IsNullOrEmpty(toolAttr.PollAction) ? "status" : toolAttr.PollAction,
+                    MaxPollSeconds = toolAttr.MaxPollSeconds,
+                    Group = toolAttr.Group ?? "core"
                 };
 
-                metadata.IsBuiltIn = DetermineIsBuiltIn(type, metadata);
+                metadata.IsBuiltIn = StringCaseUtility.IsBuiltInMcpType(
+                    type, metadata.AssemblyName, "MCPForUnity.Editor.Tools");
 
                 return metadata;
 
@@ -202,20 +209,7 @@ namespace MCPForUnity.Editor.Services
             return "object";
         }
 
-        private string ConvertToSnakeCase(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            // Convert PascalCase to snake_case
-            var result = System.Text.RegularExpressions.Regex.Replace(
-                input,
-                "([a-z0-9])([A-Z])",
-                "$1_$2"
-            ).ToLower();
-
-            return result;
-        }
+        private string ConvertToSnakeCase(string input) => StringCaseUtility.ToSnakeCase(input);
 
         public void InvalidateCache()
         {
@@ -234,16 +228,6 @@ namespace MCPForUnity.Editor.Services
             {
                 bool defaultValue = metadata.AutoRegister || metadata.IsBuiltIn;
                 EditorPrefs.SetBool(key, defaultValue);
-                return;
-            }
-
-            if (metadata.IsBuiltIn && !metadata.AutoRegister)
-            {
-                bool currentValue = EditorPrefs.GetBool(key, metadata.AutoRegister);
-                if (currentValue == metadata.AutoRegister)
-                {
-                    EditorPrefs.SetBool(key, true);
-                }
             }
         }
 
@@ -252,24 +236,5 @@ namespace MCPForUnity.Editor.Services
             return EditorPrefKeys.ToolEnabledPrefix + toolName;
         }
 
-        private bool DetermineIsBuiltIn(Type type, ToolMetadata metadata)
-        {
-            if (metadata == null)
-            {
-                return false;
-            }
-
-            if (type != null && !string.IsNullOrEmpty(type.Namespace) && type.Namespace.StartsWith("MCPForUnity.Editor.Tools", StringComparison.Ordinal))
-            {
-                return true;
-            }
-
-            if (!string.IsNullOrEmpty(metadata.AssemblyName) && metadata.AssemblyName.Equals("MCPForUnity.Editor", StringComparison.Ordinal))
-            {
-                return true;
-            }
-
-            return false;
-        }
     }
 }

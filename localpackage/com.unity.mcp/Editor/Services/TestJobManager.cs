@@ -45,12 +45,14 @@ namespace MCPForUnity.Editor.Services
     /// <summary>
     /// Tracks async test jobs started via MCP tools. This is not intended to capture manual Test Runner UI runs.
     /// </summary>
-    [InitializeOnLoad]
     internal static class TestJobManager
     {
         // Keep this small to avoid ballooning payloads during polling.
         private const int FailureCap = 25;
         private const long StuckThresholdMs = 60_000;
+        private const long InitializationTimeoutMs = 15_000; // 15 seconds to call OnRunStarted, else fail
+        private const long NoHeartbeatBeforeFirstTestThresholdMs = 5 * 60_000;
+        private const long NoHeartbeatDuringActiveTestThresholdMs = 30 * 60_000;
         private const int MaxJobsToKeep = 10;
         private const long MinPersistIntervalMs = 1000; // Throttle persistence to reduce overhead
 
@@ -80,9 +82,126 @@ namespace MCPForUnity.Editor.Services
             {
                 lock (LockObj)
                 {
-                    return !string.IsNullOrEmpty(_currentJobId);
+                    return !string.IsNullOrEmpty(_currentJobId)
+                        && Jobs.TryGetValue(_currentJobId, out var job)
+                        && job.Status == TestJobStatus.Running;
                 }
             }
+        }
+
+        internal static bool TryRepairStaleRunningState()
+        {
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            bool testRunFlag = TestRunStatus.IsRunning;
+            bool changed = false;
+            bool shouldPersist = false;
+            bool shouldMarkFinished = false;
+            string clearedJobId = null;
+            string clearedReason = null;
+
+            lock (LockObj)
+            {
+                if (string.IsNullOrEmpty(_currentJobId))
+                {
+                    if (testRunFlag)
+                    {
+                        shouldMarkFinished = true;
+                        changed = true;
+                        clearedReason = "test run flag was still set without a current job";
+                    }
+                }
+                else if (!Jobs.TryGetValue(_currentJobId, out var currentJob))
+                {
+                    clearedJobId = _currentJobId;
+                    _currentJobId = null;
+                    shouldMarkFinished = true;
+                    changed = true;
+                    shouldPersist = true;
+                    clearedReason = "current job id no longer exists";
+                }
+                else if (currentJob.Status != TestJobStatus.Running)
+                {
+                    clearedJobId = currentJob.JobId;
+                    _currentJobId = null;
+                    shouldMarkFinished = true;
+                    changed = true;
+                    shouldPersist = true;
+                    clearedReason = $"current job was already finalized as {currentJob.Status}";
+                }
+                else if (ShouldClearStaleRunningJob(currentJob, now))
+                {
+                    clearedJobId = currentJob.JobId;
+                    currentJob.Status = TestJobStatus.Failed;
+                    currentJob.Error = BuildOrphanedJobMessage(currentJob, now);
+                    currentJob.FinishedUnixMs = now;
+                    currentJob.LastUpdateUnixMs = now;
+                    currentJob.CurrentTestFullName = null;
+                    currentJob.CurrentTestStartedUnixMs = null;
+                    _currentJobId = null;
+                    shouldMarkFinished = true;
+                    changed = true;
+                    shouldPersist = true;
+                    clearedReason = "running job stopped emitting progress while the editor was idle";
+                }
+            }
+
+            if (shouldMarkFinished)
+            {
+                TestRunStatus.MarkFinished();
+            }
+
+            if (shouldPersist)
+            {
+                PersistToSessionState(force: true);
+            }
+
+            if (changed)
+            {
+                string jobLabel = string.IsNullOrEmpty(clearedJobId) ? "<none>" : clearedJobId;
+                McpLog.Warn($"[TestJobManager] Repaired stale test run state for job {jobLabel}: {clearedReason}");
+            }
+
+            return changed;
+        }
+
+        /// <summary>
+        /// Force-clears any stuck or orphaned test job. Call this when tests get stuck due to
+        /// assembly reloads or other interruptions.
+        /// </summary>
+        /// <returns>True if a job was cleared, false if no running job exists.</returns>
+        public static bool ClearStuckJob()
+        {
+            bool cleared = false;
+            lock (LockObj)
+            {
+                if (string.IsNullOrEmpty(_currentJobId))
+                {
+                    return false;
+                }
+
+                if (Jobs.TryGetValue(_currentJobId, out var job) && job.Status == TestJobStatus.Running)
+                {
+                    long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    job.Status = TestJobStatus.Failed;
+                    job.Error = "Job cleared manually (stuck or orphaned)";
+                    job.FinishedUnixMs = now;
+                    job.LastUpdateUnixMs = now;
+                    job.CurrentTestFullName = null;
+                    job.CurrentTestStartedUnixMs = null;
+                    McpLog.Warn($"[TestJobManager] Manually cleared stuck job {_currentJobId}");
+                    cleared = true;
+                }
+
+                _currentJobId = null;
+            }
+
+            if (cleared || TestRunStatus.IsRunning)
+            {
+                TestRunStatus.MarkFinished();
+            }
+
+            PersistToSessionState(force: true);
+            return cleared;
         }
 
         private sealed class PersistedState
@@ -205,15 +324,6 @@ namespace MCPForUnity.Editor.Services
             {
                 // Restoration is best-effort; never block editor load.
                 McpLog.Warn($"[TestJobManager] Failed to restore SessionState: {ex.Message}");
-            }
-
-            // After domain reload, if there is still an active running job, force-recreate
-            // TestRunnerService so its ICallbacks (RunFinished, etc.) are re-registered with
-            // the Unity Test Runner. Without this, RunFinished is never delivered and the job
-            // stays "running" forever. Access outside lock to avoid deadlocks.
-            if (!string.IsNullOrEmpty(_currentJobId))
-            {
-                _ = MCPServiceLocator.Tests;
             }
         }
 
@@ -452,10 +562,46 @@ namespace MCPForUnity.Editor.Services
             {
                 return null;
             }
+
+            TestJob jobToReturn = null;
+            bool shouldPersist = false;
             lock (LockObj)
             {
-                return Jobs.TryGetValue(jobId, out var job) ? job : null;
+                if (!Jobs.TryGetValue(jobId, out var job))
+                {
+                    return null;
+                }
+
+                // Check if job is stuck in "running" state without having called OnRunStarted (TotalTests still null).
+                // This happens when tests fail to initialize (e.g., unsaved scene, compilation issues).
+                // After 15 seconds without initialization, auto-fail the job to prevent hanging.
+                if (job.Status == TestJobStatus.Running && job.TotalTests == null)
+                {
+                    long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    if (!EditorApplication.isCompiling && !EditorApplication.isUpdating && now - job.StartedUnixMs > InitializationTimeoutMs)
+                    {
+                        McpLog.Warn($"[TestJobManager] Job {jobId} failed to initialize within {InitializationTimeoutMs}ms, auto-failing");
+                        job.Status = TestJobStatus.Failed;
+                        job.Error = "Test job failed to initialize (tests did not start within timeout)";
+                        job.FinishedUnixMs = now;
+                        job.LastUpdateUnixMs = now;
+                        if (_currentJobId == jobId)
+                        {
+                            _currentJobId = null;
+                        }
+                        TestRunStatus.MarkFinished();
+                        shouldPersist = true;
+                    }
+                }
+
+                jobToReturn = job;
             }
+
+            if (shouldPersist)
+            {
+                PersistToSessionState(force: true);
+            }
+            return jobToReturn;
         }
 
         internal static object ToSerializable(TestJob job, bool includeDetails, bool includeFailedTests)
@@ -545,6 +691,53 @@ namespace MCPForUnity.Editor.Services
             return (now - job.CurrentTestStartedUnixMs.Value) > StuckThresholdMs;
         }
 
+        private static bool ShouldClearStaleRunningJob(TestJob job, long now)
+        {
+            if (job == null || job.Status != TestJobStatus.Running)
+            {
+                return false;
+            }
+
+            if (EditorApplication.isPlayingOrWillChangePlaymode
+                || EditorApplication.isCompiling
+                || EditorApplication.isUpdating)
+            {
+                return false;
+            }
+
+            if (job.TotalTests == null)
+            {
+                return (now - job.StartedUnixMs) >= InitializationTimeoutMs;
+            }
+
+            long lastHeartbeatAgeMs = Math.Max(0, now - job.LastUpdateUnixMs);
+            if (string.IsNullOrWhiteSpace(job.CurrentTestFullName) || !job.CurrentTestStartedUnixMs.HasValue)
+            {
+                return lastHeartbeatAgeMs >= NoHeartbeatBeforeFirstTestThresholdMs;
+            }
+
+            long activeTestAgeMs = Math.Max(0, now - job.CurrentTestStartedUnixMs.Value);
+            return activeTestAgeMs >= NoHeartbeatDuringActiveTestThresholdMs;
+        }
+
+        private static string BuildOrphanedJobMessage(TestJob job, long now)
+        {
+            if (job.TotalTests == null)
+            {
+                long ageSeconds = Math.Max(0, (now - job.StartedUnixMs) / 1000);
+                return $"Test job did not initialize within {ageSeconds}s while the editor was idle.";
+            }
+
+            long lastHeartbeatAgeSeconds = Math.Max(0, (now - job.LastUpdateUnixMs) / 1000);
+            if (string.IsNullOrWhiteSpace(job.CurrentTestFullName) || !job.CurrentTestStartedUnixMs.HasValue)
+            {
+                return $"Job was marked running but emitted no progress for {lastHeartbeatAgeSeconds}s while the editor was idle.";
+            }
+
+            long activeTestAgeSeconds = Math.Max(0, (now - job.CurrentTestStartedUnixMs.Value) / 1000);
+            return $"Test '{job.CurrentTestFullName}' emitted no progress for {activeTestAgeSeconds}s while the editor was idle.";
+        }
+
         private static object[] BuildFailuresPayload(List<TestJobFailure> failures)
         {
             if (failures == null || failures.Count == 0)
@@ -612,5 +805,3 @@ namespace MCPForUnity.Editor.Services
         }
     }
 }
-
-

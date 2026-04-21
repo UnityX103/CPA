@@ -24,8 +24,12 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
         private TextField gitUrlOverride;
         private Button browseGitUrlButton;
         private Button clearGitUrlButton;
+        private Toggle autoStartOnLoadToggle;
         private Toggle debugLogsToggle;
+        private Toggle logRecordToggle;
         private Toggle devModeForceRefreshToggle;
+        private Toggle allowLanHttpBindToggle;
+        private Toggle allowInsecureRemoteHttpToggle;
         private TextField deploySourcePath;
         private Button browseDeploySourceButton;
         private Button clearDeploySourceButton;
@@ -42,6 +46,7 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
         public event Action OnGitUrlChanged;
         public event Action OnHttpServerCommandUpdateRequested;
         public event Action OnTestConnectionRequested;
+        public event Action OnPackageDeployed;
 
         public VisualElement Root { get; private set; }
 
@@ -62,8 +67,12 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
             gitUrlOverride = Root.Q<TextField>("git-url-override");
             browseGitUrlButton = Root.Q<Button>("browse-git-url-button");
             clearGitUrlButton = Root.Q<Button>("clear-git-url-button");
+            autoStartOnLoadToggle = Root.Q<Toggle>("auto-start-on-load-toggle");
             debugLogsToggle = Root.Q<Toggle>("debug-logs-toggle");
+            logRecordToggle = Root.Q<Toggle>("log-record-toggle");
             devModeForceRefreshToggle = Root.Q<Toggle>("dev-mode-force-refresh-toggle");
+            allowLanHttpBindToggle = Root.Q<Toggle>("allow-lan-http-bind-toggle");
+            allowInsecureRemoteHttpToggle = Root.Q<Toggle>("allow-insecure-remote-http-toggle");
             deploySourcePath = Root.Q<TextField>("deploy-source-path");
             browseDeploySourceButton = Root.Q<Button>("browse-deploy-source-button");
             clearDeploySourceButton = Root.Q<Button>("clear-deploy-source-button");
@@ -91,12 +100,33 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
                 if (debugLabel != null)
                     debugLabel.tooltip = debugLogsToggle.tooltip;
             }
+            if (logRecordToggle != null)
+            {
+                logRecordToggle.tooltip = "Log every MCP tool execution (tool, action, status, duration) to Assets/UnityMCP/Log/mcp.log.";
+                var logRecordLabel = logRecordToggle?.parent?.Q<Label>();
+                if (logRecordLabel != null)
+                    logRecordLabel.tooltip = logRecordToggle.tooltip;
+            }
             if (devModeForceRefreshToggle != null)
             {
                 devModeForceRefreshToggle.tooltip = "When enabled, generated uvx commands add '--no-cache --refresh' before launching (slower startup, but avoids stale cached builds while iterating on the Server).";
                 var forceRefreshLabel = devModeForceRefreshToggle?.parent?.Q<Label>();
                 if (forceRefreshLabel != null)
                     forceRefreshLabel.tooltip = devModeForceRefreshToggle.tooltip;
+            }
+            if (allowLanHttpBindToggle != null)
+            {
+                allowLanHttpBindToggle.tooltip = "Allow HTTP Local to bind on all interfaces (0.0.0.0 / ::). Disabled by default because devices on your LAN may reach MCP tools.";
+                var lanBindLabel = allowLanHttpBindToggle?.parent?.Q<Label>();
+                if (lanBindLabel != null)
+                    lanBindLabel.tooltip = allowLanHttpBindToggle.tooltip;
+            }
+            if (allowInsecureRemoteHttpToggle != null)
+            {
+                allowInsecureRemoteHttpToggle.tooltip = "Allow HTTP Remote over plaintext http/ws. Disabled by default to require HTTPS/WSS.";
+                var insecureRemoteLabel = allowInsecureRemoteHttpToggle?.parent?.Q<Label>();
+                if (insecureRemoteLabel != null)
+                    insecureRemoteLabel.tooltip = allowInsecureRemoteHttpToggle.tooltip;
             }
             if (testConnectionButton != null)
                 testConnectionButton.tooltip = "Test the connection between Unity and the MCP server.";
@@ -121,13 +151,33 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
             if (deployRestoreButton != null)
                 deployRestoreButton.tooltip = "Restore the last backup before deployment";
 
+            if (autoStartOnLoadToggle != null)
+            {
+                autoStartOnLoadToggle.tooltip = "Automatically start the local HTTP server and connect the MCP bridge when the Unity Editor opens. Only applies to HTTP transport (stdio always auto-starts).";
+                var autoStartLabel = autoStartOnLoadToggle.parent?.Q<Label>();
+                if (autoStartLabel != null)
+                    autoStartLabel.tooltip = autoStartOnLoadToggle.tooltip;
+                autoStartOnLoadToggle.SetValueWithoutNotify(EditorPrefs.GetBool(EditorPrefKeys.AutoStartOnLoad, false));
+            }
+
             gitUrlOverride.value = EditorPrefs.GetString(EditorPrefKeys.GitUrlOverride, "");
 
             bool debugEnabled = EditorPrefs.GetBool(EditorPrefKeys.DebugLogs, false);
             debugLogsToggle.value = debugEnabled;
             McpLog.SetDebugLoggingEnabled(debugEnabled);
 
+            if (logRecordToggle != null)
+                logRecordToggle.value = McpLogRecord.IsEnabled;
+
             devModeForceRefreshToggle.value = EditorPrefs.GetBool(EditorPrefKeys.DevModeForceServerRefresh, false);
+            if (allowLanHttpBindToggle != null)
+            {
+                allowLanHttpBindToggle.SetValueWithoutNotify(EditorPrefs.GetBool(EditorPrefKeys.AllowLanHttpBind, false));
+            }
+            if (allowInsecureRemoteHttpToggle != null)
+            {
+                allowInsecureRemoteHttpToggle.SetValueWithoutNotify(EditorPrefs.GetBool(EditorPrefKeys.AllowInsecureRemoteHttp, false));
+            }
             UpdatePathOverrides();
             UpdateDeploymentSection();
         }
@@ -147,6 +197,12 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
                 }
                 else
                 {
+                    url = ResolveServerPath(url);
+                    // Update the text field if the path was auto-corrected, without re-triggering the callback
+                    if (url != evt.newValue?.Trim())
+                    {
+                        gitUrlOverride.SetValueWithoutNotify(url);
+                    }
                     EditorPrefs.SetString(EditorPrefKeys.GitUrlOverride, url);
                 }
                 OnGitUrlChanged?.Invoke();
@@ -166,11 +222,45 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
                 McpLog.SetDebugLoggingEnabled(evt.newValue);
             });
 
+            if (logRecordToggle != null)
+            {
+                logRecordToggle.RegisterValueChangedCallback(evt =>
+                {
+                    McpLogRecord.IsEnabled = evt.newValue;
+                });
+            }
+
+            if (autoStartOnLoadToggle != null)
+            {
+                autoStartOnLoadToggle.RegisterValueChangedCallback(evt =>
+                {
+                    EditorPrefs.SetBool(EditorPrefKeys.AutoStartOnLoad, evt.newValue);
+                });
+            }
+
             devModeForceRefreshToggle.RegisterValueChangedCallback(evt =>
             {
                 EditorPrefs.SetBool(EditorPrefKeys.DevModeForceServerRefresh, evt.newValue);
                 OnHttpServerCommandUpdateRequested?.Invoke();
             });
+
+            if (allowLanHttpBindToggle != null)
+            {
+                allowLanHttpBindToggle.RegisterValueChangedCallback(evt =>
+                {
+                    EditorPrefs.SetBool(EditorPrefKeys.AllowLanHttpBind, evt.newValue);
+                    OnHttpServerCommandUpdateRequested?.Invoke();
+                });
+            }
+
+            if (allowInsecureRemoteHttpToggle != null)
+            {
+                allowInsecureRemoteHttpToggle.RegisterValueChangedCallback(evt =>
+                {
+                    EditorPrefs.SetBool(EditorPrefKeys.AllowInsecureRemoteHttp, evt.newValue);
+                    OnHttpServerCommandUpdateRequested?.Invoke();
+                });
+            }
 
             deploySourcePath.RegisterValueChangedCallback(evt =>
             {
@@ -272,8 +362,20 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
             }
 
             gitUrlOverride.value = EditorPrefs.GetString(EditorPrefKeys.GitUrlOverride, "");
+            if (autoStartOnLoadToggle != null)
+                autoStartOnLoadToggle.value = EditorPrefs.GetBool(EditorPrefKeys.AutoStartOnLoad, false);
             debugLogsToggle.value = EditorPrefs.GetBool(EditorPrefKeys.DebugLogs, false);
+            if (logRecordToggle != null)
+                logRecordToggle.value = McpLogRecord.IsEnabled;
             devModeForceRefreshToggle.value = EditorPrefs.GetBool(EditorPrefKeys.DevModeForceServerRefresh, false);
+            if (allowLanHttpBindToggle != null)
+            {
+                allowLanHttpBindToggle.value = EditorPrefs.GetBool(EditorPrefKeys.AllowLanHttpBind, false);
+            }
+            if (allowInsecureRemoteHttpToggle != null)
+            {
+                allowInsecureRemoteHttpToggle.value = EditorPrefs.GetBool(EditorPrefKeys.AllowInsecureRemoteHttp, false);
+            }
             UpdateDeploymentSection();
         }
 
@@ -307,15 +409,64 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
 
         private void OnBrowseGitUrlClicked()
         {
-            string picked = EditorUtility.OpenFolderPanel("Select Server folder", string.Empty, string.Empty);
+            string picked = EditorUtility.OpenFolderPanel("Select Server folder (containing pyproject.toml)", string.Empty, string.Empty);
             if (!string.IsNullOrEmpty(picked))
             {
+                picked = ResolveServerPath(picked);
                 gitUrlOverride.value = picked;
                 EditorPrefs.SetString(EditorPrefKeys.GitUrlOverride, picked);
                 OnGitUrlChanged?.Invoke();
                 OnHttpServerCommandUpdateRequested?.Invoke();
                 McpLog.Info($"Server source override set to: {picked}");
             }
+        }
+
+        /// <summary>
+        /// Validates and auto-corrects a local server path to ensure it points to the directory
+        /// containing pyproject.toml (the Python package root). If the user selects a parent
+        /// directory (e.g. the repo root), this checks for a "Server" subdirectory with
+        /// pyproject.toml and returns that instead.
+        /// </summary>
+        private static string ResolveServerPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return path;
+
+            // If path is not a local filesystem path, return as-is (git URLs, PyPI refs, etc.)
+            if (path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("git+", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("ssh://", StringComparison.OrdinalIgnoreCase))
+            {
+                return path;
+            }
+
+            // Strip file:// prefix for filesystem checks, but preserve it for the return value
+            string checkPath = path;
+            string prefix = string.Empty;
+            if (checkPath.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+            {
+                prefix = "file://";
+                checkPath = checkPath.Substring(7);
+            }
+
+            // Already points to a directory with pyproject.toml — correct path
+            if (File.Exists(Path.Combine(checkPath, "pyproject.toml")))
+            {
+                return path;
+            }
+
+            // Check if "Server" subdirectory contains pyproject.toml (common repo structure)
+            string serverSubDir = Path.Combine(checkPath, "Server");
+            if (File.Exists(Path.Combine(serverSubDir, "pyproject.toml")))
+            {
+                string corrected = prefix + serverSubDir;
+                McpLog.Info($"Auto-corrected server path to 'Server' subdirectory: {corrected}");
+                return corrected;
+            }
+
+            // Return as-is; uvx will report the error if the path is invalid
+            return path;
         }
 
         private void UpdateDeploymentSection()
@@ -382,6 +533,7 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
             else
             {
                 EditorUtility.DisplayDialog("Deployment Complete", result.Message + (string.IsNullOrEmpty(result.BackupPath) ? string.Empty : $"\nBackup: {result.BackupPath}"), "OK");
+                OnPackageDeployed?.Invoke();
             }
 
             UpdateDeploymentSection();
@@ -399,6 +551,7 @@ namespace MCPForUnity.Editor.Windows.Components.Advanced
             else
             {
                 EditorUtility.DisplayDialog("Restore Complete", result.Message, "OK");
+                OnPackageDeployed?.Invoke();
             }
 
             UpdateDeploymentSection();

@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using MCPForUnity.Runtime.Helpers;
 
 namespace MCPForUnity.Editor.Tools
 {
@@ -94,6 +95,12 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse(error ?? $"Failed to add component '{componentTypeName}'.");
             }
 
+            // When adding VFX-related components (ParticleSystem, LineRenderer, TrailRenderer),
+            // ensure the renderer has a material compatible with the active render pipeline.
+            // Without this, newly added ParticleSystems in URP/HDRP projects get Unity's default
+            // Built-in RP particle material, which renders as magenta.
+            EnsureVfxRendererMaterial(targetGo, newComponent);
+
             // Set properties if provided
             JObject properties = @params["properties"] as JObject ?? @params["componentProperties"] as JObject;
             if (properties != null && properties.HasValues)
@@ -112,9 +119,9 @@ namespace MCPForUnity.Editor.Tools
                 message = $"Component '{componentTypeName}' added to '{targetGo.name}'.",
                 data = new
                 {
-                    instanceID = targetGo.GetInstanceID(),
+                    instanceID = targetGo.GetInstanceIDCompat(),
                     componentType = type.FullName,
-                    componentInstanceID = newComponent.GetInstanceID()
+                    componentInstanceID = newComponent.GetInstanceIDCompat()
                 }
             };
         }
@@ -140,7 +147,26 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse($"Component type '{componentTypeName}' not found.");
             }
 
-            // Use ComponentOps for the actual operation
+            int? componentIndex = ParamCoercion.CoerceIntNullable(@params["componentIndex"] ?? @params["component_index"]);
+            if (componentIndex.HasValue)
+            {
+                var components = targetGo.GetComponents(type);
+                if (componentIndex.Value < 0 || componentIndex.Value >= components.Length)
+                    return new ErrorResponse($"component_index {componentIndex.Value} out of range. Found {components.Length} '{componentTypeName}' component(s).");
+                if (type == typeof(Transform) || type == typeof(RectTransform))
+                    return new ErrorResponse("Cannot remove Transform or RectTransform components.");
+                Undo.DestroyObjectImmediate(components[componentIndex.Value]);
+                EditorUtility.SetDirty(targetGo);
+                MarkOwningSceneDirty(targetGo);
+                return new
+                {
+                    success = true,
+                    message = $"Component '{componentTypeName}' (index {componentIndex.Value}) removed from '{targetGo.name}'.",
+                    data = new { instanceID = targetGo.GetInstanceIDCompat(), componentIndex = componentIndex.Value }
+                };
+            }
+
+            // Use ComponentOps for the actual operation (removes first instance)
             bool removed = ComponentOps.RemoveComponent(targetGo, type, out string error);
             if (!removed)
             {
@@ -156,7 +182,7 @@ namespace MCPForUnity.Editor.Tools
                 message = $"Component '{componentTypeName}' removed from '{targetGo.name}'.",
                 data = new
                 {
-                    instanceID = targetGo.GetInstanceID()
+                    instanceID = targetGo.GetInstanceIDCompat()
                 }
             };
         }
@@ -182,7 +208,19 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse($"Component type '{componentType}' not found.");
             }
 
-            Component component = targetGo.GetComponent(type);
+            int? componentIndex = ParamCoercion.CoerceIntNullable(@params["componentIndex"] ?? @params["component_index"]);
+            Component component;
+            if (componentIndex.HasValue)
+            {
+                var components = targetGo.GetComponents(type);
+                if (componentIndex.Value < 0 || componentIndex.Value >= components.Length)
+                    return new ErrorResponse($"component_index {componentIndex.Value} out of range. Found {components.Length} '{componentType}' component(s).");
+                component = components[componentIndex.Value];
+            }
+            else
+            {
+                component = targetGo.GetComponent(type);
+            }
             if (component == null)
             {
                 return new ErrorResponse($"Component '{componentType}' not found on '{targetGo.name}'.");
@@ -240,7 +278,7 @@ namespace MCPForUnity.Editor.Tools
                         message = $"Some properties failed to set on '{componentType}'.",
                         data = new
                         {
-                            instanceID = targetGo.GetInstanceID(),
+                            instanceID = targetGo.GetInstanceIDCompat(),
                             errors = errors
                         }
                     };
@@ -252,7 +290,7 @@ namespace MCPForUnity.Editor.Tools
                     message = $"Properties set on component '{componentType}' on '{targetGo.name}'.",
                     data = new
                     {
-                        instanceID = targetGo.GetInstanceID()
+                        instanceID = targetGo.GetInstanceIDCompat()
                     }
                 };
             }
@@ -265,6 +303,40 @@ namespace MCPForUnity.Editor.Tools
         #endregion
 
         #region Helpers
+
+        /// <summary>
+        /// When a VFX-capable component is added (ParticleSystem, LineRenderer, TrailRenderer),
+        /// ensures its renderer material is valid for the active render pipeline.
+        /// This prevents magenta rendering in URP/HDRP projects where the default built-in
+        /// particle/line materials use incompatible shaders.
+        /// </summary>
+        private static void EnsureVfxRendererMaterial(GameObject go, Component addedComponent)
+        {
+            Renderer renderer = null;
+
+            if (addedComponent is ParticleSystem ps)
+            {
+                renderer = go.GetComponent<ParticleSystemRenderer>();
+
+                // Apply sensible defaults so newly added ParticleSystems aren't oversized.
+                // These are overridden by any subsequent particle_set_* calls.
+                RendererHelpers.SetSensibleParticleDefaults(ps);
+            }
+            else if (addedComponent is Renderer r)
+            {
+                // Covers LineRenderer, TrailRenderer, and any other Renderer subclass
+                renderer = r;
+            }
+
+            if (renderer != null)
+            {
+                var result = RendererHelpers.EnsureMaterial(renderer);
+                if (result.MaterialReplaced)
+                {
+                    McpLog.Info($"[ManageComponents] Auto-assigned pipeline-compatible material to {renderer.GetType().Name} on '{go.name}' (reason: {result.ReplacementReason}).");
+                }
+            }
+        }
 
         /// <summary>
         /// Marks the appropriate scene as dirty for the given GameObject.

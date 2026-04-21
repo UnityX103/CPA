@@ -34,7 +34,7 @@ namespace MCPForUnity.Editor.Tools.GameObjects
 
             bool modified = false;
 
-            string name = @params["name"]?.ToString();
+            string name = @params["name"]?.ToString() ?? @params["new_name"]?.ToString() ?? @params["newName"]?.ToString();
             if (!string.IsNullOrEmpty(name) && targetGo.name != name)
             {
                 // Check if we're renaming the root object of an open prefab stage
@@ -47,7 +47,7 @@ namespace MCPForUnity.Editor.Tools.GameObjects
                     // Rename the prefab asset file to match the new name (avoids Unity dialog)
                     string assetPath = prefabStageForRename.assetPath;
                     string directory = System.IO.Path.GetDirectoryName(assetPath);
-                    string newAssetPath = System.IO.Path.Combine(directory, name + ".prefab").Replace('\\', '/');
+                    string newAssetPath = AssetPathUtility.NormalizeSeparators(System.IO.Path.Combine(directory, name + ".prefab"));
 
                     // Only rename if the path actually changes
                     if (newAssetPath != assetPath)
@@ -147,6 +147,19 @@ namespace MCPForUnity.Editor.Tools.GameObjects
                 if (layerId != -1 && targetGo.layer != layerId)
                 {
                     targetGo.layer = layerId;
+                    modified = true;
+                }
+            }
+
+            bool? isStatic = @params["isStatic"]?.ToObject<bool?>();
+            if (isStatic.HasValue)
+            {
+                var desiredFlags = isStatic.Value ? (StaticEditorFlags)~0 : 0;
+                var currentFlags = GameObjectUtility.GetStaticEditorFlags(targetGo);
+
+                if (currentFlags != desiredFlags)
+                {
+                    GameObjectUtility.SetStaticEditorFlags(targetGo, desiredFlags);
                     modified = true;
                 }
             }

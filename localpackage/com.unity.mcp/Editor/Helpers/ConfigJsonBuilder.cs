@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using MCPForUnity.Editor.Constants;
-using MCPForUnity.Editor.Clients.Configurators;
-using MCPForUnity.Editor.Helpers;
+using MCPForUnity.Editor.Services;
 using MCPForUnity.Editor.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -51,9 +49,10 @@ namespace MCPForUnity.Editor.Helpers
         private static void PopulateUnityNode(JObject unity, string uvPath, McpClient client, bool isVSCode)
         {
             // Get transport preference (default to HTTP)
-            bool prefValue = EditorPrefs.GetBool(EditorPrefKeys.UseHttpTransport, true);
+            bool prefValue = EditorConfigurationCache.Instance.UseHttpTransport;
             bool clientSupportsHttp = client?.SupportsHttpTransport != false;
             bool useHttpTransport = clientSupportsHttp && prefValue;
+            bool isCline = client?.name == "Cline";
             string httpProperty = string.IsNullOrEmpty(client?.HttpUrlProperty) ? "url" : client.HttpUrlProperty;
             var urlPropsToRemove = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "url", "serverUrl" };
             urlPropsToRemove.Remove(httpProperty);
@@ -73,13 +72,35 @@ namespace MCPForUnity.Editor.Helpers
                 if (unity["command"] != null) unity.Remove("command");
                 if (unity["args"] != null) unity.Remove("args");
 
-                if (isVSCode)
+                // Only include API key header for remote-hosted mode
+                if (HttpEndpointUtility.IsRemoteScope())
                 {
-                    unity["type"] = "http";
+                    string apiKey = EditorPrefs.GetString(EditorPrefKeys.ApiKey, string.Empty);
+                    if (!string.IsNullOrEmpty(apiKey))
+                    {
+                        var headers = new JObject { [AuthConstants.ApiKeyHeader] = apiKey };
+                        unity["headers"] = headers;
+                    }
+                    else
+                    {
+                        if (unity["headers"] != null) unity.Remove("headers");
+                    }
                 }
-                // Also add type for Claude Code (uses mcpServers layout but needs type field)
-                else if (client?.name == "Claude Code")
+                else
                 {
+                    // Local HTTP doesn't use API keys; remove any stale headers
+                    if (unity["headers"] != null) unity.Remove("headers");
+                }
+
+                // Cline expects streamableHttp for HTTP endpoints.
+                if (isCline)
+                {
+                    unity["type"] = "streamableHttp";
+                }
+                else
+                {
+                    // "type" is standard MCP protocol; include for all clients to avoid
+                    // clients that default to SSE when they see a URL without a type field.
                     unity["type"] = "http";
                 }
             }
@@ -90,35 +111,15 @@ namespace MCPForUnity.Editor.Helpers
 
                 var toolArgs = BuildUvxArgs(fromUrl, packageName);
 
-                if (ShouldUseWindowsCmdShim(client))
-                {
-                    unity["command"] = ResolveCmdPath();
-
-                    var cmdArgs = new List<string> { "/c", uvxPath };
-                    cmdArgs.AddRange(toolArgs);
-
-                    unity["args"] = JArray.FromObject(cmdArgs.ToArray());
-                }
-                else
-                {
-                    unity["command"] = uvxPath;
-                    unity["args"] = JArray.FromObject(toolArgs.ToArray());
-                }
+                unity["command"] = uvxPath;
+                unity["args"] = JArray.FromObject(toolArgs.ToArray());
 
                 // Remove url/serverUrl if they exist from previous config
                 if (unity["url"] != null) unity.Remove("url");
                 if (unity["serverUrl"] != null) unity.Remove("serverUrl");
 
-                if (isVSCode)
-                {
-                    unity["type"] = "stdio";
-                }
-            }
-
-            // Remove type for non-VSCode clients (except Claude Code which needs it)
-            if (!isVSCode && client?.name != "Claude Code" && unity["type"] != null)
-            {
-                unity.Remove("type");
+                // Include type for all clients — standard MCP protocol field.
+                unity["type"] = "stdio";
             }
 
             bool requiresEnv = client?.EnsureEnvObject == true;
@@ -164,16 +165,13 @@ namespace MCPForUnity.Editor.Helpers
             // Keep ordering consistent with other uvx builders: dev flags first, then --from <url>, then package name.
             var args = new List<string>();
 
-            // Use central helper that checks both DevModeForceServerRefresh AND local path detection.
-            if (AssetPathUtility.ShouldForceUvxRefresh())
+            foreach (var flag in AssetPathUtility.GetUvxDevFlagsList())
+                args.Add(flag);
+
+            // Use centralized helper for beta server / prerelease args
+            foreach (var arg in AssetPathUtility.GetBetaServerFromArgsList())
             {
-                args.Add("--no-cache");
-                args.Add("--refresh");
-            }
-            if (!string.IsNullOrEmpty(fromUrl))
-            {
-                args.Add("--from");
-                args.Add(fromUrl);
+                args.Add(arg);
             }
             args.Add(packageName);
 
@@ -183,27 +181,5 @@ namespace MCPForUnity.Editor.Helpers
             return args;
         }
 
-        private static bool ShouldUseWindowsCmdShim(McpClient client)
-        {
-            if (client == null)
-            {
-                return false;
-            }
-
-            return Application.platform == RuntimePlatform.WindowsEditor &&
-                   string.Equals(client.name, ClaudeDesktopConfigurator.ClientName, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string ResolveCmdPath()
-        {
-            var comSpec = Environment.GetEnvironmentVariable("ComSpec");
-            if (!string.IsNullOrEmpty(comSpec) && File.Exists(comSpec))
-            {
-                return comSpec;
-            }
-
-            string system32Cmd = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-            return File.Exists(system32Cmd) ? system32Cmd : "cmd.exe";
-        }
     }
 }

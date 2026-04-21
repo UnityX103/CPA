@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using MCPForUnity.Runtime.Helpers;
 
 namespace MCPForUnity.Editor.Helpers
 {
@@ -65,13 +66,23 @@ namespace MCPForUnity.Editor.Helpers
         }
 
         /// <summary>
+        /// Resolves an instance ID to a UnityEngine.Object.
+        /// </summary>
+        public static UnityEngine.Object ResolveInstanceID(int instanceId)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return EditorUtility.EntityIdToObject(instanceId);
+#else
+            return EditorUtility.InstanceIDToObject(instanceId);
+#endif
+        }
+
+        /// <summary>
         /// Finds a GameObject by its instance ID.
         /// </summary>
         public static GameObject FindById(int instanceId)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            return EditorUtility.InstanceIDToObject(instanceId) as GameObject;
-#pragma warning restore CS0618
+            return ResolveInstanceID(instanceId) as GameObject;
         }
 
         /// <summary>
@@ -105,9 +116,7 @@ namespace MCPForUnity.Editor.Helpers
                 case SearchMethod.ById:
                     if (int.TryParse(searchTerm, out int instanceId))
                     {
-#pragma warning disable CS0618 // Type or member is obsolete
-                        var obj = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
-#pragma warning restore CS0618
+                        var obj = ResolveInstanceID(instanceId) as GameObject;
                         if (obj != null && (includeInactive || obj.activeInHierarchy))
                         {
                             results.Add(instanceId);
@@ -147,7 +156,7 @@ namespace MCPForUnity.Editor.Helpers
             if (maxResults > 0)
                 matching = matching.Take(maxResults);
 
-            return matching.Select(go => go.GetInstanceID());
+            return matching.Select(go => go.GetInstanceIDCompat());
         }
 
         private static IEnumerable<int> SearchByPath(string path, bool includeInactive)
@@ -162,7 +171,7 @@ namespace MCPForUnity.Editor.Helpers
                 {
                     if (MatchesPath(go, path))
                     {
-                        yield return go.GetInstanceID();
+                        yield return go.GetInstanceIDCompat();
                     }
                 }
                 yield break;
@@ -179,7 +188,7 @@ namespace MCPForUnity.Editor.Helpers
                 {
                     if (MatchesPath(go, path))
                     {
-                        yield return go.GetInstanceID();
+                        yield return go.GetInstanceIDCompat();
                     }
                 }
             }
@@ -189,7 +198,7 @@ namespace MCPForUnity.Editor.Helpers
                 var found = GameObject.Find(path);
                 if (found != null)
                 {
-                    yield return found.GetInstanceID();
+                    yield return found.GetInstanceIDCompat();
                 }
             }
         }
@@ -222,7 +231,7 @@ namespace MCPForUnity.Editor.Helpers
 
             foreach (var go in results)
             {
-                yield return go.GetInstanceID();
+                yield return go.GetInstanceIDCompat();
             }
         }
 
@@ -246,7 +255,7 @@ namespace MCPForUnity.Editor.Helpers
 
             foreach (var go in matching)
             {
-                yield return go.GetInstanceID();
+                yield return go.GetInstanceIDCompat();
             }
         }
 
@@ -266,7 +275,7 @@ namespace MCPForUnity.Editor.Helpers
             {
                 if (go.GetComponent(componentType) != null)
                 {
-                    yield return go.GetInstanceID();
+                    yield return go.GetInstanceIDCompat();
                     count++;
 
                     if (maxResults > 0 && count >= maxResults)

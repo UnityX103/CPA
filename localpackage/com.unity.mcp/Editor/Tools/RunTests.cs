@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using MCPForUnity.Editor.Helpers;
 using MCPForUnity.Editor.Resources.Tests;
@@ -13,13 +12,25 @@ namespace MCPForUnity.Editor.Tools
     /// Starts a Unity Test Runner run asynchronously and returns a job id immediately.
     /// Use get_test_job(job_id) to poll status/results.
     /// </summary>
-    [McpForUnityTool("run_tests", AutoRegister = false)]
+    [McpForUnityTool("run_tests", AutoRegister = false, Group = "testing")]
     public static class RunTests
     {
         public static Task<object> HandleCommand(JObject @params)
         {
             try
             {
+                TestJobManager.TryRepairStaleRunningState();
+
+                // Check for clear_stuck action first
+                if (ParamCoercion.CoerceBool(@params?["clear_stuck"], false))
+                {
+                    bool wasCleared = TestJobManager.ClearStuckJob();
+                    return Task.FromResult<object>(new SuccessResponse(
+                        wasCleared ? "Stuck job cleared." : "No running job to clear.",
+                        new { cleared = wasCleared }
+                    ));
+                }
+
                 string modeStr = @params?["mode"]?.ToString();
                 if (string.IsNullOrWhiteSpace(modeStr))
                 {
@@ -31,26 +42,9 @@ namespace MCPForUnity.Editor.Tools
                     return Task.FromResult<object>(new ErrorResponse(parseError));
                 }
 
-                bool includeDetails = false;
-                bool includeFailedTests = false;
-                try
-                {
-                    var includeDetailsToken = @params?["includeDetails"];
-                    if (includeDetailsToken != null && bool.TryParse(includeDetailsToken.ToString(), out var parsedIncludeDetails))
-                    {
-                        includeDetails = parsedIncludeDetails;
-                    }
-
-                    var includeFailedTestsToken = @params?["includeFailedTests"];
-                    if (includeFailedTestsToken != null && bool.TryParse(includeFailedTestsToken.ToString(), out var parsedIncludeFailedTests))
-                    {
-                        includeFailedTests = parsedIncludeFailedTests;
-                    }
-                }
-                catch
-                {
-                    // ignore parse failures
-                }
+                var p = new ToolParams(@params);
+                bool includeDetails = p.GetBool("includeDetails");
+                bool includeFailedTests = p.GetBool("includeFailedTests");
 
                 var filterOptions = GetFilterOptions(@params);
                 string jobId = TestJobManager.StartJob(parsedMode.Value, filterOptions);
@@ -82,32 +76,11 @@ namespace MCPForUnity.Editor.Tools
                 return null;
             }
 
-            string[] ParseStringArray(string key)
-            {
-                var token = @params[key];
-                if (token == null) return null;
-                if (token.Type == JTokenType.String)
-                {
-                    var value = token.ToString();
-                    return string.IsNullOrWhiteSpace(value) ? null : new[] { value };
-                }
-                if (token.Type == JTokenType.Array)
-                {
-                    var array = token as JArray;
-                    if (array == null || array.Count == 0) return null;
-                    var values = array
-                        .Values<string>()
-                        .Where(s => !string.IsNullOrWhiteSpace(s))
-                        .ToArray();
-                    return values.Length > 0 ? values : null;
-                }
-                return null;
-            }
-
-            var testNames = ParseStringArray("testNames");
-            var groupNames = ParseStringArray("groupNames");
-            var categoryNames = ParseStringArray("categoryNames");
-            var assemblyNames = ParseStringArray("assemblyNames");
+            var p = new ToolParams(@params);
+            var testNames = p.GetStringArray("testNames");
+            var groupNames = p.GetStringArray("groupNames");
+            var categoryNames = p.GetStringArray("categoryNames");
+            var assemblyNames = p.GetStringArray("assemblyNames");
 
             if (testNames == null && groupNames == null && categoryNames == null && assemblyNames == null)
             {

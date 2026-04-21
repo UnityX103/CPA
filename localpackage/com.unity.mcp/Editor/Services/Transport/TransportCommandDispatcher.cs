@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MCPForUnity.Editor.Helpers;
 using MCPForUnity.Editor.Models;
+using MCPForUnity.Editor.Services;
 using MCPForUnity.Editor.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -35,6 +36,7 @@ namespace MCPForUnity.Editor.Services.Transport
                 CompletionSource = completionSource;
                 CancellationToken = cancellationToken;
                 CancellationRegistration = registration;
+                QueuedAt = DateTime.UtcNow;
             }
 
             public string CommandJson { get; }
@@ -42,6 +44,7 @@ namespace MCPForUnity.Editor.Services.Transport
             public CancellationToken CancellationToken { get; }
             public CancellationTokenRegistration CancellationRegistration { get; }
             public bool IsExecuting { get; set; }
+            public DateTime QueuedAt { get; }
 
             public void Dispose()
             {
@@ -337,17 +340,77 @@ namespace MCPForUnity.Editor.Services.Transport
                 }
 
                 var parameters = command.@params ?? new JObject();
+
+                // Block execution of disabled resources
+                var resourceMeta = MCPServiceLocator.ResourceDiscovery.GetResourceMetadata(command.type);
+                if (resourceMeta != null && !MCPServiceLocator.ResourceDiscovery.IsResourceEnabled(command.type))
+                {
+                    pending.TrySetResult(SerializeError(
+                        $"Resource '{command.type}' is disabled in the Unity Editor."));
+                    RemovePending(id, pending);
+                    return;
+                }
+
+                // Block execution of disabled tools
+                var toolMeta = MCPServiceLocator.ToolDiscovery.GetToolMetadata(command.type);
+                if (toolMeta != null && !MCPServiceLocator.ToolDiscovery.IsToolEnabled(command.type))
+                {
+                    pending.TrySetResult(SerializeError(
+                        $"Tool '{command.type}' is disabled in the Unity Editor."));
+                    RemovePending(id, pending);
+                    return;
+                }
+
+                var logType = resourceMeta != null ? "resource" : toolMeta != null ? "tool" : "unknown";
+                var sw = McpLogRecord.IsEnabled ? System.Diagnostics.Stopwatch.StartNew() : null;
                 var result = CommandRegistry.ExecuteCommand(command.type, parameters, pending.CompletionSource);
 
                 if (result == null)
                 {
                     // Async command – cleanup after completion on next editor frame to preserve order.
-                    pending.CompletionSource.Task.ContinueWith(_ =>
+                    var capturedType = command.type;
+                    var capturedParams = parameters;
+                    var capturedLogType = logType;
+                    pending.CompletionSource.Task.ContinueWith(t =>
                     {
+                        sw?.Stop();
+                        var logStatus = "SUCCESS";
+                        string logError = null;
+                        if (t.IsFaulted)
+                        {
+                            logStatus = "ERROR";
+                            logError = t.Exception?.InnerException?.Message;
+                        }
+                        else if (t.IsCompletedSuccessfully && t.Result != null)
+                        {
+                            try
+                            {
+                                var resultObj = JObject.Parse(t.Result);
+                                if (string.Equals(resultObj.Value<string>("status"), "error", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    logStatus = "ERROR";
+                                    logError = resultObj.Value<string>("error");
+                                }
+                            }
+                            catch { }
+                        }
+                        McpLogRecord.Log(capturedType, capturedParams, capturedLogType,
+                            logStatus, sw?.ElapsedMilliseconds ?? 0, logError);
                         EditorApplication.delayCall += () => RemovePending(id, pending);
                     }, TaskScheduler.Default);
                     return;
                 }
+
+                sw?.Stop();
+
+                string syncLogStatus = "SUCCESS";
+                string syncLogError = null;
+                if (result is ErrorResponse errResp)
+                {
+                    syncLogStatus = "ERROR";
+                    syncLogError = errResp.Error;
+                }
+                McpLogRecord.Log(command.type, parameters, logType, syncLogStatus, sw?.ElapsedMilliseconds ?? 0, syncLogError);
 
                 var response = new { status = "success", result };
                 pending.TrySetResult(JsonConvert.SerializeObject(response));

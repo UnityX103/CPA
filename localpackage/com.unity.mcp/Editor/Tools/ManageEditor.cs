@@ -1,8 +1,10 @@
 using System;
 using MCPForUnity.Editor.Helpers;
+using MCPForUnity.Editor.Services;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditorInternal; // Required for tag management
+using UnityEngine;
 
 namespace MCPForUnity.Editor.Tools
 {
@@ -24,17 +26,26 @@ namespace MCPForUnity.Editor.Tools
         /// </summary>
         public static object HandleCommand(JObject @params)
         {
-            string action = @params["action"]?.ToString()?.ToLowerInvariant();
-            // Parameters for specific actions
-            string tagName = @params["tagName"]?.ToString();
-            string layerName = @params["layerName"]?.ToString();
-            bool waitForCompletion = @params["waitForCompletion"]?.ToObject<bool>() ?? false; // Example - not used everywhere
-
-            if (string.IsNullOrEmpty(action))
+            // Step 1: Null parameter guard (consistent across all tools)
+            if (@params == null)
             {
-                return new ErrorResponse("Action parameter is required.");
+                return new ErrorResponse("Parameters cannot be null.");
             }
 
+            // Step 2: Wrap parameters
+            var p = new ToolParams(@params);
+
+            // Step 3: Extract and validate required parameters
+            var actionResult = p.GetRequired("action");
+            if (!actionResult.IsSuccess)
+            {
+                return new ErrorResponse(actionResult.ErrorMessage);
+            }
+            string action = actionResult.Value.ToLowerInvariant();
+
+            // Parameters for specific actions
+            string tagName = p.Get("tagName");
+            string layerName = p.Get("layerName");
             // Route action
             switch (action)
             {
@@ -86,29 +97,33 @@ namespace MCPForUnity.Editor.Tools
 
                 // Tool Control
                 case "set_active_tool":
-                    string toolName = @params["toolName"]?.ToString();
-                    if (string.IsNullOrEmpty(toolName))
-                        return new ErrorResponse("'toolName' parameter required for set_active_tool.");
-                    return SetActiveTool(toolName);
+                    var toolNameResult = p.GetRequired("toolName", "'toolName' parameter required for set_active_tool.");
+                    if (!toolNameResult.IsSuccess)
+                        return new ErrorResponse(toolNameResult.ErrorMessage);
+                    return SetActiveTool(toolNameResult.Value);
 
                 // Tag Management
                 case "add_tag":
-                    if (string.IsNullOrEmpty(tagName))
-                        return new ErrorResponse("'tagName' parameter required for add_tag.");
-                    return AddTag(tagName);
+                    var addTagResult = p.GetRequired("tagName", "'tagName' parameter required for add_tag.");
+                    if (!addTagResult.IsSuccess)
+                        return new ErrorResponse(addTagResult.ErrorMessage);
+                    return AddTag(addTagResult.Value);
                 case "remove_tag":
-                    if (string.IsNullOrEmpty(tagName))
-                        return new ErrorResponse("'tagName' parameter required for remove_tag.");
-                    return RemoveTag(tagName);
+                    var removeTagResult = p.GetRequired("tagName", "'tagName' parameter required for remove_tag.");
+                    if (!removeTagResult.IsSuccess)
+                        return new ErrorResponse(removeTagResult.ErrorMessage);
+                    return RemoveTag(removeTagResult.Value);
                 // Layer Management
                 case "add_layer":
-                    if (string.IsNullOrEmpty(layerName))
-                        return new ErrorResponse("'layerName' parameter required for add_layer.");
-                    return AddLayer(layerName);
+                    var addLayerResult = p.GetRequired("layerName", "'layerName' parameter required for add_layer.");
+                    if (!addLayerResult.IsSuccess)
+                        return new ErrorResponse(addLayerResult.ErrorMessage);
+                    return AddLayer(addLayerResult.Value);
                 case "remove_layer":
-                    if (string.IsNullOrEmpty(layerName))
-                        return new ErrorResponse("'layerName' parameter required for remove_layer.");
-                    return RemoveLayer(layerName);
+                    var removeLayerResult = p.GetRequired("layerName", "'layerName' parameter required for remove_layer.");
+                    if (!removeLayerResult.IsSuccess)
+                        return new ErrorResponse(removeLayerResult.ErrorMessage);
+                    return RemoveLayer(removeLayerResult.Value);
                 // --- Settings (Example) ---
                 // case "set_resolution":
                 //     int? width = @params["width"]?.ToObject<int?>();
@@ -119,9 +134,44 @@ namespace MCPForUnity.Editor.Tools
                 //     // Handle string name or int index
                 //     return SetQualityLevel(@params["qualityLevel"]);
 
+                // Package Deployment
+                case "deploy_package":
+                    return DeployPackage();
+                case "restore_package":
+                    return RestorePackage();
+
+                // Undo/Redo
+                case "undo":
+                {
+                    string groupName = Undo.GetCurrentGroupName();
+                    Undo.PerformUndo();
+                    string message = string.IsNullOrEmpty(groupName)
+                        ? "Undo performed (stack may be empty)."
+                        : $"Undid: {groupName}";
+                    if (EditorApplication.isPlaying)
+                        message += " Warning: undo during play mode may have unexpected effects.";
+                    return new SuccessResponse(message, new
+                    {
+                        undone_group = string.IsNullOrEmpty(groupName) ? (string)null : groupName,
+                        next_group = Undo.GetCurrentGroupName()
+                    });
+                }
+                case "redo":
+                {
+                    Undo.PerformRedo();
+                    string nextGroup = Undo.GetCurrentGroupName();
+                    string message = "Redo performed.";
+                    if (EditorApplication.isPlaying)
+                        message += " Warning: redo during play mode may have unexpected effects.";
+                    return new SuccessResponse(message, new
+                    {
+                        current_group = string.IsNullOrEmpty(nextGroup) ? (string)null : nextGroup
+                    });
+                }
+
                 default:
                     return new ErrorResponse(
-                        $"Unknown action: '{action}'. Supported actions: play, pause, stop, set_active_tool, add_tag, remove_tag, add_layer, remove_layer. Use MCP resources for reading editor state, project info, tags, layers, selection, windows, prefab stage, and active tool."
+                        $"Unknown action: '{action}'. Supported actions: play, pause, stop, set_active_tool, add_tag, remove_tag, add_layer, remove_layer, deploy_package, restore_package, undo, redo. For prefab editing (open/save/close prefab stage), use manage_prefabs. Use MCP resources for reading editor state, project info, tags, layers, selection, windows, prefab stage, and active tool."
                     );
             }
         }
@@ -338,6 +388,49 @@ namespace MCPForUnity.Editor.Tools
             catch (Exception e)
             {
                 return new ErrorResponse($"Failed to remove layer '{layerName}': {e.Message}");
+            }
+        }
+
+        // --- Package Deployment Methods ---
+
+        private static object DeployPackage()
+        {
+            try
+            {
+                var result = MCPServiceLocator.Deployment.DeployFromStoredSource();
+                if (!result.Success)
+                    return new ErrorResponse(result.Message);
+
+                return new SuccessResponse(result.Message, new
+                {
+                    source_path = result.SourcePath,
+                    target_path = result.TargetPath,
+                    backup_path = result.BackupPath
+                });
+            }
+            catch (Exception e)
+            {
+                return new ErrorResponse($"Deploy failed: {e.Message}");
+            }
+        }
+
+        private static object RestorePackage()
+        {
+            try
+            {
+                var result = MCPServiceLocator.Deployment.RestoreLastBackup();
+                if (!result.Success)
+                    return new ErrorResponse(result.Message);
+
+                return new SuccessResponse(result.Message, new
+                {
+                    target_path = result.TargetPath,
+                    backup_path = result.BackupPath
+                });
+            }
+            catch (Exception e)
+            {
+                return new ErrorResponse($"Restore failed: {e.Message}");
             }
         }
 

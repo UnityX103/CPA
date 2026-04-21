@@ -4,6 +4,7 @@ using MCPForUnity.Editor.Helpers;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
+using MCPForUnity.Runtime.Helpers;
 
 namespace MCPForUnity.Editor.Tools.GameObjects
 {
@@ -24,8 +25,11 @@ namespace MCPForUnity.Editor.Tools.GameObjects
                 if (targetGo != null)
                 {
                     string goName = targetGo.name;
-                    int goId = targetGo.GetInstanceID();
-                    Undo.DestroyObjectImmediate(targetGo);
+                    int goId = targetGo.GetInstanceIDCompat();
+                    // Note: Undo.DestroyObjectImmediate doesn't work reliably in test context,
+                    // so we use Object.DestroyImmediate. This means delete isn't undoable.
+                    // TODO: Investigate Undo.DestroyObjectImmediate behavior in Unity 2022+
+                    Object.DestroyImmediate(targetGo);
                     deletedObjects.Add(new { name = goName, instanceID = goId });
                 }
             }

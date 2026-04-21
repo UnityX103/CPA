@@ -28,6 +28,11 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="setting-row">
+                <ui:Label text="Log Record (Assets/mcp.log):" class="setting-label" />
+                <ui:Toggle name="log-record-toggle" class="setting-toggle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="setting-row">
                 <ui:Label text="Server Health:" class="setting-label" />
                 <ui:VisualElement class="status-container">
                     <ui:VisualElement name="health-indicator" class="status-dot" />
@@ -37,8 +42,23 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="setting-row">
+                <ui:Label text="Auto-Start Server on Editor Load:" class="setting-label" />
+                <ui:Toggle name="auto-start-on-load-toggle" class="setting-toggle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="setting-row">
                 <ui:Label text="Force Fresh Install:" class="setting-label" />
                 <ui:Toggle name="dev-mode-force-refresh-toggle" class="setting-toggle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="setting-row">
+                <ui:Label text="Allow LAN Bind (HTTP Local):" class="setting-label" />
+                <ui:Toggle name="allow-lan-http-bind-toggle" class="setting-toggle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="setting-row">
+                <ui:Label text="Allow Insecure Remote HTTP:" class="setting-label" />
+                <ui:Toggle name="allow-insecure-remote-http-toggle" class="setting-toggle" />
             </ui:VisualElement>
 
             <ui:VisualElement class="override-row" style="margin-top: 8px;">

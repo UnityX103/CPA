@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+using MCPForUnity.Editor.Constants;
 using MCPForUnity.Editor.Helpers;
+using MCPForUnity.Editor.Services;
 using Newtonsoft.Json.Linq;
+using UnityEditor;
 
 namespace MCPForUnity.Editor.Tools
 {
@@ -14,7 +16,20 @@ namespace MCPForUnity.Editor.Tools
     [McpForUnityTool("batch_execute", AutoRegister = false)]
     public static class BatchExecute
     {
-        private const int MaxCommandsPerBatch = 25;
+        /// <summary>Default limit when no EditorPrefs override is set.</summary>
+        internal const int DefaultMaxCommandsPerBatch = 25;
+
+        /// <summary>Hard ceiling to prevent extreme editor freezes regardless of user setting.</summary>
+        internal const int AbsoluteMaxCommandsPerBatch = 100;
+
+        /// <summary>
+        /// Returns the user-configured max commands per batch, clamped between 1 and <see cref="AbsoluteMaxCommandsPerBatch"/>.
+        /// </summary>
+        internal static int GetMaxCommandsPerBatch()
+        {
+            int configured = EditorPrefs.GetInt(EditorPrefKeys.BatchExecuteMaxCommands, DefaultMaxCommandsPerBatch);
+            return Math.Clamp(configured, 1, AbsoluteMaxCommandsPerBatch);
+        }
 
         public static async Task<object> HandleCommand(JObject @params)
         {
@@ -29,9 +44,11 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse("Provide at least one command entry in 'commands'.");
             }
 
-            if (commandsToken.Count > MaxCommandsPerBatch)
+            int maxCommands = GetMaxCommandsPerBatch();
+            if (commandsToken.Count > maxCommands)
             {
-                return new ErrorResponse($"A maximum of {MaxCommandsPerBatch} commands are allowed per batch.");
+                return new ErrorResponse(
+                    $"A maximum of {maxCommands} commands are allowed per batch (configurable in MCP Tools window, hard max {AbsoluteMaxCommandsPerBatch}).");
             }
 
             bool failFast = @params.Value<bool?>("failFast") ?? false;
@@ -85,6 +102,22 @@ namespace MCPForUnity.Editor.Tools
                     {
                         break;
                     }
+                    continue;
+                }
+
+                // Block disabled tools (mirrors TransportCommandDispatcher check)
+                var toolMeta = MCPServiceLocator.ToolDiscovery.GetToolMetadata(toolName);
+                if (toolMeta != null && !MCPServiceLocator.ToolDiscovery.IsToolEnabled(toolName))
+                {
+                    invocationFailureCount++;
+                    anyCommandFailed = true;
+                    commandResults.Add(new
+                    {
+                        tool = toolName,
+                        callSucceeded = false,
+                        result = new ErrorResponse($"Tool '{toolName}' is disabled in the Unity Editor.")
+                    });
+                    if (failFast) break;
                     continue;
                 }
 
@@ -192,61 +225,11 @@ namespace MCPForUnity.Editor.Tools
             foreach (var property in source.Properties())
             {
                 string normalizedName = ToCamelCase(property.Name);
-                normalized[normalizedName] = NormalizeToken(property.Value);
+                normalized[normalizedName] = property.Value;
             }
             return normalized;
         }
 
-        private static JArray NormalizeArray(JArray source)
-        {
-            var normalized = new JArray();
-            foreach (var token in source)
-            {
-                normalized.Add(NormalizeToken(token));
-            }
-            return normalized;
-        }
-
-        private static JToken NormalizeToken(JToken token)
-        {
-            return token switch
-            {
-                JObject obj => NormalizeParameterKeys(obj),
-                JArray arr => NormalizeArray(arr),
-                _ => token.DeepClone()
-            };
-        }
-
-        private static string ToCamelCase(string key)
-        {
-            if (string.IsNullOrEmpty(key) || key.IndexOf('_') < 0)
-            {
-                return key;
-            }
-
-            var parts = key.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
-            {
-                return key;
-            }
-
-            var builder = new StringBuilder(parts[0]);
-            for (int i = 1; i < parts.Length; i++)
-            {
-                var part = parts[i];
-                if (string.IsNullOrEmpty(part))
-                {
-                    continue;
-                }
-
-                builder.Append(char.ToUpperInvariant(part[0]));
-                if (part.Length > 1)
-                {
-                    builder.Append(part.AsSpan(1));
-                }
-            }
-
-            return builder.ToString();
-        }
+        private static string ToCamelCase(string key) => StringCaseUtility.ToCamelCase(key);
     }
 }

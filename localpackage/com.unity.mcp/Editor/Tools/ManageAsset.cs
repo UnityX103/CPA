@@ -8,10 +8,11 @@ using UnityEditor;
 using UnityEngine;
 using MCPForUnity.Editor.Helpers; // For Response class
 using MCPForUnity.Editor.Tools;
+using MCPForUnity.Runtime.Helpers;
 
 #if UNITY_6000_0_OR_NEWER
 using PhysicsMaterialType = UnityEngine.PhysicsMaterial;
-using PhysicsMaterialCombine = UnityEngine.PhysicsMaterialCombine;  
+using PhysicsMaterialCombine = UnityEngine.PhysicsMaterialCombine;
 #else
 using PhysicsMaterialType = UnityEngine.PhysicMaterial;
 using PhysicsMaterialCombine = UnityEngine.PhysicMaterialCombine;
@@ -802,7 +803,7 @@ namespace MCPForUnity.Editor.Tools
                     .Select(comp => new
                     {
                         typeName = comp.GetType().FullName,
-                        instanceID = comp.GetInstanceID(),
+                        instanceID = comp.GetInstanceIDCompat(),
                         // TODO: Add more component-specific details here if needed in the future?
                         //       Requires reflection or specific handling per component type.
                     })
@@ -1058,7 +1059,7 @@ namespace MCPForUnity.Editor.Tools
                         try
                         {
                             rt = RenderTexture.GetTemporary(preview.width, preview.height);
-                            Graphics.Blit(preview, rt);
+                            UnityEngine.Graphics.Blit(preview, rt);
                             RenderTexture.active = rt;
                             readablePreview = new Texture2D(preview.width, preview.height, TextureFormat.RGB24, false);
                             readablePreview.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
@@ -1104,7 +1105,7 @@ namespace MCPForUnity.Editor.Tools
                 name = Path.GetFileNameWithoutExtension(path),
                 fileName = Path.GetFileName(path),
                 isFolder = AssetDatabase.IsValidFolder(path),
-                instanceID = asset?.GetInstanceID() ?? 0,
+                instanceID = asset?.GetInstanceIDCompat() ?? 0,
                 lastWriteTimeUtc = File.GetLastWriteTimeUtc(
                         Path.Combine(Directory.GetCurrentDirectory(), path)
                     )

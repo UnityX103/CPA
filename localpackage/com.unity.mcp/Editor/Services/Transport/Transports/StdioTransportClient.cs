@@ -46,5 +46,12 @@ namespace MCPForUnity.Editor.Services.Transport.Transports
             return Task.FromResult(running);
         }
 
+        public Task ReregisterToolsAsync()
+        {
+            // In stdio mode, Python re-syncs tools automatically on reconnection
+            // after domain reload. No proactive push mechanism exists over TCP.
+            return Task.CompletedTask;
+        }
+
     }
 }

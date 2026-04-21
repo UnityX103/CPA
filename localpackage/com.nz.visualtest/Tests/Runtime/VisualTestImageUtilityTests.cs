@@ -66,8 +66,8 @@ namespace NZ.VisualTest.Tests
             }
             finally
             {
-                Object.DestroyImmediate(expected);
-                Object.DestroyImmediate(actual);
+                UnityEngine.Object.DestroyImmediate(expected);
+                UnityEngine.Object.DestroyImmediate(actual);
             }
 
             VisualImageComparisonResult result = VisualTestImageUtility.ComparePngFiles(
@@ -100,8 +100,8 @@ namespace NZ.VisualTest.Tests
             }
             finally
             {
-                Object.DestroyImmediate(expected);
-                Object.DestroyImmediate(actual);
+                UnityEngine.Object.DestroyImmediate(expected);
+                UnityEngine.Object.DestroyImmediate(actual);
             }
 
             VisualImageComparisonResult result = VisualTestImageUtility.ComparePngFiles(

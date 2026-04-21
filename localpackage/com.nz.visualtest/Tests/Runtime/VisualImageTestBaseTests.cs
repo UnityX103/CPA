@@ -29,20 +29,20 @@ namespace NZ.VisualTest.Tests
         {
             if (_uiDocumentObject != null)
             {
-                Object.Destroy(_uiDocumentObject);
+                UnityEngine.Object.Destroy(_uiDocumentObject);
                 _uiDocumentObject = null;
                 _uiDocument = null;
             }
 
             if (_panelSettings != null)
             {
-                Object.Destroy(_panelSettings);
+                UnityEngine.Object.Destroy(_panelSettings);
                 _panelSettings = null;
             }
 
             if (_cameraObject != null)
             {
-                Object.Destroy(_cameraObject);
+                UnityEngine.Object.Destroy(_cameraObject);
                 _cameraObject = null;
             }
 

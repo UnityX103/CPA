@@ -8,36 +8,22 @@ namespace MCPForUnity.Editor.Tools
     /// <summary>
     /// Poll a previously started async test job by job_id.
     /// </summary>
-    [McpForUnityTool("get_test_job", AutoRegister = false)]
+    [McpForUnityTool("get_test_job", AutoRegister = false, Group = "testing")]
     public static class GetTestJob
     {
         public static object HandleCommand(JObject @params)
         {
+            TestJobManager.TryRepairStaleRunningState();
+
             string jobId = @params?["job_id"]?.ToString() ?? @params?["jobId"]?.ToString();
             if (string.IsNullOrWhiteSpace(jobId))
             {
                 return new ErrorResponse("Missing required parameter 'job_id'.");
             }
 
-            bool includeDetails = false;
-            bool includeFailedTests = false;
-            try
-            {
-                var includeDetailsToken = @params?["includeDetails"];
-                if (includeDetailsToken != null && bool.TryParse(includeDetailsToken.ToString(), out var parsedIncludeDetails))
-                {
-                    includeDetails = parsedIncludeDetails;
-                }
-                var includeFailedTestsToken = @params?["includeFailedTests"];
-                if (includeFailedTestsToken != null && bool.TryParse(includeFailedTestsToken.ToString(), out var parsedIncludeFailedTests))
-                {
-                    includeFailedTests = parsedIncludeFailedTests;
-                }
-            }
-            catch
-            {
-                // ignore parse failures
-            }
+            var p = new ToolParams(@params);
+            bool includeDetails = p.GetBool("includeDetails");
+            bool includeFailedTests = p.GetBool("includeFailedTests");
 
             var job = TestJobManager.GetJob(jobId);
             if (job == null)

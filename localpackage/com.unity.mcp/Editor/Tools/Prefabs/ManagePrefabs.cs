@@ -1,29 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MCPForUnity.Editor.Helpers;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using MCPForUnity.Runtime.Helpers;
 
 namespace MCPForUnity.Editor.Tools.Prefabs
 {
     [McpForUnityTool("manage_prefabs", AutoRegister = false)]
     /// <summary>
-    /// Tool to manage Unity Prefab stages and create prefabs from GameObjects.
+    /// Tool to manage Unity Prefabs: create, inspect, modify, and open/save/close prefab stage.
+    /// Supports both headless editing (modify_contents) and interactive prefab stage workflows.
     /// </summary>
     public static class ManagePrefabs
     {
         // Action constants
-        private const string ACTION_OPEN_STAGE = "open_stage";
-        private const string ACTION_CLOSE_STAGE = "close_stage";
-        private const string ACTION_SAVE_OPEN_STAGE = "save_open_stage";
         private const string ACTION_CREATE_FROM_GAMEOBJECT = "create_from_gameobject";
         private const string ACTION_GET_INFO = "get_info";
         private const string ACTION_GET_HIERARCHY = "get_hierarchy";
-        private const string SupportedActions = ACTION_OPEN_STAGE + ", " + ACTION_CLOSE_STAGE + ", " + ACTION_SAVE_OPEN_STAGE + ", " + ACTION_CREATE_FROM_GAMEOBJECT + ", " + ACTION_GET_INFO + ", " + ACTION_GET_HIERARCHY;
+        private const string ACTION_MODIFY_CONTENTS = "modify_contents";
+        private const string ACTION_OPEN_PREFAB_STAGE = "open_prefab_stage";
+        private const string ACTION_SAVE_PREFAB_STAGE = "save_prefab_stage";
+        private const string ACTION_CLOSE_PREFAB_STAGE = "close_prefab_stage";
+        private const string SupportedActions = ACTION_CREATE_FROM_GAMEOBJECT + ", " + ACTION_GET_INFO + ", " + ACTION_GET_HIERARCHY + ", " + ACTION_MODIFY_CONTENTS + ", " + ACTION_OPEN_PREFAB_STAGE + ", " + ACTION_SAVE_PREFAB_STAGE + ", " + ACTION_CLOSE_PREFAB_STAGE;
 
         public static object HandleCommand(JObject @params)
         {
@@ -42,18 +46,26 @@ namespace MCPForUnity.Editor.Tools.Prefabs
             {
                 switch (action)
                 {
-                    case ACTION_OPEN_STAGE:
-                        return OpenStage(@params);
-                    case ACTION_CLOSE_STAGE:
-                        return CloseStage(@params);
-                    case ACTION_SAVE_OPEN_STAGE:
-                        return SaveOpenStage(@params);
                     case ACTION_CREATE_FROM_GAMEOBJECT:
                         return CreatePrefabFromGameObject(@params);
                     case ACTION_GET_INFO:
                         return GetInfo(@params);
                     case ACTION_GET_HIERARCHY:
                         return GetHierarchy(@params);
+                    case ACTION_MODIFY_CONTENTS:
+                        return ModifyContents(@params);
+                    case ACTION_OPEN_PREFAB_STAGE:
+                    {
+                        string prefabPath = @params["prefabPath"]?.ToString() ?? @params["path"]?.ToString();
+                        return OpenPrefabStage(prefabPath);
+                    }
+                    case ACTION_SAVE_PREFAB_STAGE:
+                        return SavePrefabStage();
+                    case ACTION_CLOSE_PREFAB_STAGE:
+                    {
+                        bool saveBeforeClose = @params["saveBeforeClose"]?.ToObject<bool>() ?? false;
+                        return ClosePrefabStage(saveBeforeClose);
+                    }
                     default:
                         return new ErrorResponse($"Unknown action: '{action}'. Valid actions are: {SupportedActions}.");
                 }
@@ -64,192 +76,6 @@ namespace MCPForUnity.Editor.Tools.Prefabs
                 return new ErrorResponse($"Internal error: {e.Message}");
             }
         }
-
-        /// <summary>
-        /// Opens a prefab in prefab mode for editing.
-        /// </summary>
-        private static object OpenStage(JObject @params)
-        {
-            string prefabPath = @params["prefabPath"]?.ToString();
-            if (string.IsNullOrEmpty(prefabPath))
-            {
-                return new ErrorResponse("'prefabPath' parameter is required for open_stage.");
-            }
-
-            string sanitizedPath = AssetPathUtility.SanitizeAssetPath(prefabPath);
-            if (string.IsNullOrEmpty(sanitizedPath))
-            {
-                return new ErrorResponse($"Invalid prefab path: '{prefabPath}'.");
-            }
-            GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(sanitizedPath);
-            if (prefabAsset == null)
-            {
-                return new ErrorResponse($"No prefab asset found at path '{sanitizedPath}'.");
-            }
-
-            PrefabStage stage = PrefabStageUtility.OpenPrefab(sanitizedPath);
-            if (stage == null)
-            {
-                return new ErrorResponse($"Failed to open prefab stage for '{sanitizedPath}'.");
-            }
-
-            return new SuccessResponse($"Opened prefab stage for '{sanitizedPath}'.", SerializeStage(stage));
-        }
-
-        /// <summary>
-        /// Closes the currently open prefab stage, optionally saving first.
-        /// </summary>
-        private static object CloseStage(JObject @params)
-        {
-            PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (stage == null)
-            {
-                return new SuccessResponse("No prefab stage was open.");
-            }
-
-            string assetPath = stage.assetPath;
-            bool saveBeforeClose = @params["saveBeforeClose"]?.ToObject<bool>() ?? false;
-
-            if (saveBeforeClose && stage.scene.isDirty)
-            {
-                try
-                {
-                    SaveAndRefreshStage(stage);
-                }
-                catch (Exception e)
-                {
-                    return new ErrorResponse($"Failed to save prefab before closing: {e.Message}");
-                }
-            }
-
-            StageUtility.GoToMainStage();
-            return new SuccessResponse($"Closed prefab stage for '{assetPath}'.");
-        }
-
-        /// <summary>
-        /// Saves changes to the currently open prefab stage.
-        /// Supports a 'force' parameter for automated workflows where isDirty may not be set.
-        /// </summary>
-        private static object SaveOpenStage(JObject @params)
-        {
-            PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (stage == null)
-            {
-                return new ErrorResponse("No prefab stage is currently open.");
-            }
-
-            if (!ValidatePrefabStageForSave(stage))
-            {
-                return new ErrorResponse("Prefab stage validation failed. Cannot save.");
-            }
-
-            // Check for force parameter (useful for automated workflows)
-            bool force = @params?["force"]?.ToObject<bool>() ?? false;
-
-            // Check if there are actual changes to save
-            bool wasDirty = stage.scene.isDirty;
-            if (!wasDirty && !force)
-            {
-                return new SuccessResponse($"Prefab stage for '{stage.assetPath}' has no unsaved changes.", SerializeStage(stage));
-            }
-
-            try
-            {
-                SaveAndRefreshStage(stage, force);
-                return new SuccessResponse($"Saved prefab stage for '{stage.assetPath}'.", SerializeStage(stage));
-            }
-            catch (Exception e)
-            {
-                return new ErrorResponse($"Failed to save prefab: {e.Message}");
-            }
-        }
-
-        #region Prefab Save Operations
-
-        /// <summary>
-        /// Saves the prefab stage and refreshes the asset database.
-        /// Uses PrefabUtility.SaveAsPrefabAsset for reliable prefab saving without dialogs.
-        /// </summary>
-        /// <param name="stage">The prefab stage to save.</param>
-        /// <param name="force">If true, marks the prefab dirty before saving to ensure changes are captured.</param>
-        private static void SaveAndRefreshStage(PrefabStage stage, bool force = false)
-        {
-            if (stage == null)
-            {
-                throw new ArgumentNullException(nameof(stage), "Prefab stage cannot be null.");
-            }
-
-            if (stage.prefabContentsRoot == null)
-            {
-                throw new InvalidOperationException("Cannot save prefab stage without a prefab root.");
-            }
-
-            if (string.IsNullOrEmpty(stage.assetPath))
-            {
-                throw new InvalidOperationException("Prefab stage has invalid asset path.");
-            }
-
-            // When force=true, mark the prefab root dirty to ensure changes are saved
-            // This is useful for automated workflows where isDirty may not be set correctly
-            if (force)
-            {
-                EditorUtility.SetDirty(stage.prefabContentsRoot);
-                EditorSceneManager.MarkSceneDirty(stage.scene);
-            }
-
-            // Mark all children as dirty to ensure their changes are captured
-            foreach (Transform child in stage.prefabContentsRoot.GetComponentsInChildren<Transform>(true))
-            {
-                if (child != stage.prefabContentsRoot.transform)
-                {
-                    EditorUtility.SetDirty(child.gameObject);
-                }
-            }
-
-            // Use PrefabUtility.SaveAsPrefabAsset which saves without dialogs
-            // This is more reliable for automated workflows than EditorSceneManager.SaveScene
-            bool success;
-            PrefabUtility.SaveAsPrefabAsset(stage.prefabContentsRoot, stage.assetPath, out success);
-
-            if (!success)
-            {
-                throw new InvalidOperationException($"Failed to save prefab asset for '{stage.assetPath}'.");
-            }
-
-            // Ensure changes are persisted to disk
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            McpLog.Info($"[ManagePrefabs] Successfully saved prefab '{stage.assetPath}'.");
-        }
-
-        /// <summary>
-        /// Validates prefab stage before saving.
-        /// </summary>
-        private static bool ValidatePrefabStageForSave(PrefabStage stage)
-        {
-            if (stage == null)
-            {
-                McpLog.Warn("[ManagePrefabs] No prefab stage is open.");
-                return false;
-            }
-
-            if (stage.prefabContentsRoot == null)
-            {
-                McpLog.Error($"[ManagePrefabs] Prefab stage '{stage.assetPath}' has no root object.");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(stage.assetPath))
-            {
-                McpLog.Error("[ManagePrefabs] Prefab stage has invalid asset path.");
-                return false;
-            }
-
-            return true;
-        }
-
-        #endregion
 
         #region Create Prefab from GameObject
 
@@ -316,7 +142,10 @@ namespace MCPForUnity.Editor.Tools.Prefabs
                 }
             }
 
-            // 7. Create the prefab
+            // 7. Persist any runtime-only materials so they survive prefab serialization
+            var persistResult = PersistRuntimeMaterials(sourceObject, finalPath);
+
+            // 8. Create the prefab
             try
             {
                 GameObject result = CreatePrefabAsset(sourceObject, finalPath, replaceExisting);
@@ -326,7 +155,7 @@ namespace MCPForUnity.Editor.Tools.Prefabs
                     return new ErrorResponse($"Failed to create prefab asset at '{finalPath}'.");
                 }
 
-                // 8. Select the newly created instance
+                // 9. Select the newly created instance
                 Selection.activeGameObject = result;
 
                 return new SuccessResponse(
@@ -334,12 +163,13 @@ namespace MCPForUnity.Editor.Tools.Prefabs
                     new
                     {
                         prefabPath = finalPath,
-                        instanceId = result.GetInstanceID(),
+                        instanceId = result.GetInstanceIDCompat(),
                         instanceName = result.name,
                         wasUnlinked = unlinkIfInstance && objectValidation.shouldUnlink,
                         wasReplaced = replaceExisting && fileExistedAtPath,
                         componentCount = result.GetComponents<Component>().Length,
-                        childCount = result.transform.childCount
+                        childCount = result.transform.childCount,
+                        materialsPersisted = persistResult.count
                     }
                 );
             }
@@ -452,6 +282,148 @@ namespace MCPForUnity.Editor.Tools.Prefabs
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Scans all Renderers in the hierarchy and persists any runtime-only materials
+        /// (MaterialPropertyBlock overrides or in-memory instances from renderer.material)
+        /// as .mat assets so they survive prefab serialization.
+        /// </summary>
+        private static (int count, List<string> paths) PersistRuntimeMaterials(GameObject root, string prefabPath)
+        {
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            var persistedPaths = new List<string>();
+            string prefabDir = Path.GetDirectoryName(prefabPath).Replace("\\", "/");
+            string materialsFolder = $"{prefabDir}/Materials";
+
+            foreach (var renderer in renderers)
+            {
+                Material[] sharedMats = renderer.sharedMaterials;
+                bool changed = false;
+
+                for (int slot = 0; slot < sharedMats.Length; slot++)
+                {
+                    Material mat = sharedMats[slot];
+
+                    // Case 1: Material is null but a property block has color data —
+                    // this happens after instance mode severs the asset link.
+                    // Case 2: Material exists but is not a persistent asset (runtime instance).
+                    bool isRuntimeInstance = mat != null && !EditorUtility.IsPersistent(mat);
+                    bool isNullWithPropertyBlock = mat == null && HasPropertyBlockColors(renderer, slot);
+                    bool isNullMaterial = mat == null && !isNullWithPropertyBlock;
+
+                    if (!isRuntimeInstance && !isNullWithPropertyBlock)
+                        continue;
+
+                    // Derive a unique asset path from the GameObject name and slot
+                    string goName = renderer.gameObject.name.Replace(" ", "_");
+                    string suffix = slot > 0 ? $"_slot{slot}" : "";
+                    string matPath = $"{materialsFolder}/{goName}{suffix}_mat.mat";
+                    matPath = AssetPathUtility.SanitizeAssetPath(matPath);
+                    if (matPath == null)
+                    {
+                        McpLog.Warn($"[ManagePrefabs] Could not build safe material path for '{renderer.gameObject.name}', skipping.");
+                        continue;
+                    }
+
+                    // Ensure the Materials directory exists (recursive)
+                    EnsureAssetFolderExists(materialsFolder);
+
+                    Material persisted = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+                    if (persisted == null)
+                    {
+                        // Create a new material with the correct shader for the active pipeline
+                        Shader shader = isRuntimeInstance && mat.shader != null
+                            ? mat.shader
+                            : RenderPipelineUtility.ResolveShader("Standard");
+                        persisted = new Material(shader);
+                        AssetDatabase.CreateAsset(persisted, matPath);
+                    }
+
+                    // Copy properties from the runtime instance if available
+                    if (isRuntimeInstance)
+                    {
+                        persisted.CopyPropertiesFromMaterial(mat);
+                        EditorUtility.SetDirty(persisted);
+                    }
+                    else if (isNullWithPropertyBlock)
+                    {
+                        // Extract color from the property block and apply to the new material
+                        ApplyPropertyBlockToMaterial(renderer, slot, persisted);
+                        EditorUtility.SetDirty(persisted);
+                    }
+
+                    sharedMats[slot] = persisted;
+                    changed = true;
+                    persistedPaths.Add(matPath);
+                    McpLog.Info($"[ManagePrefabs] Persisted runtime material for '{renderer.gameObject.name}' slot {slot} → {matPath}");
+                }
+
+                if (changed)
+                {
+                    Undo.RecordObject(renderer, "Persist runtime materials for prefab");
+                    renderer.sharedMaterials = sharedMats;
+                    // Clear any property blocks now that the material is persisted
+                    for (int slot = 0; slot < sharedMats.Length; slot++)
+                    {
+                        renderer.SetPropertyBlock(null, slot);
+                    }
+                    EditorUtility.SetDirty(renderer);
+                }
+            }
+
+            if (persistedPaths.Count > 0)
+            {
+                AssetDatabase.SaveAssets();
+                McpLog.Info($"[ManagePrefabs] Persisted {persistedPaths.Count} runtime material(s) before prefab save.");
+            }
+
+            return (persistedPaths.Count, persistedPaths);
+        }
+
+        /// <summary>
+        /// Recursively creates the folder hierarchy for the given asset path if it doesn't exist.
+        /// </summary>
+        private static void EnsureAssetFolderExists(string assetFolderPath)
+        {
+            if (AssetDatabase.IsValidFolder(assetFolderPath))
+                return;
+
+            string[] parts = assetFolderPath.Replace('\\', '/').Split('/');
+            string current = parts[0]; // "Assets"
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string next = current + "/" + parts[i];
+                if (!AssetDatabase.IsValidFolder(next))
+                    AssetDatabase.CreateFolder(current, parts[i]);
+                current = next;
+            }
+        }
+
+        private static bool HasPropertyBlockColors(Renderer renderer, int slot)
+        {
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block, slot);
+            return !block.isEmpty;
+        }
+
+        /// <summary>
+        /// Extracts color properties from a MaterialPropertyBlock and applies them to a material.
+        /// </summary>
+        private static void ApplyPropertyBlockToMaterial(Renderer renderer, int slot, Material mat)
+        {
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block, slot);
+
+            // Try the standard color property names
+            string[] colorProps = { "_BaseColor", "_Color" };
+            foreach (string prop in colorProps)
+            {
+                if (mat.HasProperty(prop) && block.HasColor(prop))
+                {
+                    mat.SetColor(prop, block.GetColor(prop));
+                }
+            }
         }
 
         #endregion
@@ -618,6 +590,622 @@ namespace MCPForUnity.Editor.Tools.Prefabs
 
         #endregion
 
+        #region Headless Prefab Editing
+
+        /// <summary>
+        /// Modifies a prefab's contents directly without opening the prefab stage.
+        /// This is ideal for automated/agentic workflows as it avoids UI, dirty flags, and dialogs.
+        /// </summary>
+        private static object ModifyContents(JObject @params)
+        {
+            string prefabPath = @params["prefabPath"]?.ToString() ?? @params["path"]?.ToString();
+            if (string.IsNullOrEmpty(prefabPath))
+            {
+                return new ErrorResponse("'prefabPath' parameter is required for modify_contents.");
+            }
+
+            string sanitizedPath = AssetPathUtility.SanitizeAssetPath(prefabPath);
+            if (string.IsNullOrEmpty(sanitizedPath))
+            {
+                return new ErrorResponse($"Invalid prefab path '{prefabPath}'. Path traversal sequences are not allowed.");
+            }
+
+            // Load prefab contents in isolated context (no UI)
+            GameObject prefabContents = PrefabUtility.LoadPrefabContents(sanitizedPath);
+            if (prefabContents == null)
+            {
+                return new ErrorResponse($"Failed to load prefab contents from '{sanitizedPath}'.");
+            }
+
+            try
+            {
+                // Find target object within the prefab (defaults to root)
+                string targetName = @params["target"]?.ToString();
+                GameObject targetGo = FindInPrefabContents(prefabContents, targetName);
+
+                if (targetGo == null)
+                {
+                    string searchedFor = string.IsNullOrEmpty(targetName) ? "root" : $"'{targetName}'";
+                    return new ErrorResponse($"Target {searchedFor} not found in prefab '{sanitizedPath}'.");
+                }
+
+                // Apply modifications
+                var modifyResult = ApplyModificationsToPrefabObject(targetGo, @params, prefabContents, sanitizedPath);
+                if (modifyResult.error != null)
+                {
+                    return modifyResult.error;
+                }
+
+                // Skip saving when no modifications were made to avoid unnecessary asset writes
+                if (!modifyResult.modified)
+                {
+                    return new SuccessResponse(
+                        $"Prefab '{sanitizedPath}' is already up to date; no changes were applied.",
+                        new
+                        {
+                            prefabPath = sanitizedPath,
+                            targetName = targetGo.name,
+                            modified = false
+                        }
+                    );
+                }
+
+                // Save the prefab
+                bool success;
+                PrefabUtility.SaveAsPrefabAsset(prefabContents, sanitizedPath, out success);
+
+                if (!success)
+                {
+                    return new ErrorResponse($"Failed to save prefab asset at '{sanitizedPath}'.");
+                }
+
+                AssetDatabase.Refresh();
+
+                McpLog.Info($"[ManagePrefabs] Successfully modified and saved prefab '{sanitizedPath}' (headless).");
+
+                return new SuccessResponse(
+                    $"Prefab '{sanitizedPath}' modified and saved successfully.",
+                    new
+                    {
+                        prefabPath = sanitizedPath,
+                        targetName = targetGo.name,
+                        modified = modifyResult.modified,
+                        transform = new
+                        {
+                            position = new { x = targetGo.transform.localPosition.x, y = targetGo.transform.localPosition.y, z = targetGo.transform.localPosition.z },
+                            rotation = new { x = targetGo.transform.localEulerAngles.x, y = targetGo.transform.localEulerAngles.y, z = targetGo.transform.localEulerAngles.z },
+                            scale = new { x = targetGo.transform.localScale.x, y = targetGo.transform.localScale.y, z = targetGo.transform.localScale.z }
+                        },
+                        componentTypes = PrefabUtilityHelper.GetComponentTypeNames(targetGo)
+                    }
+                );
+            }
+            finally
+            {
+                // Always unload prefab contents to free memory
+                PrefabUtility.UnloadPrefabContents(prefabContents);
+            }
+        }
+
+        /// <summary>
+        /// Finds a GameObject within loaded prefab contents by name or path.
+        /// </summary>
+        private static GameObject FindInPrefabContents(GameObject prefabContents, string target)
+        {
+            if (string.IsNullOrEmpty(target))
+            {
+                // Return root if no target specified
+                return prefabContents;
+            }
+
+            // Try to find by path first (e.g., "Parent/Child/Target")
+            if (target.Contains("/"))
+            {
+                Transform found = prefabContents.transform.Find(target);
+                if (found != null)
+                {
+                    return found.gameObject;
+                }
+
+                // If path starts with root name, try without it
+                if (target.StartsWith(prefabContents.name + "/"))
+                {
+                    string relativePath = target.Substring(prefabContents.name.Length + 1);
+                    found = prefabContents.transform.Find(relativePath);
+                    if (found != null)
+                    {
+                        return found.gameObject;
+                    }
+                }
+            }
+
+            // Check if target matches root name
+            if (prefabContents.name == target)
+            {
+                return prefabContents;
+            }
+
+            // Search by name in hierarchy
+            foreach (Transform t in prefabContents.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.gameObject.name == target)
+                {
+                    return t.gameObject;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Applies modifications to a GameObject within loaded prefab contents.
+        /// Returns (modified: bool, error: ErrorResponse or null).
+        /// </summary>
+        private static (bool modified, ErrorResponse error) ApplyModificationsToPrefabObject(GameObject targetGo, JObject @params, GameObject prefabRoot, string editingPrefabPath)
+        {
+            bool modified = false;
+
+            // Name change
+            string newName = @params["name"]?.ToString();
+            if (!string.IsNullOrEmpty(newName) && targetGo.name != newName)
+            {
+                // If renaming the root, this will affect the prefab asset name on save
+                targetGo.name = newName;
+                modified = true;
+            }
+
+            // Active state
+            bool? setActive = @params["setActive"]?.ToObject<bool?>();
+            if (setActive.HasValue && targetGo.activeSelf != setActive.Value)
+            {
+                targetGo.SetActive(setActive.Value);
+                modified = true;
+            }
+
+            // Tag
+            string tag = @params["tag"]?.ToString();
+            if (tag != null && targetGo.tag != tag)
+            {
+                string tagToSet = string.IsNullOrEmpty(tag) ? "Untagged" : tag;
+                try
+                {
+                    targetGo.tag = tagToSet;
+                    modified = true;
+                }
+                catch (Exception ex)
+                {
+                    return (false, new ErrorResponse($"Failed to set tag to '{tagToSet}': {ex.Message}"));
+                }
+            }
+
+            // Layer
+            string layerName = @params["layer"]?.ToString();
+            if (!string.IsNullOrEmpty(layerName))
+            {
+                int layerId = LayerMask.NameToLayer(layerName);
+                if (layerId == -1)
+                {
+                    return (false, new ErrorResponse($"Invalid layer specified: '{layerName}'. Use a valid layer name."));
+                }
+                if (targetGo.layer != layerId)
+                {
+                    targetGo.layer = layerId;
+                    modified = true;
+                }
+            }
+
+            // Transform: position, rotation, scale
+            Vector3? position = VectorParsing.ParseVector3(@params["position"]);
+            Vector3? rotation = VectorParsing.ParseVector3(@params["rotation"]);
+            Vector3? scale = VectorParsing.ParseVector3(@params["scale"]);
+
+            if (position.HasValue && targetGo.transform.localPosition != position.Value)
+            {
+                targetGo.transform.localPosition = position.Value;
+                modified = true;
+            }
+            if (rotation.HasValue && targetGo.transform.localEulerAngles != rotation.Value)
+            {
+                targetGo.transform.localEulerAngles = rotation.Value;
+                modified = true;
+            }
+            if (scale.HasValue && targetGo.transform.localScale != scale.Value)
+            {
+                targetGo.transform.localScale = scale.Value;
+                modified = true;
+            }
+
+            // Parent change (within prefab hierarchy)
+            JToken parentToken = @params["parent"];
+            if (parentToken != null)
+            {
+                string parentTarget = parentToken.ToString();
+                Transform newParent = null;
+
+                if (!string.IsNullOrEmpty(parentTarget))
+                {
+                    GameObject parentGo = FindInPrefabContents(prefabRoot, parentTarget);
+                    if (parentGo == null)
+                    {
+                        return (false, new ErrorResponse($"Parent '{parentTarget}' not found in prefab."));
+                    }
+                    if (parentGo.transform.IsChildOf(targetGo.transform))
+                    {
+                        return (false, new ErrorResponse($"Cannot parent '{targetGo.name}' to '{parentGo.name}' as it would create a hierarchy loop."));
+                    }
+                    newParent = parentGo.transform;
+                }
+
+                if (targetGo.transform.parent != newParent)
+                {
+                    targetGo.transform.SetParent(newParent, true);
+                    modified = true;
+                }
+            }
+
+            // Components to add
+            if (@params["componentsToAdd"] is JArray componentsToAdd)
+            {
+                foreach (var compToken in componentsToAdd)
+                {
+                    string typeName = compToken.Type == JTokenType.String
+                        ? compToken.ToString()
+                        : (compToken as JObject)?["typeName"]?.ToString();
+
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        if (!ComponentResolver.TryResolve(typeName, out Type componentType, out string error))
+                        {
+                            return (false, new ErrorResponse($"Component type '{typeName}' not found: {error}"));
+                        }
+                        targetGo.AddComponent(componentType);
+                        modified = true;
+                    }
+                }
+            }
+
+            // Components to remove
+            if (@params["componentsToRemove"] is JArray componentsToRemove)
+            {
+                foreach (var compToken in componentsToRemove)
+                {
+                    string typeName = compToken.ToString();
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        if (!ComponentResolver.TryResolve(typeName, out Type componentType, out string error))
+                        {
+                            return (false, new ErrorResponse($"Component type '{typeName}' not found: {error}"));
+                        }
+                        Component comp = targetGo.GetComponent(componentType);
+                        if (comp != null)
+                        {
+                            UnityEngine.Object.DestroyImmediate(comp);
+                            modified = true;
+                        }
+                    }
+                }
+            }
+
+            // Create child GameObjects (supports single object or array)
+            JToken createChildToken = @params["createChild"] ?? @params["create_child"];
+            if (createChildToken != null)
+            {
+                // Handle array of children
+                if (createChildToken is JArray childArray)
+                {
+                    foreach (var childToken in childArray)
+                    {
+                        var childResult = CreateSingleChildInPrefab(childToken, targetGo, prefabRoot, editingPrefabPath);
+                        if (childResult.error != null)
+                        {
+                            return (false, childResult.error);
+                        }
+                        if (childResult.created)
+                        {
+                            modified = true;
+                        }
+                    }
+                }
+                else
+                {
+                    // Handle single child object
+                    var childResult = CreateSingleChildInPrefab(createChildToken, targetGo, prefabRoot, editingPrefabPath);
+                    if (childResult.error != null)
+                    {
+                        return (false, childResult.error);
+                    }
+                    if (childResult.created)
+                    {
+                        modified = true;
+                    }
+                }
+            }
+
+            // Delete child GameObjects (supports single string or array of paths/names)
+            JToken deleteChildToken = @params["deleteChild"] ?? @params["delete_child"];
+            if (deleteChildToken != null)
+            {
+                var deleteResult = RemoveChildren(deleteChildToken, targetGo, prefabRoot);
+                if (deleteResult.error != null)
+                {
+                    return (false, deleteResult.error);
+                }
+                if (deleteResult.removedCount > 0)
+                {
+                    modified = true;
+                }
+            }
+
+            // Set properties on existing components
+            JObject componentProperties = @params["componentProperties"] as JObject ?? @params["component_properties"] as JObject;
+            if (componentProperties != null && componentProperties.Count > 0)
+            {
+                var errors = new List<string>();
+
+                foreach (var entry in componentProperties.Properties())
+                {
+                    string typeName = entry.Name;
+                    if (!ComponentResolver.TryResolve(typeName, out Type componentType, out string resolveError))
+                    {
+                        errors.Add($"{typeName}: type not found — {resolveError}");
+                        continue;
+                    }
+
+                    Component component = targetGo.GetComponent(componentType);
+                    if (component == null)
+                    {
+                        errors.Add($"{typeName}: not found on '{targetGo.name}'");
+                        continue;
+                    }
+
+                    if (entry.Value is not JObject props || !props.HasValues)
+                    {
+                        continue;
+                    }
+
+                    foreach (var prop in props.Properties())
+                    {
+                        if (!ComponentOps.SetProperty(component, prop.Name, prop.Value, out string setError))
+                        {
+                            errors.Add($"{typeName}.{prop.Name}: {setError}");
+                        }
+                        else
+                        {
+                            modified = true;
+                        }
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    return (false, new ErrorResponse($"Failed to set component properties (no changes saved): {string.Join("; ", errors)}"));
+                }
+            }
+
+            return (modified, null);
+        }
+
+        /// <summary>
+        /// Creates a single child GameObject within the prefab contents.
+        /// </summary>
+        private static (bool created, ErrorResponse error) CreateSingleChildInPrefab(JToken createChildToken, GameObject defaultParent, GameObject prefabRoot, string editingPrefabPath)
+        {
+            JObject childParams;
+            if (createChildToken is JObject obj)
+            {
+                childParams = obj;
+            }
+            else
+            {
+                return (false, new ErrorResponse("'create_child' must be an object with child properties."));
+            }
+
+            // Required: name
+            string childName = childParams["name"]?.ToString();
+            if (string.IsNullOrEmpty(childName))
+            {
+                return (false, new ErrorResponse("'create_child.name' is required."));
+            }
+
+            // Optional: parent (defaults to the target object)
+            string parentName = childParams["parent"]?.ToString();
+            Transform parentTransform = defaultParent.transform;
+            if (!string.IsNullOrEmpty(parentName))
+            {
+                GameObject parentGo = FindInPrefabContents(prefabRoot, parentName);
+                if (parentGo == null)
+                {
+                    return (false, new ErrorResponse($"Parent '{parentName}' not found in prefab for create_child."));
+                }
+                parentTransform = parentGo.transform;
+            }
+
+            // Create the GameObject
+            GameObject newChild;
+            string sourcePrefabPath = childParams["sourcePrefabPath"]?.ToString() ?? childParams["source_prefab_path"]?.ToString();
+            string primitiveType = childParams["primitiveType"]?.ToString() ?? childParams["primitive_type"]?.ToString();
+
+            if (!string.IsNullOrEmpty(sourcePrefabPath) && !string.IsNullOrEmpty(primitiveType))
+            {
+                return (false, new ErrorResponse("'source_prefab_path' and 'primitive_type' are mutually exclusive in create_child."));
+            }
+
+            if (!string.IsNullOrEmpty(sourcePrefabPath))
+            {
+                string sanitizedSourcePath = AssetPathUtility.SanitizeAssetPath(sourcePrefabPath);
+                if (string.IsNullOrEmpty(sanitizedSourcePath))
+                {
+                    return (false, new ErrorResponse($"Invalid source_prefab_path '{sourcePrefabPath}'. Path traversal sequences are not allowed."));
+                }
+
+                if (!string.IsNullOrEmpty(editingPrefabPath) &&
+                    sanitizedSourcePath.Equals(editingPrefabPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (false, new ErrorResponse($"Cannot nest prefab '{sanitizedSourcePath}' inside itself. This would create a circular reference."));
+                }
+
+                GameObject sourcePrefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(sanitizedSourcePath);
+                if (sourcePrefabAsset == null)
+                {
+                    return (false, new ErrorResponse($"Source prefab not found at path: '{sanitizedSourcePath}'."));
+                }
+
+                newChild = PrefabUtility.InstantiatePrefab(sourcePrefabAsset, parentTransform) as GameObject;
+                if (newChild == null)
+                {
+                    return (false, new ErrorResponse($"Failed to instantiate prefab from '{sanitizedSourcePath}' as nested child."));
+                }
+                newChild.name = childName;
+            }
+            else if (!string.IsNullOrEmpty(primitiveType))
+            {
+                try
+                {
+                    PrimitiveType type = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), primitiveType, true);
+                    newChild = GameObject.CreatePrimitive(type);
+                    newChild.name = childName;
+                }
+                catch (ArgumentException)
+                {
+                    return (false, new ErrorResponse($"Invalid primitive type: '{primitiveType}'. Valid types: {string.Join(", ", Enum.GetNames(typeof(PrimitiveType)))}"));
+                }
+            }
+            else
+            {
+                newChild = new GameObject(childName);
+            }
+
+            // Ensure local-space transform (worldPositionStays=false) for all creation modes
+            newChild.transform.SetParent(parentTransform, false);
+
+            // Apply transform properties
+            Vector3? position = VectorParsing.ParseVector3(childParams["position"]);
+            Vector3? rotation = VectorParsing.ParseVector3(childParams["rotation"]);
+            Vector3? scale = VectorParsing.ParseVector3(childParams["scale"]);
+
+            if (position.HasValue)
+            {
+                newChild.transform.localPosition = position.Value;
+            }
+            if (rotation.HasValue)
+            {
+                newChild.transform.localEulerAngles = rotation.Value;
+            }
+            if (scale.HasValue)
+            {
+                newChild.transform.localScale = scale.Value;
+            }
+
+            // Add components
+            JArray componentsToAdd = childParams["componentsToAdd"] as JArray ?? childParams["components_to_add"] as JArray;
+            if (componentsToAdd != null)
+            {
+                for (int i = 0; i < componentsToAdd.Count; i++)
+                {
+                    var compToken = componentsToAdd[i];
+                    string typeName = compToken.Type == JTokenType.String
+                        ? compToken.ToString()
+                        : (compToken as JObject)?["typeName"]?.ToString();
+
+                    if (string.IsNullOrEmpty(typeName))
+                    {
+                        // Clean up partially created child
+                        UnityEngine.Object.DestroyImmediate(newChild);
+                        return (false, new ErrorResponse($"create_child.components_to_add[{i}] must be a string or object with 'typeName' field, got {compToken.Type}"));
+                    }
+
+                    if (!ComponentResolver.TryResolve(typeName, out Type componentType, out string error))
+                    {
+                        // Clean up partially created child
+                        UnityEngine.Object.DestroyImmediate(newChild);
+                        return (false, new ErrorResponse($"Component type '{typeName}' not found for create_child: {error}"));
+                    }
+                    newChild.AddComponent(componentType);
+                }
+            }
+
+            // Set tag if specified
+            string tag = childParams["tag"]?.ToString();
+            if (!string.IsNullOrEmpty(tag))
+            {
+                try
+                {
+                    newChild.tag = tag;
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Object.DestroyImmediate(newChild);
+                    return (false, new ErrorResponse($"Failed to set tag '{tag}' on child '{childName}': {ex.Message}"));
+                }
+            }
+
+            // Set layer if specified
+            string layerName = childParams["layer"]?.ToString();
+            if (!string.IsNullOrEmpty(layerName))
+            {
+                int layerId = LayerMask.NameToLayer(layerName);
+                if (layerId == -1)
+                {
+                    UnityEngine.Object.DestroyImmediate(newChild);
+                    return (false, new ErrorResponse($"Invalid layer '{layerName}' for child '{childName}'. Use a valid layer name."));
+                }
+                newChild.layer = layerId;
+            }
+
+            // Set active state
+            bool? setActive = childParams["setActive"]?.ToObject<bool?>() ?? childParams["set_active"]?.ToObject<bool?>();
+            if (setActive.HasValue)
+            {
+                newChild.SetActive(setActive.Value);
+            }
+
+            McpLog.Info($"[ManagePrefabs] Created child '{childName}' under '{parentTransform.name}' in prefab.");
+            return (true, null);
+        }
+
+        /// <summary>
+        /// Removes child GameObjects from a prefab.
+        /// </summary>
+        private static (int removedCount, ErrorResponse error) RemoveChildren(JToken deleteChildToken, GameObject targetGo, GameObject prefabRoot)
+        {
+            int removedCount = 0;
+
+            // Normalize to array
+            JArray childrenToDelete;
+            if (deleteChildToken is JArray arr)
+            {
+                childrenToDelete = arr;
+            }
+            else
+            {
+                childrenToDelete = new JArray { deleteChildToken };
+            }
+
+            foreach (var childToken in childrenToDelete)
+            {
+                string childPath = childToken.Type == JTokenType.String ? childToken.ToString() : childToken["name"]?.ToString();
+                if (string.IsNullOrEmpty(childPath))
+                {
+                    return (removedCount, new ErrorResponse("'deleteChild'/'delete_child' entries must be a string or object with 'name' field."));
+                }
+
+                // Find the child to remove
+                Transform childToRemove = targetGo.transform.Find(childPath);
+                if (childToRemove == null)
+                {
+                    return (removedCount, new ErrorResponse($"Child '{childPath}' not found under '{targetGo.name}'."));
+                }
+
+                UnityEngine.Object.DestroyImmediate(childToRemove.gameObject);
+                removedCount++;
+                McpLog.Info($"[ManagePrefabs] Removed child '{childPath}' under '{targetGo.name}' in prefab.");
+            }
+
+            return (removedCount, null);
+        }
+
+        #endregion
+
         #region Hierarchy Builder
 
         /// <summary>
@@ -647,7 +1235,7 @@ namespace MCPForUnity.Editor.Tools.Prefabs
 
             string name = transform.gameObject.name;
             string path = string.IsNullOrEmpty(parentPath) ? name : $"{parentPath}/{name}";
-            int instanceId = transform.gameObject.GetInstanceID();
+            int instanceId = transform.gameObject.GetInstanceIDCompat();
             bool activeSelf = transform.gameObject.activeSelf;
             int childCount = transform.childCount;
             var componentTypes = PrefabUtilityHelper.GetComponentTypeNames(transform.gameObject);
@@ -690,24 +1278,121 @@ namespace MCPForUnity.Editor.Tools.Prefabs
 
         #endregion
 
-        /// <summary>
-        /// Serializes the prefab stage information for response.
-        /// </summary>
-        private static object SerializeStage(PrefabStage stage)
+        #region Prefab Stage
+
+        private static object OpenPrefabStage(string requestedPath)
         {
-            if (stage == null)
+            if (string.IsNullOrWhiteSpace(requestedPath))
             {
-                return new { isOpen = false };
+                return new ErrorResponse("Either 'prefabPath' or 'path' parameter is required for open_prefab_stage.");
             }
 
-            return new
+            string sanitizedPath = AssetPathUtility.SanitizeAssetPath(requestedPath);
+            if (sanitizedPath == null)
             {
-                isOpen = true,
-                assetPath = stage.assetPath,
-                prefabRootName = stage.prefabContentsRoot != null ? stage.prefabContentsRoot.name : null,
-                mode = stage.mode.ToString(),
-                isDirty = stage.scene.isDirty
-            };
+                return new ErrorResponse($"Invalid prefab path (path traversal detected): '{requestedPath}'.");
+            }
+
+            if (!sanitizedPath.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+            {
+                return new ErrorResponse($"Prefab path must be within the Assets folder. Got: '{sanitizedPath}'.");
+            }
+
+            if (!sanitizedPath.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase))
+            {
+                return new ErrorResponse($"Prefab path must end with '.prefab'. Got: '{sanitizedPath}'.");
+            }
+
+            try
+            {
+                GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(sanitizedPath);
+                if (prefabAsset == null)
+                {
+                    return new ErrorResponse($"Prefab asset not found at '{sanitizedPath}'.");
+                }
+
+                var prefabStage = PrefabStageUtility.OpenPrefab(sanitizedPath);
+                bool enteredStage = prefabStage != null
+                    && string.Equals(prefabStage.assetPath, sanitizedPath, StringComparison.OrdinalIgnoreCase)
+                    && prefabStage.prefabContentsRoot != null;
+
+                if (!enteredStage)
+                {
+                    return new ErrorResponse($"Failed to open prefab stage for '{sanitizedPath}'. PrefabStageUtility.OpenPrefab did not enter the requested prefab stage.");
+                }
+
+                return new SuccessResponse(
+                    $"Opened prefab stage for '{sanitizedPath}'.",
+                    new
+                    {
+                        prefabPath = sanitizedPath,
+                        openedPrefabPath = prefabStage.assetPath,
+                        rootName = prefabStage.prefabContentsRoot.name,
+                        enteredPrefabStage = enteredStage
+                    }
+                );
+            }
+            catch (Exception e)
+            {
+                return new ErrorResponse($"Error opening prefab stage: {e.Message}");
+            }
         }
+
+        private static object SavePrefabStage()
+        {
+            try
+            {
+                var prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+                if (prefabStage == null)
+                {
+                    return new ErrorResponse("Not currently in prefab editing mode. Open a prefab stage first with open_prefab_stage.");
+                }
+
+                string prefabPath = prefabStage.assetPath;
+                EditorSceneManager.MarkSceneDirty(prefabStage.scene);
+                bool saved = EditorSceneManager.SaveScene(prefabStage.scene);
+                if (!saved)
+                {
+                    return new ErrorResponse($"Failed to save prefab stage for '{prefabPath}'. The file may be read-only or the disk may be full.");
+                }
+
+                return new SuccessResponse($"Saved prefab stage changes for '{prefabPath}'.", new { prefabPath, saved });
+            }
+            catch (Exception e)
+            {
+                return new ErrorResponse($"Error saving prefab stage: {e.Message}");
+            }
+        }
+
+        private static object ClosePrefabStage(bool saveBeforeClose = false)
+        {
+            try
+            {
+                var prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+                if (prefabStage == null)
+                {
+                    return new SuccessResponse("Not currently in prefab editing mode.");
+                }
+
+                if (saveBeforeClose)
+                {
+                    var saveResult = SavePrefabStage();
+                    if (saveResult is ErrorResponse)
+                    {
+                        return saveResult;
+                    }
+                }
+
+                string prefabPath = prefabStage.assetPath;
+                StageUtility.GoToMainStage();
+                return new SuccessResponse($"Exited prefab stage for '{prefabPath}'.", new { prefabPath });
+            }
+            catch (Exception e)
+            {
+                return new ErrorResponse($"Error closing prefab stage: {e.Message}");
+            }
+        }
+
+        #endregion
     }
 }

@@ -189,10 +189,10 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: 58a2df877f43b485fb4ee3d13a93a1de, type: 2}
   _uwc: {fileID: 0}
   _pomodoroPanelView: {fileID: 183578049}
-  _playerCardTemplate: {fileID: 0}
-  _pomodoroSettingsTemplate: {fileID: 0}
-  _onlineSettingsTemplate: {fileID: 0}
-  _petSettingsTemplate: {fileID: 0}
+  _playerCardTemplate: {fileID: 9197481963319205126, guid: 29186224ae6024713aab7af6b8291689, type: 3}
+  _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
+  _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
+  _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
 --- !u!82 &183578048
 AudioSource:
   m_ObjectHideFlags: 0

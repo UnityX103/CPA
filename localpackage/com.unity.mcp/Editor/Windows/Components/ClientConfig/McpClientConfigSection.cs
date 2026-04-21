@@ -10,6 +10,7 @@ using MCPForUnity.Editor.Constants;
 using MCPForUnity.Editor.Helpers;
 using MCPForUnity.Editor.Models;
 using MCPForUnity.Editor.Services;
+using MCPForUnity.Editor.Setup;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -28,9 +29,14 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
         private VisualElement clientStatusIndicator;
         private Label clientStatusLabel;
         private Button configureButton;
+        private Button installSkillsButton;
         private VisualElement claudeCliPathRow;
         private TextField claudeCliPath;
         private Button browseClaudeButton;
+        private VisualElement clientProjectDirRow;
+        private TextField clientProjectDirField;
+        private Button browseProjectDirButton;
+        private Button clearProjectDirButton;
         private Foldout manualConfigFoldout;
         private TextField configPathField;
         private Button copyPathButton;
@@ -45,6 +51,7 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
         private readonly HashSet<IMcpClientConfigurator> statusRefreshInFlight = new();
         private static readonly TimeSpan StatusRefreshInterval = TimeSpan.FromSeconds(45);
         private int selectedClientIndex = 0;
+        private bool isSkillSyncInProgress;
 
         // Events
         /// <summary>
@@ -52,6 +59,12 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
         /// The parameter contains the client name and its configured transport.
         /// </summary>
         public event Action<string, ConfiguredTransport> OnClientTransportDetected;
+
+        /// <summary>
+        /// Fired when a config mismatch is detected (e.g., version mismatch).
+        /// The parameter contains the client name and the mismatch message (null if no mismatch).
+        /// </summary>
+        public event Action<string, string> OnClientConfigMismatch;
 
         public VisualElement Root { get; private set; }
 
@@ -71,9 +84,14 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
             clientStatusIndicator = Root.Q<VisualElement>("client-status-indicator");
             clientStatusLabel = Root.Q<Label>("client-status");
             configureButton = Root.Q<Button>("configure-button");
+            installSkillsButton = Root.Q<Button>("install-skills-button");
             claudeCliPathRow = Root.Q<VisualElement>("claude-cli-path-row");
             claudeCliPath = Root.Q<TextField>("claude-cli-path");
             browseClaudeButton = Root.Q<Button>("browse-claude-button");
+            clientProjectDirRow = Root.Q<VisualElement>("client-project-dir-row");
+            clientProjectDirField = Root.Q<TextField>("client-project-dir");
+            browseProjectDirButton = Root.Q<Button>("browse-project-dir-button");
+            clearProjectDirButton = Root.Q<Button>("clear-project-dir-button");
             manualConfigFoldout = Root.Q<Foldout>("manual-config-foldout");
             configPathField = Root.Q<TextField>("config-path");
             copyPathButton = Root.Q<Button>("copy-path-button");
@@ -95,30 +113,60 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
             clientDropdown.choices = clientNames;
             if (clientNames.Count > 0)
             {
-                clientDropdown.index = 0;
+                // Restore last selected client from EditorPrefs
+                string lastClientId = EditorPrefs.GetString(EditorPrefKeys.LastSelectedClientId, string.Empty);
+                int restoredIndex = FindConfiguratorIndex(lastClientId);
+                if (restoredIndex < 0)
+                    restoredIndex = 0;
+
+                clientDropdown.index = restoredIndex;
+                selectedClientIndex = restoredIndex;
             }
 
             claudeCliPathRow.style.display = DisplayStyle.None;
+            clientProjectDirRow.style.display = DisplayStyle.None;
 
             // Initialize the configuration display for the first selected client
             UpdateClientStatus();
             UpdateManualConfiguration();
             UpdateClaudeCliPathVisibility();
+            UpdateClientProjectDirVisibility();
+            UpdateInstallSkillsVisibility();
         }
 
         private void RegisterCallbacks()
         {
             clientDropdown.RegisterValueChangedCallback(evt =>
             {
-                selectedClientIndex = clientDropdown.index;
+                int selectedIndex = GetIndexForDropdownValue(evt.newValue);
+                if (selectedIndex < 0)
+                {
+                    selectedIndex = clientDropdown.index;
+                }
+                if (selectedIndex < 0 || selectedIndex >= configurators.Count)
+                {
+                    return;
+                }
+
+                selectedClientIndex = selectedIndex;
+                // Persist the selected client so it's restored on next window open
+                if (selectedClientIndex >= 0 && selectedClientIndex < configurators.Count)
+                {
+                    EditorPrefs.SetString(EditorPrefKeys.LastSelectedClientId, configurators[selectedClientIndex].Id);
+                }
                 UpdateClientStatus();
                 UpdateManualConfiguration();
                 UpdateClaudeCliPathVisibility();
+                UpdateClientProjectDirVisibility();
+                UpdateInstallSkillsVisibility();
             });
 
             configureAllButton.clicked += OnConfigureAllClientsClicked;
             configureButton.clicked += OnConfigureClicked;
+            installSkillsButton.clicked += OnInstallSkillsClicked;
             browseClaudeButton.clicked += OnBrowseClaudeClicked;
+            browseProjectDirButton.clicked += OnBrowseProjectDirClicked;
+            clearProjectDirButton.clicked += OnClearProjectDirClicked;
             copyPathButton.clicked += OnCopyPathClicked;
             openFileButton.clicked += OnOpenFileClicked;
             copyJsonButton.clicked += OnCopyJsonClicked;
@@ -147,6 +195,7 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                 McpStatus.UnsupportedOS => "Unsupported OS",
                 McpStatus.MissingConfig => "Missing MCPForUnity Config",
                 McpStatus.Error => "Error",
+                McpStatus.VersionMismatch => "Version Mismatch",
                 _ => "Unknown",
             };
         }
@@ -200,6 +249,32 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
             else
             {
                 claudeCliPathRow.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void UpdateClientProjectDirVisibility()
+        {
+            if (selectedClientIndex < 0 || selectedClientIndex >= configurators.Count)
+                return;
+
+            var client = configurators[selectedClientIndex];
+
+            if (client is ClaudeCliMcpConfigurator)
+            {
+                clientProjectDirRow.style.display = DisplayStyle.Flex;
+                string projectDir = ClaudeCliMcpConfigurator.GetClientProjectDir();
+                if (ClaudeCliMcpConfigurator.HasClientProjectDirOverride)
+                {
+                    clientProjectDirField.value = projectDir + "  (override)";
+                }
+                else
+                {
+                    clientProjectDirField.value = projectDir;
+                }
+            }
+            else
+            {
+                clientProjectDirRow.style.display = DisplayStyle.None;
             }
         }
 
@@ -266,15 +341,17 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
 
             statusRefreshInFlight.Add(client);
             bool isCurrentlyConfigured = client.Status == McpStatus.Configured;
-            ApplyStatusToUi(client, showChecking: true, customMessage: isCurrentlyConfigured ? "Unregistering..." : "Registering...");
+            ApplyStatusToUi(client, showChecking: true, customMessage: isCurrentlyConfigured ? "Unregistering..." : "Configuring...");
 
             // Capture ALL main-thread-only values before async task
-            string projectDir = Path.GetDirectoryName(Application.dataPath);
-            bool useHttpTransport = EditorPrefs.GetBool(EditorPrefKeys.UseHttpTransport, true);
+            string projectDir = ClaudeCliMcpConfigurator.GetClientProjectDir();
+            bool useHttpTransport = EditorConfigurationCache.Instance.UseHttpTransport;
             string claudePath = MCPServiceLocator.Paths.GetClaudeCliPath();
             string httpUrl = HttpEndpointUtility.GetMcpRpcUrl();
-            var (uvxPath, gitUrl, packageName) = AssetPathUtility.GetUvxCommandParts();
-            bool shouldForceRefresh = AssetPathUtility.ShouldForceUvxRefresh();
+            var (uvxPath, _, packageName) = AssetPathUtility.GetUvxCommandParts();
+            string fromArgs = AssetPathUtility.GetBetaServerFromArgs(quoteFromPath: true);
+            string uvxDevFlags = AssetPathUtility.GetUvxDevFlags();
+            string apiKey = EditorPrefs.GetString(EditorPrefKeys.ApiKey, string.Empty);
 
             // Compute pathPrepend on main thread
             string pathPrepend = null;
@@ -296,10 +373,12 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                 {
                     if (client is ClaudeCliMcpConfigurator cliConfigurator)
                     {
+                        var serverTransport = HttpEndpointUtility.GetCurrentServerTransport();
                         cliConfigurator.ConfigureWithCapturedValues(
                             projectDir, claudePath, pathPrepend,
                             useHttpTransport, httpUrl,
-                            uvxPath, gitUrl, packageName, shouldForceRefresh);
+                            uvxPath, fromArgs, packageName, uvxDevFlags,
+                            apiKey, serverTransport);
                     }
                     return (success: true, error: (string)null);
                 }
@@ -345,6 +424,64 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
             });
         }
 
+        private void UpdateInstallSkillsVisibility()
+        {
+            if (installSkillsButton == null)
+                return;
+
+            bool visible = selectedClientIndex >= 0
+                           && selectedClientIndex < configurators.Count
+                           && configurators[selectedClientIndex].SupportsSkills;
+
+            installSkillsButton.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void OnInstallSkillsClicked()
+        {
+            if (isSkillSyncInProgress)
+                return;
+
+            if (selectedClientIndex < 0 || selectedClientIndex >= configurators.Count)
+                return;
+
+            var client = configurators[selectedClientIndex];
+            if (!client.SupportsSkills)
+                return;
+
+            string installPath = client.GetSkillInstallPath();
+            if (string.IsNullOrEmpty(installPath))
+                return;
+
+            string branch = AssetPathUtility.IsPreReleaseVersion() ? "beta" : "main";
+
+            isSkillSyncInProgress = true;
+            installSkillsButton.SetEnabled(false);
+            installSkillsButton.text = "Syncing...";
+
+            SkillSyncService.SyncAsync(installPath, branch, null, result =>
+                {
+                    isSkillSyncInProgress = false;
+                    installSkillsButton.SetEnabled(true);
+                    installSkillsButton.text = "Install Skills";
+
+                    if (result.Success)
+                    {
+                        bool noChanges = result.Added == 0 && result.Updated == 0 && result.Deleted == 0;
+                        string summary = noChanges
+                            ? "Skills are already up to date."
+                            : $"Added: {result.Added}, Updated: {result.Updated}, Deleted: {result.Deleted}";
+                        McpLog.Info($"SkillSync complete: {summary} ({installPath})");
+                        EditorUtility.DisplayDialog("Install Skills",
+                            $"{summary}\n\nInstalled at: {installPath}", "OK");
+                    }
+                    else
+                    {
+                        McpLog.Error($"SkillSync failed: {result.Error}");
+                        EditorUtility.DisplayDialog("Install Skills Failed", result.Error, "OK");
+                    }
+                });
+        }
+
         private void OnBrowseClaudeClicked()
         {
             string suggested = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
@@ -365,6 +502,32 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                     EditorUtility.DisplayDialog("Invalid Path", ex.Message, "OK");
                 }
             }
+        }
+
+        private void OnBrowseProjectDirClicked()
+        {
+            string currentDir = ClaudeCliMcpConfigurator.GetClientProjectDir();
+            string picked = EditorUtility.OpenFolderPanel("Select Client Project Directory", currentDir, "");
+            if (!string.IsNullOrEmpty(picked))
+            {
+                if (!Directory.Exists(picked))
+                {
+                    EditorUtility.DisplayDialog("Invalid Path", "The selected directory does not exist.", "OK");
+                    return;
+                }
+                EditorPrefs.SetString(EditorPrefKeys.ClientProjectDirOverride, picked);
+                UpdateClientProjectDirVisibility();
+                UpdateClientStatus();
+                McpLog.Info($"Client project directory override set to: {picked}");
+            }
+        }
+
+        private void OnClearProjectDirClicked()
+        {
+            EditorPrefs.DeleteKey(EditorPrefKeys.ClientProjectDirOverride);
+            UpdateClientProjectDirVisibility();
+            UpdateClientStatus();
+            McpLog.Info("Client project directory override cleared, using Unity project directory.");
         }
 
         private void OnCopyPathClicked()
@@ -452,9 +615,14 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                 ApplyStatusToUi(client, showChecking: true);
 
                 // Capture main-thread-only values before async task
-                string projectDir = Path.GetDirectoryName(Application.dataPath);
-                bool useHttpTransport = EditorPrefs.GetBool(EditorPrefKeys.UseHttpTransport, true);
+                string projectDir = ClaudeCliMcpConfigurator.GetClientProjectDir();
+                bool useHttpTransport = EditorConfigurationCache.Instance.UseHttpTransport;
                 string claudePath = MCPServiceLocator.Paths.GetClaudeCliPath();
+                RuntimePlatform platform = Application.platform;
+                bool isRemoteScope = HttpEndpointUtility.IsRemoteScope();
+                // Get expected package source based on installed package version and overrides.
+                string expectedPackageSource = GetExpectedPackageSourceForCurrentPackage();
+                bool hasProjectDirOverride = ClaudeCliMcpConfigurator.HasClientProjectDirOverride;
 
                 Task.Run(() =>
                 {
@@ -463,7 +631,7 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                     if (client is ClaudeCliMcpConfigurator claudeConfigurator)
                     {
                         // Use thread-safe version with captured main-thread values
-                        claudeConfigurator.CheckStatusWithProjectDir(projectDir, useHttpTransport, claudePath, attemptAutoRewrite: false);
+                        claudeConfigurator.CheckStatusWithProjectDir(projectDir, useHttpTransport, claudePath, platform, isRemoteScope, expectedPackageSource, attemptAutoRewrite: false, hasProjectDirOverride: hasProjectDirOverride);
                     }
                 }).ContinueWith(t =>
                 {
@@ -525,12 +693,14 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                 return;
             }
 
-            // Check for transport mismatch
+            // Check for transport mismatch (3-way: Stdio, Http, HttpRemote).
+            // Skip when a project dir override is active — the registered transport
+            // in the overridden project may legitimately differ from the local server.
             bool hasTransportMismatch = false;
-            if (client.ConfiguredTransport != ConfiguredTransport.Unknown)
+            if (client.ConfiguredTransport != ConfiguredTransport.Unknown
+                && !ClaudeCliMcpConfigurator.HasClientProjectDirOverride)
             {
-                bool serverUsesHttp = EditorPrefs.GetBool(EditorPrefKeys.UseHttpTransport, true);
-                ConfiguredTransport serverTransport = serverUsesHttp ? ConfiguredTransport.Http : ConfiguredTransport.Stdio;
+                ConfiguredTransport serverTransport = HttpEndpointUtility.GetCurrentServerTransport();
                 hasTransportMismatch = client.ConfiguredTransport != serverTransport;
             }
 
@@ -554,6 +724,8 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
                     case McpStatus.IncorrectPath:
                     case McpStatus.CommunicationError:
                     case McpStatus.NoResponse:
+                    case McpStatus.Error:
+                    case McpStatus.VersionMismatch:
                         clientStatusIndicator.AddToClassList("warning");
                         break;
                     default:
@@ -567,6 +739,88 @@ namespace MCPForUnity.Editor.Windows.Components.ClientConfig
 
             // Notify listeners about the client's configured transport
             OnClientTransportDetected?.Invoke(client.DisplayName, client.ConfiguredTransport);
+
+            // Notify listeners about version mismatch if applicable
+            if (client.Status == McpStatus.VersionMismatch && client is McpClientConfiguratorBase baseConfigurator)
+            {
+                // Get the mismatch reason from the configStatus field
+                string mismatchReason = baseConfigurator.Client.configStatus;
+                OnClientConfigMismatch?.Invoke(client.DisplayName, mismatchReason);
+            }
+            else
+            {
+                // Clear any previous mismatch warning
+                OnClientConfigMismatch?.Invoke(client.DisplayName, null);
+            }
+        }
+
+        /// <summary>
+        /// Gets the expected package source for validation based on installed package version.
+        /// Uses the same logic as registration to ensure validation matches what was registered.
+        /// MUST be called from the main thread due to EditorPrefs access.
+        /// </summary>
+        private static string GetExpectedPackageSourceForCurrentPackage()
+        {
+            return AssetPathUtility.GetMcpServerPackageSource();
+        }
+
+        private int FindConfiguratorIndex(string persistedClientValue)
+        {
+            if (string.IsNullOrWhiteSpace(persistedClientValue))
+                return -1;
+
+            // Primary match: stored stable ID.
+            for (int i = 0; i < configurators.Count; i++)
+            {
+                if (string.Equals(configurators[i].Id, persistedClientValue, StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+
+            // Compatibility match for older persisted values (e.g., display names with spaces).
+            string normalized = NormalizeClientToken(persistedClientValue);
+            if (string.IsNullOrEmpty(normalized))
+                return -1;
+
+            for (int i = 0; i < configurators.Count; i++)
+            {
+                if (NormalizeClientToken(configurators[i].Id) == normalized ||
+                    NormalizeClientToken(configurators[i].DisplayName) == normalized)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private int GetIndexForDropdownValue(string dropdownValue)
+        {
+            if (string.IsNullOrWhiteSpace(dropdownValue))
+                return -1;
+
+            int directIndex = clientDropdown.choices?.IndexOf(dropdownValue) ?? -1;
+            if (directIndex >= 0 && directIndex < configurators.Count)
+                return directIndex;
+
+            string normalized = NormalizeClientToken(dropdownValue);
+            if (string.IsNullOrEmpty(normalized))
+                return -1;
+
+            for (int i = 0; i < configurators.Count; i++)
+            {
+                if (NormalizeClientToken(configurators[i].DisplayName) == normalized)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private static string NormalizeClientToken(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            return new string(value.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
         }
     }
 }
