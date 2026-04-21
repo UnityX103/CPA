@@ -2,7 +2,8 @@
     "name": "APP.Network.Tests",
     "rootNamespace": "APP.Network.Tests",
     "references": [
-        "APP.Runtime"
+        "APP.Runtime",
+        "NZ.AppMonitor.Runtime"
     ],
     "includePlatforms": [
         "Editor"

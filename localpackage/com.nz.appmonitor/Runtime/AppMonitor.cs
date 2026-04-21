@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace CPA.Monitoring
 {
-    public sealed class AppMonitor
+    public sealed class AppMonitor : IAppMonitor
     {
         public static AppMonitor Instance { get; } = new AppMonitor();
 
