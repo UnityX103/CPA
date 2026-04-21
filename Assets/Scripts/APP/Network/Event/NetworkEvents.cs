@@ -86,4 +86,10 @@ namespace APP.Network.Event
             Players = players ?? new List<RemotePlayerData>();
         }
     }
+
+    public readonly struct E_IconUpdated
+    {
+        public readonly string BundleId;
+        public E_IconUpdated(string bundleId) { BundleId = bundleId; }
+    }
 }

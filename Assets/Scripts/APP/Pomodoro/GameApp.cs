@@ -22,6 +22,7 @@ namespace APP.Pomodoro
             RegisterSystem<IPomodoroTimerSystem>(new PomodoroTimerSystem());
             RegisterSystem<IWindowPositionSystem>(new WindowPositionSystem());
             RegisterSystem<IActiveAppSystem>(new ActiveAppSystem());
+            RegisterSystem<IIconCacheSystem>(new IconCacheSystem());
             RegisterSystem<INetworkSystem>(new NetworkSystem());
             RegisterSystem<IStateSyncSystem>(new StateSyncSystem());
         }
