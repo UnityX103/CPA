@@ -1,0 +1,19 @@
+{
+    "name": "NZ.AppMonitor.Tests",
+    "rootNamespace": "NZ.AppMonitor.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "NZ.AppMonitor.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
