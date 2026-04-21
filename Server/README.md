@@ -9,7 +9,7 @@ npm install --package-lock=false
 npm start
 ```
 
-默认监听 `ws://127.0.0.1:8080`，可通过 `PORT` 环境变量覆盖端口。
+默认监听 `ws://127.0.0.1:8765`，可通过 `PORT` 环境变量覆盖端口。
 
 ## 测试
 
