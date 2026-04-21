@@ -4,22 +4,6 @@
  */
 
 .pet-root {
-    width: 572px; /* Pencil: fill_container(572) */
     flex-direction: column;
-    border-radius: 20px;
-    border-width: 1px;
-    border-color: rgb(241, 229, 216); /* #F1E5D8 */
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    overflow: hidden;
-}
-
-/* ── Header: 标题 + 关闭按钮 ──────────────────────────────── */
-.pet-head {
-    flex-direction: row;
-    align-items: center;
-}
-
-.pet-head-spacer {
-    flex-grow: 1;
+    width: 100%;
 }

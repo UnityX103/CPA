@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.LowLevel;
 
-namespace NZ.VisualTest.Runtime
+namespace NZ.VisualTest
 {
     /// <summary>
     /// 输入系统测试工具

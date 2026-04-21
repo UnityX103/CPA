@@ -250,7 +250,12 @@
     padding-right: 16px;
 }
 
-.settings-tab-content {
+.settings-content-host {
     flex-direction: column;
-    gap: 16px;
+    width: 100%;
+}
+
+.settings-content .unity-scroll-view__content-container {
+    flex-direction: column;
+    width: 100%;
 }

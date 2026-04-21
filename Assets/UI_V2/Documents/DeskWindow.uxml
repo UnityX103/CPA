@@ -41,9 +41,7 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:ScrollView name="settings-content" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" class="settings-content">
-                    <ui:VisualElement name="content-pomodoro" class="settings-tab-content" />
-                    <ui:VisualElement name="content-online" class="settings-tab-content" style="display: none;" />
-                    <ui:VisualElement name="content-pet" class="settings-tab-content" style="display: none;" />
+                    <ui:VisualElement name="settings-content-host" class="settings-content-host" />
                 </ui:ScrollView>
             </ui:VisualElement>
         </ui:VisualElement>

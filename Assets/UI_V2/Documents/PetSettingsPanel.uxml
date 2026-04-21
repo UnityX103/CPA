@@ -2,25 +2,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
-  <ui:Template name="BackButton" src="BackButton.uxml"/>
   <ui:Style src="../Styles/Variables.uss"/>
   <ui:Style src="../Styles/PetSettingsPanel.uss"/>
-  <!-- 组件 USS -->
-  <ui:Style src="../Styles/Components/PanelTitle.uss"/>
 
   <!--
     PetSettingsPanel — 宠物设置面板
     对应 Pencil 组件: Pet Settings Panel (id = v2ZgA)
-    尺寸: width 572px
   -->
   <ui:VisualElement name="pet-root" class="pet-root">
-
-    <!-- Pencil: petHead — 标题 + 关闭按钮 -->
-    <ui:VisualElement class="pet-head">
-      <ui:Label class="comp-panel-title__title" text="宠物设置"/>
-      <ui:VisualElement class="pet-head-spacer" />
-      <ui:Instance name="pet-back" template="BackButton" class="panel-back-instance"/>
-    </ui:VisualElement>
-
   </ui:VisualElement>
 </ui:UXML>

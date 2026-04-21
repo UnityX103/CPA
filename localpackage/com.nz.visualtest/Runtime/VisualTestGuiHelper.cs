@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NZ.VisualTest.Runtime
+namespace NZ.VisualTest
 {
     /// <summary>
     /// 可视化测试 GUI 辅助组件

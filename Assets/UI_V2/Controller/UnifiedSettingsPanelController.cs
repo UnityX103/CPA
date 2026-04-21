@@ -14,9 +14,7 @@ namespace APP.Pomodoro.Controller
     {
         // ─── UI 元素 ─────────────────────────────────────────────
         private VisualElement _overlay;
-        private VisualElement _contentPomodoro;
-        private VisualElement _contentOnline;
-        private VisualElement _contentPet;
+        private VisualElement _contentHost;
         private VisualElement _tabPomodoro;
         private VisualElement _tabOnline;
         private VisualElement _tabPet;
@@ -29,6 +27,17 @@ namespace APP.Pomodoro.Controller
         private PomodoroSettingsPanelController _pomodoroSettings;
         private OnlineSettingsPanelController _onlineSettings;
         private PetSettingsPanelController _petSettings;
+
+        // ─── 模板与缓存实例 ──────────────────────────────────────
+        private VisualTreeAsset _pomodoroTemplate;
+        private VisualTreeAsset _onlineTemplate;
+        private VisualTreeAsset _petTemplate;
+        private IPomodoroModel _model;
+        private IRoomModel _roomModel;
+        private GameObject _lifecycleOwner;
+        private VisualElement _pomodoroRoot;
+        private VisualElement _onlineRoot;
+        private VisualElement _petRoot;
 
         // ─── 公开属性 ────────────────────────────────────────────
         public bool IsVisible => _overlay != null && _overlay.resolvedStyle.display == DisplayStyle.Flex;
@@ -54,20 +63,20 @@ namespace APP.Pomodoro.Controller
             VisualTreeAsset petTemplate,
             GameObject lifecycleOwner)
         {
-            // 查询 overlay 及子元素
-            _overlay         = root.Q("settings-overlay");
-            _contentPomodoro = root.Q("content-pomodoro");
-            _contentOnline   = root.Q("content-online");
-            _contentPet      = root.Q("content-pet");
-            _tabPomodoro     = root.Q("tab-pomodoro");
-            _tabOnline       = root.Q("tab-online");
-            _tabPet          = root.Q("tab-pet");
-            _closeBtn        = root.Q("settings-close");
+            _model = model;
+            _roomModel = roomModel;
+            _pomodoroTemplate = pomodoroTemplate;
+            _onlineTemplate = onlineTemplate;
+            _petTemplate = petTemplate;
+            _lifecycleOwner = lifecycleOwner;
 
-            // 将各设置面板 UXML 克隆到对应内容容器
-            pomodoroTemplate?.CloneTree(_contentPomodoro);
-            onlineTemplate?.CloneTree(_contentOnline);
-            petTemplate?.CloneTree(_contentPet);
+            // 查询 overlay 及子元素
+            _overlay = root.Q("settings-overlay");
+            _contentHost = root.Q("settings-content-host");
+            _tabPomodoro = root.Q("tab-pomodoro");
+            _tabOnline = root.Q("tab-online");
+            _tabPet = root.Q("tab-pet");
+            _closeBtn = root.Q("settings-close");
 
             // 注册关闭与 tab 切换事件
             _closeBtn?.RegisterCallback<PointerUpEvent>(_ => Hide());
@@ -75,15 +84,7 @@ namespace APP.Pomodoro.Controller
             _tabOnline?.RegisterCallback<PointerUpEvent>(_ => SelectTab("online"));
             _tabPet?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pet"));
 
-            // 初始化三个子面板控制器
-            _pomodoroSettings = new PomodoroSettingsPanelController();
-            _pomodoroSettings.Init(_contentPomodoro, model, lifecycleOwner);
-
-            _onlineSettings = new OnlineSettingsPanelController();
-            _onlineSettings.Init(_contentOnline, roomModel, lifecycleOwner);
-
-            _petSettings = new PetSettingsPanelController();
-            _petSettings.Init(_contentPet, lifecycleOwner);
+            SelectTab(_activeTab);
         }
 
         // ─── 显隐控制 ────────────────────────────────────────────
@@ -120,13 +121,13 @@ namespace APP.Pomodoro.Controller
             _tabOnline?.EnableInClassList("sidebar-tab--active", tabName == "online");
             _tabPet?.EnableInClassList("sidebar-tab--active", tabName == "pet");
 
-            // 切换内容区 display
-            if (_contentPomodoro != null)
-                _contentPomodoro.style.display = tabName == "pomodoro" ? DisplayStyle.Flex : DisplayStyle.None;
-            if (_contentOnline != null)
-                _contentOnline.style.display = tabName == "online" ? DisplayStyle.Flex : DisplayStyle.None;
-            if (_contentPet != null)
-                _contentPet.style.display = tabName == "pet" ? DisplayStyle.Flex : DisplayStyle.None;
+            VisualElement content = EnsureTabContent(tabName);
+
+            if (_contentHost != null && content != null)
+            {
+                _contentHost.Clear();
+                _contentHost.Add(content);
+            }
 
             // 刷新当前激活面板的数据
             switch (tabName)
@@ -138,6 +139,48 @@ namespace APP.Pomodoro.Controller
                     _onlineSettings?.RefreshCardState();
                     break;
             }
+        }
+
+        private VisualElement EnsureTabContent(string tabName)
+        {
+            switch (tabName)
+            {
+                case "online":
+                    if (_onlineRoot == null)
+                    {
+                        _onlineRoot = CloneTemplate(_onlineTemplate);
+                        _onlineSettings = new OnlineSettingsPanelController();
+                        _onlineSettings.Init(_onlineRoot, _roomModel, _lifecycleOwner);
+                    }
+
+                    return _onlineRoot;
+
+                case "pet":
+                    if (_petRoot == null)
+                    {
+                        _petRoot = CloneTemplate(_petTemplate);
+                        _petSettings = new PetSettingsPanelController();
+                        _petSettings.Init(_petRoot, _lifecycleOwner);
+                    }
+
+                    return _petRoot;
+
+                case "pomodoro":
+                default:
+                    if (_pomodoroRoot == null)
+                    {
+                        _pomodoroRoot = CloneTemplate(_pomodoroTemplate);
+                        _pomodoroSettings = new PomodoroSettingsPanelController();
+                        _pomodoroSettings.Init(_pomodoroRoot, _model, _lifecycleOwner);
+                    }
+
+                    return _pomodoroRoot;
+            }
+        }
+
+        private static VisualElement CloneTemplate(VisualTreeAsset template)
+        {
+            return template?.CloneTree();
         }
     }
 }

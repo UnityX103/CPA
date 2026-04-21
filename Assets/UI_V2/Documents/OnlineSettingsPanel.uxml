@@ -1,14 +1,10 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:Template name="BackButton" src="BackButton.uxml"/>
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/OnlineSettingsPanel.uss"/>
-    <!-- 组件 USS -->
-    <ui:Style src="../Styles/Components/PanelTitle.uss"/>
     <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
     <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
     <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
     <ui:Style src="../Styles/Components/InputText.uss"/>
-    <ui:Style src="../Styles/BackButton.uss"/>
 
     <!--
       OnlineSettingsPanel — 联机设置面板
@@ -19,14 +15,6 @@
         osp-hist-card  — 未加入时显示
     -->
     <ui:VisualElement name="osp-root" class="osp-root">
-
-        <!-- Pencil: onlHead — 标题 + spacer + 关闭按钮 -->
-        <ui:VisualElement class="osp-header">
-            <ui:Label text="联机模式" class="comp-panel-title__title" />
-            <ui:VisualElement class="osp-header-spacer" />
-            <ui:Instance name="osp-back" template="BackButton" class="panel-back-instance"/>
-        </ui:VisualElement>
-
         <!-- Pencil: onlAutoRow — 自动联网开关 -->
         <ui:VisualElement class="osp-row">
             <ui:Label text="自动联网" class="osp-row-label" />

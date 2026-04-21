@@ -6,13 +6,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
+using FFmpegOut;
 
-#if UNITY_EDITOR
-using UnityEditor.Recorder;
-using UnityEditor.Recorder.Input;
-#endif
-
-namespace NZ.VisualTest.Runtime
+namespace NZ.VisualTest
 {
     /// <summary>
     /// 可视化测试基类
@@ -23,10 +19,7 @@ namespace NZ.VisualTest.Runtime
         private GameObject _cameraObject;
         private GameObject _guiHelperObject;
         private VisualTestGuiHelper _guiHelper;
-
-#if UNITY_EDITOR
-        private RecorderController _recorderController;
-#endif
+        private RuntimeFFmpegRecorder _runtimeRecorder;
 
         /// <summary>
         /// 测试名称，默认为类名，子类可覆盖
@@ -34,6 +27,18 @@ namespace NZ.VisualTest.Runtime
         protected virtual string TestName => GetType().Name;
 
         protected virtual bool UseDedicatedTestCamera => true;
+
+        /// <summary>
+        /// 是否在 SetUp 阶段自动启动录制，默认 true。
+        /// 子类可覆盖为 false 以延迟录制，并在合适时机调用 <see cref="StartRecordingNow"/>。
+        /// </summary>
+        protected virtual bool RecordOnSetUp => true;
+
+        /// <summary>
+        /// 供子类在延迟录制场景下手动启动录制。
+        /// 仅当 <see cref="RecordOnSetUp"/> 为 false 时才需要手动调用。
+        /// </summary>
+        protected void StartRecordingNow() => StartRecorder();
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -44,35 +49,14 @@ namespace NZ.VisualTest.Runtime
             }
             SetUpGuiHelper();
             yield return null;
-
-#if UNITY_EDITOR
-            // 录制器启动时 Unity 音频系统可能禁用，会产生已知错误日志
-            // 提前声明忽略，避免 Test Runner 将其判定为测试失败
-            LogAssert.ignoreFailingMessages = true;
-            StartRecorder();
-            // PrepareRecording 内部会将 Time.timeScale 设为 0 等待第一帧
-            // 等 2 帧让 Recorder 完成初始化，再强制恢复 timeScale，
-            // 否则后续 WaitForSeconds 永远不推进
-            yield return null;
-            yield return null;
-            if (Time.timeScale == 0f)
-                Time.timeScale = 1f;
-            yield return null;
-            LogAssert.ignoreFailingMessages = false;
-#endif
+            if (RecordOnSetUp)
+                StartRecorder();
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-#if UNITY_EDITOR
-            if (_recorderController != null && _recorderController.IsRecording())
-            {
-                _recorderController.StopRecording();
-            }
-            yield return new WaitForSeconds(0.5f);
-            _recorderController = null;
-#endif
+            StopRecorder();
 
             if (_guiHelperObject != null)
             {
@@ -86,10 +70,7 @@ namespace NZ.VisualTest.Runtime
                 UnityEngine.Object.Destroy(_cameraObject);
                 _cameraObject = null;
             }
-
-#if !UNITY_EDITOR
             yield return null;
-#endif
         }
 
         private void SetUpCamera()
@@ -109,66 +90,212 @@ namespace NZ.VisualTest.Runtime
             _guiHelper = _guiHelperObject.AddComponent<VisualTestGuiHelper>();
         }
 
-#if UNITY_EDITOR
+        private string GetVideoOutputDirectory()
+        {
+            return Path.Combine(Application.persistentDataPath, "TestOutput", GetType().Name, "Video");
+        }
+
+        private string BuildTimestampedFileName()
+        {
+            return $"{TestName}_{DateTime.Now:yyyyMMdd_HHmmss}";
+        }
+
         private void StartRecorder()
         {
             try
             {
-                var controllerSettings = ScriptableObject.CreateInstance<RecorderControllerSettings>();
-                controllerSettings.SetRecordModeToManual();
-
-                var movieSettings = ScriptableObject.CreateInstance<MovieRecorderSettings>();
-                movieSettings.Enabled = true;
-                movieSettings.OutputFormat = MovieRecorderSettings.VideoRecorderOutputFormat.MP4;
-                movieSettings.ImageInputSettings = new GameViewInputSettings
+                if (!FFmpegPipe.IsAvailable)
                 {
-                    OutputWidth = 1920,
-                    OutputHeight = 1080
-                };
-                // 测试环境音频系统被禁用，关闭音轨录制避免 "Zero sample rate" 错误
-                movieSettings.AudioInputSettings.PreserveAudio = false;
+                    Debug.LogWarning("[VisualTestBase] FFmpegOut 录制器启动失败：未找到 FFmpeg 可执行文件。");
+                    return;
+                }
 
-                // 输出路径：项目根目录/TestVideo/TestName_时间戳
-                string projectRoot = Path.GetDirectoryName(Application.dataPath);
-                string outputDir = Path.Combine(projectRoot, "TestVideo");
+                if (!SystemInfo.supportsAsyncGPUReadback)
+                {
+                    Debug.LogWarning("[VisualTestBase] FFmpegOut 录制器启动失败：当前图形 API 不支持 AsyncGPUReadback。");
+                    return;
+                }
+
+                var camera = ResolveCaptureCamera();
+                if (camera == null)
+                {
+                    Debug.LogWarning("[VisualTestBase] FFmpegOut 录制器启动失败：未找到可用于录制的 Camera。");
+                    return;
+                }
+
+                // 输出路径：persistentDataPath/TestOutput/{目标测试类}/Video
+                string outputDir = GetVideoOutputDirectory();
                 Directory.CreateDirectory(outputDir);
 
-                // 设置输出绝对路径
-                var fileNameGenerator = movieSettings.FileNameGenerator;
-                fileNameGenerator.Root = OutputPath.Root.Absolute;
-
-                var absPathProperty = typeof(FileNameGenerator).GetProperty(
-                    "AbsolutePath",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (absPathProperty != null)
+                string outputPath = Path.Combine(outputDir, $"{BuildTimestampedFileName()}.mp4");
+                if (File.Exists(outputPath))
                 {
-                    absPathProperty.SetValue(fileNameGenerator, outputDir);
-                }
-                else
-                {
-                    var leaf = typeof(FileNameGenerator).GetField(
-                        "m_Leaf",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (leaf != null)
-                        leaf.SetValue(fileNameGenerator, outputDir);
+                    File.Delete(outputPath);
                 }
 
-                fileNameGenerator.FileName = $"{TestName}_{DateTime.Now:yyyyMMdd_HHmmss}";
-
-                controllerSettings.AddRecorderSettings(movieSettings);
-                _recorderController = new RecorderController(controllerSettings);
-                // PrepareRecording 初始化录制会话（必须调用，否则 m_RecordingSessions 为空导致不录制）
-                // 注意：它会将 Time.timeScale 设为 0，SetUp 会在之后手动恢复
-                _recorderController.PrepareRecording();
-                _recorderController.StartRecording();
-                Debug.Log($"[VisualTestBase] 录制已启动：{outputDir}");
+                _runtimeRecorder = camera.gameObject.GetComponent<RuntimeFFmpegRecorder>();
+                if (_runtimeRecorder == null)
+                {
+                    _runtimeRecorder = camera.gameObject.AddComponent<RuntimeFFmpegRecorder>();
+                }
+                // macOS Metal 上 ScreenCapture 返回正向图像，但 Preprocess.shader 会再次 Y-flip，
+                // 因此无论在 Editor 还是 Standalone 都需要 FFmpeg vflip 来抵消。
+                _runtimeRecorder.StartRecording(
+                    outputPath,
+                    30f,
+                    FFmpegPreset.H264Default,
+                    true);
+                Debug.Log($"[VisualTestBase] FFmpegOut 录制已启动：{outputPath}");
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[VisualTestBase] 录制器启动失败，测试将继续但不录制视频。原因：{e.Message}");
+                Debug.LogWarning($"[VisualTestBase] FFmpegOut 录制器启动失败，测试将继续但不录制视频。原因：{e.Message}");
             }
         }
-#endif
+
+        private void StopRecorder()
+        {
+            if (_runtimeRecorder == null)
+                return;
+
+            _runtimeRecorder.StopRecording();
+            UnityEngine.Object.Destroy(_runtimeRecorder);
+            _runtimeRecorder = null;
+        }
+
+        private Camera ResolveCaptureCamera()
+        {
+            if (_cameraObject != null)
+            {
+                var dedicatedCamera = _cameraObject.GetComponent<Camera>();
+                if (dedicatedCamera != null)
+                    return dedicatedCamera;
+            }
+
+            if (Camera.main != null)
+                return Camera.main;
+
+            return UnityEngine.Object.FindObjectOfType<Camera>();
+        }
+
+        private sealed class RuntimeFFmpegRecorder : MonoBehaviour
+        {
+            private FFmpegSession _session;
+            private RenderTexture _captureTexture;
+            private Coroutine _recordCoroutine;
+            private float _frameRate;
+            private int _frameCount;
+            private float _startTime;
+            private int _frameDropCount;
+
+            private float FrameTime => _startTime + (_frameCount - 0.5f) / _frameRate;
+
+            public void StartRecording(string outputPath, float frameRate, FFmpegPreset preset, bool applyExtraVFlip)
+            {
+                StopRecording();
+
+                _frameRate = Mathf.Max(1f, frameRate);
+                int width = Mathf.Max(8, Screen.width);
+                int height = Mathf.Max(8, Screen.height);
+
+                _captureTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
+                _captureTexture.Create();
+
+                if (applyExtraVFlip)
+                {
+                    // ScreenCapture 到 FFmpegOut 这条链路在运行时会出现额外倒置，这里补一层 vflip 抵消。
+                    var arguments =
+                        "-y -f rawvideo -vcodec rawvideo -pixel_format rgba"
+                        + " -colorspace bt709"
+                        + " -video_size " + width + "x" + height
+                        + " -framerate " + _frameRate
+                        + " -loglevel warning -i - -vf vflip " + preset.GetOptions()
+                        + " \"" + outputPath + "\"";
+                    _session = FFmpegSession.CreateWithArguments(arguments);
+                }
+                else
+                {
+                    _session = FFmpegSession.CreateWithOutputPath(outputPath, width, height, _frameRate, preset);
+                }
+
+                _frameCount = 0;
+                _frameDropCount = 0;
+                _startTime = Time.time;
+                _recordCoroutine = StartCoroutine(RecordLoop());
+            }
+
+            public void StopRecording()
+            {
+                if (_recordCoroutine != null)
+                {
+                    StopCoroutine(_recordCoroutine);
+                    _recordCoroutine = null;
+                }
+
+                if (_session != null)
+                {
+                    _session.Close();
+                    _session.Dispose();
+                    _session = null;
+                }
+
+                if (_captureTexture != null)
+                {
+                    _captureTexture.Release();
+                    UnityEngine.Object.Destroy(_captureTexture);
+                    _captureTexture = null;
+                }
+            }
+
+            private IEnumerator RecordLoop()
+            {
+                var endOfFrame = new WaitForEndOfFrame();
+                while (_session != null)
+                {
+                    yield return endOfFrame;
+                    ScreenCapture.CaptureScreenshotIntoRenderTexture(_captureTexture);
+                    PushFrameWithTiming(_captureTexture);
+                    _session.CompletePushFrames();
+                }
+            }
+
+            private void PushFrameWithTiming(Texture frameTexture)
+            {
+                float gap = Time.time - FrameTime;
+                float delta = 1f / _frameRate;
+
+                if (gap < 0f)
+                {
+                    _session.PushFrame(null);
+                }
+                else if (gap < delta)
+                {
+                    _session.PushFrame(frameTexture);
+                    _frameCount++;
+                }
+                else if (gap < delta * 2f)
+                {
+                    _session.PushFrame(frameTexture);
+                    _session.PushFrame(frameTexture);
+                    _frameCount += 2;
+                }
+                else
+                {
+                    if (++_frameDropCount == 10)
+                    {
+                        Debug.LogWarning("[VisualTestBase] FFmpegOut 录制检测到明显丢帧，建议降低录制帧率。");
+                    }
+
+                    _session.PushFrame(frameTexture);
+                    _frameCount += Mathf.FloorToInt(gap * _frameRate);
+                }
+            }
+
+            private void OnDisable()
+            {
+                StopRecording();
+            }
+        }
 
         /// <summary>
         /// 向 GUI 输出当前操作描述

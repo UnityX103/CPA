@@ -1,14 +1,10 @@
 {
   "name": "com.nz.visualtest",
-  "displayName": "NZ.VisualTest",
+  "displayName": "NZ Visual Test",
   "version": "1.0.0",
-  "description": "视觉测试工具包，提供屏幕录制、GUI 操作提示覆盖层和输入模拟功能",
-  "unity": "2021.3",
-  "author": {
-    "name": "NZ"
-  },
+  "description": "Unity 视觉测试基类与 FFmpeg 录制能力（含 FFmpegOut 嵌入）",
   "dependencies": {
     "com.unity.inputsystem": "1.4.4",
-    "com.unity.recorder": "3.0.3"
+    "com.unity.test-framework": "1.1.33"
   }
 }

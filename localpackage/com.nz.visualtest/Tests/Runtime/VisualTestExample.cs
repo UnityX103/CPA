@@ -1,11 +1,11 @@
 using System.Collections;
 using NUnit.Framework;
-using NZ.VisualTest.Runtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TestTools;
+using NZ.VisualTest;
 
-namespace NZ.VisualTest.Tests.Runtime
+namespace NZ.VisualTest.Tests
 {
     /// <summary>
     /// 可视化测试示例
@@ -13,7 +13,7 @@ namespace NZ.VisualTest.Tests.Runtime
     /// </summary>
     [TestFixture]
     public class VisualTestExample : VisualTestBase
-    {
+    { 
         private GameObject _square;
 
         [UnityTest]

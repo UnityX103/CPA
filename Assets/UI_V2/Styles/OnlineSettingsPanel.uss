@@ -6,27 +6,9 @@
 /* ── 根容器 ──────────────────────────────────────────────── */
 
 .osp-root {
-    width: 572px;
     flex-direction: column;
-    border-radius: 20px;
-    border-width: 1px;
-    border-color: rgb(241, 229, 216); /* #F1E5D8 */
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    overflow: hidden;
+    width: 100%;
     flex-shrink: 0; /* 内容自适应，不被压缩 */
-}
-
-/* ── Header: 标题 + 关闭按钮 ──────────────────────────────── */
-
-.osp-header {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.osp-header-spacer {
-    flex-grow: 1;
 }
 
 /* ── 通用设置行（自动联网等）──────────────────────────────── */

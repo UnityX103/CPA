@@ -6,26 +6,8 @@
 /* ── 根容器 ──────────────────────────────────────────────── */
 
 .psp-root {
-    width: 572px; /* Pencil: fill_container(572) */
     flex-direction: column;
-    border-radius: 20px;
-    border-width: 1px;
-    border-color: rgb(241, 229, 216);
-    background-color: rgb(255, 255, 255);
-    padding: 20px;
-    overflow: hidden;
-}
-
-/* ── 顶部 header ─────────────────────────────────────────── */
-
-.psp-header {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.psp-header-spacer {
-    flex-grow: 1;
+    width: 100%;
 }
 
 /* ── 指标卡片区（两列）────────────────────────────────────── */
