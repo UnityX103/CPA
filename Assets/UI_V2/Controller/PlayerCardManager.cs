@@ -60,6 +60,8 @@ namespace APP.Pomodoro.Controller
                     .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
                 this.RegisterEvent<E_RoomJoined>(OnRoomJoined)
                     .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_IconUpdated>(OnIconUpdated)
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
             else
             {
@@ -68,6 +70,7 @@ namespace APP.Pomodoro.Controller
                 this.RegisterEvent<E_RemoteStateUpdated>(OnStateUpdated);
                 this.RegisterEvent<E_RoomSnapshot>(OnSnapshot);
                 this.RegisterEvent<E_RoomJoined>(OnRoomJoined);
+                this.RegisterEvent<E_IconUpdated>(OnIconUpdated);
             }
 
             _initialized = true;
@@ -122,6 +125,21 @@ namespace APP.Pomodoro.Controller
         private void OnSnapshot(E_RoomSnapshot e)
         {
             RebuildFromSnapshot(e.Players);
+        }
+
+        private void OnIconUpdated(E_IconUpdated e)
+        {
+            if (string.IsNullOrEmpty(e.BundleId)) return;
+
+            IRoomModel room = this.GetModel<IRoomModel>();
+            foreach (var kv in _cards)
+            {
+                RemotePlayerData data = FindRemotePlayer(room, kv.Key);
+                if (data != null && data.ActiveAppBundleId == e.BundleId)
+                {
+                    kv.Value.Refresh(data);
+                }
+            }
         }
 
         // ─── 暴露给测试/事件回调的操作 ──────────────────────────

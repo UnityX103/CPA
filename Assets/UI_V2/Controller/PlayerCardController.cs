@@ -1,4 +1,5 @@
 using APP.Network.Model;
+using APP.Network.System;
 using APP.Pomodoro.Model;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -32,6 +33,7 @@ namespace APP.Pomodoro.Controller
         private Label _timeLabel;
         private Label _roundsLabel;
         private Label _appLabel;
+        private VisualElement _appIcon;
 
         /// <summary>该卡片对应的远端玩家 ID。</summary>
         public string PlayerId { get; private set; }
@@ -71,6 +73,7 @@ namespace APP.Pomodoro.Controller
             _timeLabel = _root.Q<Label>("pc-time");
             _roundsLabel = _root.Q<Label>("pc-rounds");
             _appLabel = _root.Q<Label>("pc-app");
+            _appIcon = _root.Q<VisualElement>("pc-active-app-icon");
         }
 
         private void ApplyData(RemotePlayerData data)
@@ -94,7 +97,25 @@ namespace APP.Pomodoro.Controller
             if (_appLabel != null)
                 _appLabel.text = string.IsNullOrEmpty(data.ActiveAppName) ? "—" : data.ActiveAppName;
 
+            ApplyAppIcon(data.ActiveAppBundleId);
+
             ApplyPhaseClass(data.Phase, data.IsRunning);
+        }
+
+        private void ApplyAppIcon(string bundleId)
+        {
+            if (_appIcon == null) return;
+
+            Texture2D tex = null;
+            if (!string.IsNullOrEmpty(bundleId))
+            {
+                IIconCacheSystem iconCache = GameApp.Interface.GetSystem<IIconCacheSystem>();
+                tex = iconCache?.GetTexture(bundleId);
+            }
+
+            _appIcon.style.backgroundImage = tex != null
+                ? new StyleBackground(tex)
+                : new StyleBackground(StyleKeyword.None);
         }
 
         /// <summary>
