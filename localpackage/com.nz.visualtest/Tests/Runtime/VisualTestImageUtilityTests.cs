@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using NUnit.Framework;
 using UnityEngine;
@@ -112,6 +113,139 @@ namespace NZ.VisualTest.Tests
             Assert.That(result.MismatchPixelCount, Is.EqualTo(1));
             Assert.That(result.MismatchRatio, Is.EqualTo(0.25f));
             Assert.That(File.Exists(diffPath), Is.True);
+        }
+
+        [Test]
+        public void BuildRunOutputDirectory_UsesMethodScopedFolder()
+        {
+            string testName = "UnifiedSettingsPanel_ShouldCaptureExpectedStates";
+            string runId = "20260421_153011_ab12cd";
+            string outputDirectory = VisualTestImageUtility.BuildRunOutputDirectory(testName, runId);
+
+            try
+            {
+                Assert.That(outputDirectory, Does.Contain("TestOutput"));
+                Assert.That(Directory.Exists(outputDirectory), Is.True);
+
+                DirectoryInfo outputInfo = new DirectoryInfo(outputDirectory);
+                Assert.That(outputInfo.Name, Is.EqualTo(runId));
+                Assert.That(outputInfo.Parent, Is.Not.Null);
+                Assert.That(outputInfo.Parent.Name, Is.EqualTo(testName));
+            }
+            finally
+            {
+                if (Directory.Exists(outputDirectory))
+                {
+                    Directory.Delete(outputDirectory, true);
+                }
+            }
+        }
+
+        [Test]
+        public void BuildStepArtifactFileName_PrefixesSequenceAndSuffix()
+        {
+            string fileName = VisualTestImageUtility.BuildStepArtifactFileName(2, "online state", "actual");
+
+            Assert.That(fileName, Is.EqualTo("02-online state-actual.png"));
+        }
+
+        [Test]
+        public void BuildImageOutputDirectory_UsesLegacyImagesSuffix()
+        {
+            string testName = "UnifiedSettingsPanel_ShouldCaptureExpectedStates";
+            string outputDirectory = VisualTestImageUtility.BuildImageOutputDirectory(testName);
+
+            try
+            {
+                Assert.That(outputDirectory, Does.Contain("TestOutput"));
+                Assert.That(Directory.Exists(outputDirectory), Is.True);
+
+                DirectoryInfo outputInfo = new DirectoryInfo(outputDirectory);
+                Assert.That(outputInfo.Name, Is.EqualTo("Images"));
+                Assert.That(outputInfo.Parent, Is.Not.Null);
+                Assert.That(outputInfo.Parent.Name, Is.EqualTo(testName));
+            }
+            finally
+            {
+                DirectoryInfo outputInfo = new DirectoryInfo(outputDirectory);
+                string testDirectory = outputInfo.Parent?.FullName;
+                if (!string.IsNullOrWhiteSpace(testDirectory) && Directory.Exists(testDirectory))
+                {
+                    Directory.Delete(testDirectory, true);
+                }
+            }
+        }
+
+        [Test]
+        public void BuildStepArtifactFileName_Throws_WhenStepNameIsBlank()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                VisualTestImageUtility.BuildStepArtifactFileName(1, " ", "actual"));
+        }
+
+        [Test]
+        public void BuildStepArtifactFileName_Throws_WhenSuffixIsBlank()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                VisualTestImageUtility.BuildStepArtifactFileName(1, "online state", " "));
+        }
+
+        [Test]
+        public void SaveManifest_WritesExpectedJsonFields()
+        {
+            VisualImageTestRunManifest manifest = new VisualImageTestRunManifest
+            {
+                testName = "UnifiedSettingsPanel_ShouldCaptureExpectedStates",
+                testClass = "NZ.VisualTest.Tests.UnifiedSettingsPanelVisualTests",
+                runId = "20260421_153011_ab12cd",
+                createdAt = "2026-04-21T15:30:11Z",
+                steps =
+                {
+                    new VisualImageTestStepManifest
+                    {
+                        index = 1,
+                        name = "online state",
+                        actualImagePath = "actual/01-online state-actual.png",
+                        baselineImagePath = "TestArtifacts/PencilReferences/unified-settings-pomodoro.png",
+                        notes = "baseline reference"
+                    }
+                }
+            };
+
+            VisualTestImageUtility.SaveManifest(manifest, _outputDirectory);
+
+            string manifestPath = Path.Combine(_outputDirectory, "manifest.json");
+            Assert.That(File.Exists(manifestPath), Is.True);
+            Assert.That(manifest.outputDirectory, Is.EqualTo(_outputDirectory));
+
+            string json = File.ReadAllText(manifestPath);
+            VisualImageTestRunManifest savedManifest = JsonUtility.FromJson<VisualImageTestRunManifest>(json);
+
+            Assert.That(savedManifest, Is.Not.Null);
+            Assert.That(savedManifest.testName, Is.EqualTo("UnifiedSettingsPanel_ShouldCaptureExpectedStates"));
+            Assert.That(savedManifest.outputDirectory, Is.EqualTo(_outputDirectory));
+            Assert.That(savedManifest.steps, Is.Not.Null);
+            Assert.That(savedManifest.steps.Count, Is.EqualTo(1));
+
+            VisualImageTestStepManifest step = savedManifest.steps[0];
+            Assert.That(step.index, Is.EqualTo(1));
+            Assert.That(step.name, Is.EqualTo("online state"));
+            Assert.That(step.actualImagePath, Is.EqualTo("actual/01-online state-actual.png"));
+            Assert.That(step.baselineImagePath, Is.EqualTo("TestArtifacts/PencilReferences/unified-settings-pomodoro.png"));
+            Assert.That(step.notes, Is.EqualTo("baseline reference"));
+        }
+
+        [Test]
+        public void SaveManifest_Throws_WhenManifestOutputDirectoryConflicts()
+        {
+            VisualImageTestRunManifest manifest = new VisualImageTestRunManifest
+            {
+                testName = "UnifiedSettingsPanel_ShouldCaptureExpectedStates",
+                outputDirectory = Path.Combine(_outputDirectory, "other")
+            };
+
+            Assert.Throws<ArgumentException>(() =>
+                VisualTestImageUtility.SaveManifest(manifest, _outputDirectory));
         }
 
         private static Texture2D CreateSolidTexture(Color32 color)

@@ -77,10 +77,52 @@ namespace NZ.VisualTest
             return outputDirectory;
         }
 
+        public static string BuildRunOutputDirectory(string testName, string runId)
+        {
+            if (string.IsNullOrWhiteSpace(testName))
+            {
+                throw new ArgumentException("testName 不能为空。", nameof(testName));
+            }
+
+            if (string.IsNullOrWhiteSpace(runId))
+            {
+                throw new ArgumentException("runId 不能为空。", nameof(runId));
+            }
+
+            string outputDirectory = Path.Combine(
+                Application.temporaryCachePath,
+                "TestOutput",
+                SanitizeFileName(testName),
+                SanitizeFileName(runId));
+
+            Directory.CreateDirectory(outputDirectory);
+            return outputDirectory;
+        }
+
         public static string BuildArtifactPath(string testName, string artifactName)
         {
             string safeArtifactName = SanitizeFileName(artifactName);
             return Path.Combine(BuildImageOutputDirectory(testName), $"{safeArtifactName}.png");
+        }
+
+        public static string BuildStepArtifactFileName(int stepIndex, string stepName, string suffix = "actual")
+        {
+            if (stepIndex <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stepIndex), "stepIndex 必须大于 0。");
+            }
+
+            if (string.IsNullOrWhiteSpace(stepName))
+            {
+                throw new ArgumentException("stepName 不能为空。", nameof(stepName));
+            }
+
+            if (string.IsNullOrWhiteSpace(suffix))
+            {
+                throw new ArgumentException("suffix 不能为空。", nameof(suffix));
+            }
+
+            return $"{stepIndex:00}-{SanitizeFileName(stepName)}-{SanitizeFileName(suffix)}.png";
         }
 
         public static RectInt CreateScreenRegionFromTopLeftRect(
@@ -152,6 +194,35 @@ namespace NZ.VisualTest
             }
 
             File.WriteAllBytes(outputPath, pngBytes);
+        }
+
+        public static void SaveManifest(VisualImageTestRunManifest manifest, string outputDirectory)
+        {
+            if (manifest == null)
+            {
+                throw new ArgumentNullException(nameof(manifest));
+            }
+
+            if (string.IsNullOrWhiteSpace(outputDirectory))
+            {
+                throw new ArgumentException("outputDirectory 不能为空。", nameof(outputDirectory));
+            }
+
+            string normalizedOutputDirectory = Path.GetFullPath(outputDirectory);
+            if (string.IsNullOrWhiteSpace(manifest.outputDirectory))
+            {
+                manifest.outputDirectory = normalizedOutputDirectory;
+            }
+            else if (!PathsEqual(manifest.outputDirectory, normalizedOutputDirectory))
+            {
+                throw new ArgumentException("manifest.outputDirectory 与 outputDirectory 不一致。", nameof(outputDirectory));
+            }
+
+            Directory.CreateDirectory(normalizedOutputDirectory);
+
+            string manifestPath = Path.Combine(normalizedOutputDirectory, "manifest.json");
+            string json = JsonUtility.ToJson(manifest, true);
+            File.WriteAllText(manifestPath, json);
         }
 
         public static string AttachArtifact(string filePath, string description = null)
@@ -362,6 +433,18 @@ namespace NZ.VisualTest
             }
 
             return new string(chars);
+        }
+
+        private static bool PathsEqual(string leftPath, string rightPath)
+        {
+            if (string.IsNullOrWhiteSpace(leftPath) || string.IsNullOrWhiteSpace(rightPath))
+            {
+                return false;
+            }
+
+            string normalizedLeftPath = Path.GetFullPath(leftPath);
+            string normalizedRightPath = Path.GetFullPath(rightPath);
+            return string.Equals(normalizedLeftPath, normalizedRightPath, StringComparison.Ordinal);
         }
     }
 }
