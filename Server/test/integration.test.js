@@ -157,3 +157,63 @@ test('两个客户端可以完成 create/join/state_update/leave 流程', async 
     const playerLeft = await inboxA.waitFor('player_left');
     assert.equal(playerLeft.playerId, roomJoined.playerId);
 });
+
+test('图标流程：state_update → icon_need → icon_upload → icon_broadcast', async (t) =>
+{
+    const app = await createPomodoroServer({
+        port: 0,
+        heartbeatIntervalMs: 5000,
+        initTimeoutMs: 1000
+    });
+
+    t.after(async () => { await app.close(); });
+
+    const clientA = await openClient(app.url);
+    const clientB = await openClient(app.url);
+    const inboxA = createMessageCollector(clientA);
+    const inboxB = createMessageCollector(clientB);
+
+    t.after(() => { clientA.close(); clientB.close(); });
+
+    // A 创建房间，B 加入
+    sendJson(clientA, { type: 'create_room', playerName: 'A' });
+    const roomCreated = await inboxA.waitFor('room_created');
+    await inboxA.waitFor('room_snapshot');
+
+    sendJson(clientB, { type: 'join_room', roomCode: roomCreated.roomCode, playerName: 'B' });
+    await inboxB.waitFor('room_joined');
+    await inboxB.waitFor('room_snapshot');
+    await inboxA.waitFor('player_joined');
+
+    // B 发带未知 bundleId 的 state_update
+    sendJson(clientB, {
+        type: 'player_state_update',
+        state: {
+            pomodoro: { phase: 0, remainingSeconds: 1500, currentRound: 1, totalRounds: 4, isRunning: false },
+            activeApp: { name: 'Safari', bundleId: 'com.apple.Safari' }
+        }
+    });
+
+    // B 应收到 icon_need
+    const iconNeed = await inboxB.waitFor('icon_need');
+    assert.equal(iconNeed.bundleId, 'com.apple.Safari');
+
+    // B 上传图标
+    sendJson(clientB, {
+        type: 'icon_upload',
+        bundleId: 'com.apple.Safari',
+        iconBase64: 'QUFB'  // "AAA" base64
+    });
+
+    // A 与 B 都应收到 icon_broadcast
+    const bcA = await inboxA.waitFor('icon_broadcast');
+    const bcB = await inboxB.waitFor('icon_broadcast');
+    assert.equal(bcA.bundleId, 'com.apple.Safari');
+    assert.equal(bcA.iconBase64, 'QUFB');
+    assert.equal(bcB.bundleId, 'com.apple.Safari');
+
+    // A 后续 icon_request 命中缓存
+    sendJson(clientA, { type: 'icon_request', bundleIds: ['com.apple.Safari'] });
+    const bcA2 = await inboxA.waitFor('icon_broadcast');
+    assert.equal(bcA2.bundleId, 'com.apple.Safari');
+});
