@@ -10,6 +10,7 @@ using APP.Network.DTO;
 using APP.Network.Event;
 using APP.Network.Model;
 using APP.Pomodoro.Model;
+using APP.SessionMemory.Model;
 using QFramework;
 using UnityEngine;
 
@@ -394,6 +395,10 @@ namespace APP.Network.System
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
             this.SendEvent(new E_RoomCreated(inbound.roomCode));
             this.SendEvent(new E_RoomSnapshot(new List<RemotePlayerData>()));
+
+            this.GetModel<ISessionMemoryModel>().RememberJoin(
+                this.GetModel<IRoomModel>().LocalPlayerName.Value,
+                inbound.roomCode);
         }
 
         private void HandleRoomJoined(InboundMessage inbound)
@@ -409,6 +414,10 @@ namespace APP.Network.System
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
             this.SendEvent(new E_RoomJoined(inbound.roomCode, new List<RemotePlayerData>()));
             this.SendEvent(new E_RoomSnapshot(new List<RemotePlayerData>()));
+
+            this.GetModel<ISessionMemoryModel>().RememberJoin(
+                this.GetModel<IRoomModel>().LocalPlayerName.Value,
+                inbound.roomCode);
         }
 
         private void HandleRoomSnapshot(InboundMessage inbound)
