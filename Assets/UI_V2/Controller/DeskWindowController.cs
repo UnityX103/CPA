@@ -16,6 +16,11 @@ namespace APP.Pomodoro.Controller
     [RequireComponent(typeof(UIDocument))]
     public sealed class DeskWindowController : MonoBehaviour, IController
     {
+        private const string PlayerCardTemplatePath = "Assets/UI_V2/Documents/PlayerCard.uxml";
+        private const string PomodoroSettingsTemplatePath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
+        private const string OnlineSettingsTemplatePath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
+        private const string PetSettingsTemplatePath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
+
         // ─── Inspector 引用 ──────────────────────────────────────
         [Header("配置表")]
         [SerializeField] private PomodoroConfig _config;
@@ -135,6 +140,7 @@ namespace APP.Pomodoro.Controller
             }
 
             // 统一设置面板
+            EnsureSettingsTemplatesLoaded();
             var roomModel = this.GetModel<APP.Network.Model.IRoomModel>();
             _settingsPanel = new UnifiedSettingsPanelController();
             _settingsPanel.Init(
@@ -147,17 +153,10 @@ namespace APP.Pomodoro.Controller
                 gameObject);
 
             // 多人番茄钟：卡片管理器（嵌入 card-list ScrollView）
-            if (_playerCardTemplate == null)
-            {
-#if UNITY_EDITOR
-                _playerCardTemplate = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
-                    "Assets/UI_V2/Documents/PlayerCard.uxml");
-#endif
-                if (_playerCardTemplate == null)
-                {
-                    Debug.LogWarning("[DeskWindowController] PlayerCard.uxml 未在 Inspector 赋值，请检查 DeskWindowController 的 Inspector 设置。");
-                }
-            }
+            _playerCardTemplate = EnsureEditorTemplateLoaded(
+                _playerCardTemplate,
+                PlayerCardTemplatePath,
+                "PlayerCard.uxml");
 
             _playerCardManager = new PlayerCardManager();
             var cardListScrollView = root.Q<ScrollView>("card-list");
@@ -171,6 +170,46 @@ namespace APP.Pomodoro.Controller
                 else
                     _settingsPanel.Show();
             });
+        }
+
+        private void EnsureSettingsTemplatesLoaded()
+        {
+            _pomodoroSettingsTemplate = EnsureEditorTemplateLoaded(
+                _pomodoroSettingsTemplate,
+                PomodoroSettingsTemplatePath,
+                "PomodoroSettingsPanel.uxml");
+
+            _onlineSettingsTemplate = EnsureEditorTemplateLoaded(
+                _onlineSettingsTemplate,
+                OnlineSettingsTemplatePath,
+                "OnlineSettingsPanel.uxml");
+
+            _petSettingsTemplate = EnsureEditorTemplateLoaded(
+                _petSettingsTemplate,
+                PetSettingsTemplatePath,
+                "PetSettingsPanel.uxml");
+        }
+
+        private static VisualTreeAsset EnsureEditorTemplateLoaded(
+            VisualTreeAsset currentTemplate,
+            string assetPath,
+            string displayName)
+        {
+            if (currentTemplate != null)
+            {
+                return currentTemplate;
+            }
+
+#if UNITY_EDITOR
+            currentTemplate = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(assetPath);
+#endif
+
+            if (currentTemplate == null)
+            {
+                Debug.LogWarning($"[DeskWindowController] {displayName} 未在 Inspector 赋值，且未能从 {assetPath} 自动加载。");
+            }
+
+            return currentTemplate;
         }
 
         // ─── 持久化 ──────────────────────────────────────────────

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UIElements;
 using UnityEngine.TestTools;
 using FFmpegOut;
 
@@ -175,7 +176,7 @@ namespace NZ.VisualTest
             if (Camera.main != null)
                 return Camera.main;
 
-            return UnityEngine.Object.FindObjectOfType<Camera>();
+            return UnityEngine.Object.FindFirstObjectByType<Camera>();
         }
 
         private sealed class RuntimeFFmpegRecorder : MonoBehaviour
@@ -343,16 +344,16 @@ namespace NZ.VisualTest
             switch (button)
             {
                 case 0:
-                    pressedState = pressedState.WithButton(MouseButton.Left, true);
+                    pressedState = pressedState.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left, true);
                     break;
                 case 1:
-                    pressedState = pressedState.WithButton(MouseButton.Right, true);
+                    pressedState = pressedState.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Right, true);
                     break;
                 case 2:
-                    pressedState = pressedState.WithButton(MouseButton.Middle, true);
+                    pressedState = pressedState.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Middle, true);
                     break;
                 default:
-                    pressedState = pressedState.WithButton(MouseButton.Left, true);
+                    pressedState = pressedState.WithButton(UnityEngine.InputSystem.LowLevel.MouseButton.Left, true);
                     break;
             }
 
@@ -364,6 +365,71 @@ namespace NZ.VisualTest
             InputSystem.Update();
             InputSystem.RemoveDevice(mouse);
             yield return null;
+        }
+
+        /// <summary>
+        /// 捕获指定 UI Toolkit 元素截图，保存到项目临时目录并作为测试附件上传。
+        /// </summary>
+        protected IEnumerator CaptureElementScreenshot(
+            VisualElement element,
+            string artifactName,
+            Action<string> onSaved = null,
+            int padding = 0)
+        {
+            Assert.That(element, Is.Not.Null, "待截图的 VisualElement 不能为空。");
+            Assert.That(element.worldBound.width, Is.GreaterThan(0f), "待截图元素宽度必须大于 0。");
+            Assert.That(element.worldBound.height, Is.GreaterThan(0f), "待截图元素高度必须大于 0。");
+
+            yield return new WaitForEndOfFrame();
+
+            RectInt region = VisualTestImageUtility.CreateScreenRegionFromTopLeftRect(
+                element.worldBound,
+                Screen.width,
+                Screen.height,
+                padding);
+
+            Assert.That(region.width, Is.GreaterThan(0), "截图区域宽度必须大于 0。");
+            Assert.That(region.height, Is.GreaterThan(0), "截图区域高度必须大于 0。");
+
+            string actualPath = VisualTestImageUtility.BuildArtifactPath(TestName, artifactName);
+            VisualTestImageUtility.CaptureScreenRegionToFile(actualPath, region);
+            VisualTestImageUtility.AttachArtifact(actualPath, $"Captured {artifactName}");
+            onSaved?.Invoke(actualPath);
+        }
+
+        /// <summary>
+        /// 将捕获图片与设计基线图片进行比对，并输出 diff 附件。
+        /// </summary>
+        protected void AssertScreenshotMatchesBaseline(
+            string actualPath,
+            string expectedPath,
+            string diffArtifactName,
+            byte tolerance = 0,
+            float maxMismatchRatio = 0f)
+        {
+            Assert.That(File.Exists(actualPath), Is.True, $"实际截图不存在：{actualPath}");
+            Assert.That(File.Exists(expectedPath), Is.True, $"基线图片不存在：{expectedPath}");
+
+            VisualTestImageUtility.AttachArtifact(expectedPath, $"Baseline {Path.GetFileName(expectedPath)}");
+
+            string diffPath = VisualTestImageUtility.BuildArtifactPath(TestName, diffArtifactName);
+            VisualImageComparisonResult result = VisualTestImageUtility.ComparePngFiles(
+                expectedPath,
+                actualPath,
+                diffPath,
+                tolerance);
+
+            VisualTestImageUtility.AttachArtifact(diffPath, $"Diff {diffArtifactName}");
+
+            Assert.That(
+                result.SizeMatches,
+                Is.True,
+                $"截图尺寸不一致。expected={result.ExpectedWidth}x{result.ExpectedHeight}, actual={result.ActualWidth}x{result.ActualHeight}");
+
+            Assert.That(
+                result.MismatchRatio,
+                Is.LessThanOrEqualTo(maxMismatchRatio),
+                $"截图与基线差异过大。mismatch={result.MismatchPixelCount}/{result.TotalPixelCount}, ratio={result.MismatchRatio:P2}, maxChannelDiff={result.MaxChannelDifference}, meanChannelDiff={result.MeanChannelDifference:F2}");
         }
     }
 }

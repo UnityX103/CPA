@@ -4,8 +4,7 @@
     "references": [
         "APP.Runtime",
         "APP.UI_V2",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "NZ.VisualTest"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -16,6 +15,7 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],

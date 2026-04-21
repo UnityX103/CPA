@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using MCPForUnity.Editor.Services;
@@ -10,7 +11,63 @@ namespace MCPForUnity.Editor
     {
         private const string PREF_AUTO_CONNECT = "MCP_AutoConnect_OnStartup";
         private const int MCP_PORT = 8080;
+        private const string CONFIG_FILE_NAME = "mcp.config.json";
         private static bool _hasAttemptedConnect = false;
+
+        private static string GetConfigPath()
+        {
+            string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            return Path.Combine(projectRoot, CONFIG_FILE_NAME);
+        }
+
+        /// <summary>
+        /// 读取项目根目录下的 mcp.config.json，若其中 autoConnect 为 false 则返回 false。
+        /// 文件不存在时默认返回 true（自动连接）。
+        /// </summary>
+        public static bool GetAutoConnectConfigEnabled()
+        {
+            string configPath = GetConfigPath();
+
+            if (!File.Exists(configPath))
+                return true;
+
+            try
+            {
+                string json = File.ReadAllText(configPath);
+                // 简单解析，避免引入额外依赖
+                // 匹配 "autoConnect": false
+                if (System.Text.RegularExpressions.Regex.IsMatch(json,
+                    @"""autoConnect""\s*:\s*false", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[MCP AutoConnect] 读取 {CONFIG_FILE_NAME} 失败: {e.Message}");
+            }
+
+            return true;
+        }
+
+        public static void SetAutoConnectConfigEnabled(bool enabled)
+        {
+            string configPath = GetConfigPath();
+
+            try
+            {
+                File.WriteAllText(configPath, $@"{{""autoConnect"": {enabled.ToString().ToLowerInvariant()}}}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[MCP AutoConnect] 写入 {CONFIG_FILE_NAME} 失败: {e.Message}");
+            }
+        }
+
+        private static bool IsAutoConnectEnabledByConfig()
+        {
+            return GetAutoConnectConfigEnabled();
+        }
         
         public static void AutoConnect()
         {
@@ -94,9 +151,15 @@ namespace MCPForUnity.Editor
             }
             
             _hasAttemptedConnect = true;
-            
+
+            if (!IsAutoConnectEnabledByConfig())
+            {
+                Debug.Log($"[MCP AutoConnect] 项目根目录 {CONFIG_FILE_NAME} 中已禁用自动连接，跳过");
+                return;
+            }
+
             await Task.Delay(3000);
-            
+
             var bridge = MCPServiceLocator.Bridge;
             
             if (bridge.IsRunning)

@@ -314,20 +314,8 @@ namespace MCPForUnity.Editor.Services
             originalEnterPlayModeOptionsEnabled = EditorSettings.enterPlayModeOptionsEnabled;
             originalEnterPlayModeOptions = EditorSettings.enterPlayModeOptions;
 
-            // When Play Mode triggers a domain reload, the MCP connection is torn down and the pending
-            // test run response never makes it back to the caller. To keep the bridge alive for this
-            // invocation, temporarily enable Enter Play Mode Options with domain reload disabled.
-            bool domainReloadDisabled = (originalEnterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) != 0;
-            bool needsChange = !originalEnterPlayModeOptionsEnabled || !domainReloadDisabled;
-            if (!needsChange)
-            {
-                return false;
-            }
-
-            var desired = originalEnterPlayModeOptions | EnterPlayModeOptions.DisableDomainReload;
-            EditorSettings.enterPlayModeOptionsEnabled = true;
-            EditorSettings.enterPlayModeOptions = desired;
-            return true;
+            // 禁用自动修改 Enter Play Mode Options，由项目自行管理此设置。
+            return false;
         }
 
         private static void RestoreEnterPlayModeOptions(bool originalEnabled, EnterPlayModeOptions originalOptions)

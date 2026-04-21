@@ -4,9 +4,7 @@
     "references": [
         "NZ.VisualTest",
         "Unity.InputSystem",
-        "FFmpegOut",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "FFmpegOut"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,6 +15,7 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],

@@ -45,6 +45,7 @@ namespace MCPForUnity.Editor.Services
     /// <summary>
     /// Tracks async test jobs started via MCP tools. This is not intended to capture manual Test Runner UI runs.
     /// </summary>
+    [InitializeOnLoad]
     internal static class TestJobManager
     {
         // Keep this small to avoid ballooning payloads during polling.
@@ -204,6 +205,15 @@ namespace MCPForUnity.Editor.Services
             {
                 // Restoration is best-effort; never block editor load.
                 McpLog.Warn($"[TestJobManager] Failed to restore SessionState: {ex.Message}");
+            }
+
+            // After domain reload, if there is still an active running job, force-recreate
+            // TestRunnerService so its ICallbacks (RunFinished, etc.) are re-registered with
+            // the Unity Test Runner. Without this, RunFinished is never delivered and the job
+            // stays "running" forever. Access outside lock to avoid deadlocks.
+            if (!string.IsNullOrEmpty(_currentJobId))
+            {
+                _ = MCPServiceLocator.Tests;
             }
         }
 

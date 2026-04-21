@@ -2,9 +2,7 @@
     "name": "APP.Network.Tests",
     "rootNamespace": "APP.Network.Tests",
     "references": [
-        "APP.Runtime",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "APP.Runtime"
     ],
     "includePlatforms": [
         "Editor"
@@ -17,6 +15,7 @@
     ],
     "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],
