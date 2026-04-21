@@ -18,7 +18,7 @@ namespace APP.Network.DTO
     [Serializable]
     public sealed class OutboundJoinRoom : OutboundMessage
     {
-        public string code;
+        public string roomCode;              // was: code
         public string playerName;
     }
 

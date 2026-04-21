@@ -8,13 +8,12 @@ namespace APP.Network.DTO
     {
         public int v;
         public string type;
-        public string code;
+        public string roomCode;           // was: code
         public string playerId;
         public string playerName;
         public RemoteState state;
-        public List<SnapshotEntry> snapshot;
-        public string errorCode;
-        public string message;
+        public List<SnapshotEntry> players; // was: snapshot
+        public string error;              // was: errorCode + message
     }
 
     [Serializable]

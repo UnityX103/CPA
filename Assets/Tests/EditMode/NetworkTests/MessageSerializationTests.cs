@@ -9,13 +9,14 @@ namespace APP.Network.Tests
     public sealed class MessageSerializationTests
     {
         [Test]
-        public void InboundMessage_WhenRoundTripped_PreservesSnapshotPayload()
+        public void InboundMessage_WhenRoundTripped_PreservesPlayersPayload()
         {
             var message = new InboundMessage
             {
                 v = 1,
                 type = "room_snapshot",
-                snapshot = new List<SnapshotEntry>
+                roomCode = "ABC123",
+                players = new List<SnapshotEntry>
                 {
                     new SnapshotEntry
                     {
@@ -25,11 +26,8 @@ namespace APP.Network.Tests
                         {
                             pomodoro = new PomodoroStateDto
                             {
-                                phase = 1,
-                                remainingSeconds = 300,
-                                currentRound = 2,
-                                totalRounds = 4,
-                                isRunning = true,
+                                phase = 1, remainingSeconds = 300,
+                                currentRound = 2, totalRounds = 4, isRunning = true,
                             },
                             activeApp = null,
                         },
@@ -40,11 +38,10 @@ namespace APP.Network.Tests
             string json = JsonUtility.ToJson(message);
             InboundMessage restored = JsonUtility.FromJson<InboundMessage>(json);
 
-            Assert.That(restored.v, Is.EqualTo(1));
-            Assert.That(restored.type, Is.EqualTo("room_snapshot"));
-            Assert.That(restored.snapshot, Has.Count.EqualTo(1));
-            Assert.That(restored.snapshot[0].playerName, Is.EqualTo("Alice"));
-            Assert.That(restored.snapshot[0].state.pomodoro.remainingSeconds, Is.EqualTo(300));
+            Assert.That(restored.roomCode, Is.EqualTo("ABC123"));
+            Assert.That(restored.players, Has.Count.EqualTo(1));
+            Assert.That(restored.players[0].playerName, Is.EqualTo("Alice"));
+            Assert.That(restored.players[0].state.pomodoro.remainingSeconds, Is.EqualTo(300));
         }
 
         [Test]
@@ -93,19 +90,29 @@ namespace APP.Network.Tests
         }
 
         [Test]
-        public void InboundMessage_WhenOptionalFieldsMissing_UsesDefaultValues()
+        public void InboundMessage_WhenErrorFieldProvided_ParsesErrorCode()
         {
-            const string json = "{\"v\":1,\"type\":\"player_joined\",\"playerId\":\"remote-2\"}";
+            const string json = "{\"v\":1,\"type\":\"error\",\"error\":\"ROOM_FULL\"}";
 
             InboundMessage restored = JsonUtility.FromJson<InboundMessage>(json);
 
-            Assert.That(restored.v, Is.EqualTo(1));
-            Assert.That(restored.type, Is.EqualTo("player_joined"));
-            Assert.That(restored.playerId, Is.EqualTo("remote-2"));
-            // JsonUtility 对 string 返回空字符串而非 null
-            Assert.That(string.IsNullOrEmpty(restored.playerName), Is.True);
-            // JsonUtility 对 [Serializable] 类字段实例化空对象而非 null，List 返回空列表
-            // 只验证无异常和基本字段正确即可
+            Assert.That(restored.type, Is.EqualTo("error"));
+            Assert.That(restored.error, Is.EqualTo("ROOM_FULL"));
+        }
+
+        [Test]
+        public void OutboundJoinRoom_WhenSerialized_UsesRoomCodeField()
+        {
+            var msg = new OutboundJoinRoom
+            {
+                type = "join_room",
+                roomCode = "XYZ789",
+                playerName = "Bob",
+            };
+
+            string json = JsonUtility.ToJson(msg);
+            Assert.That(json, Does.Contain("\"roomCode\":\"XYZ789\""));
+            Assert.That(json, Does.Not.Contain("\"code\":"));
         }
 
         [Test]
