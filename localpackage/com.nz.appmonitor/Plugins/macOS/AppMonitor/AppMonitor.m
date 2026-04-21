@@ -136,18 +136,21 @@ int GetFrontmostAppInfo(char *appName,
                         int nameLen,
                         char *windowTitle,
                         int titleLen,
+                        char *bundleId,
+                        int bundleIdLen,
                         unsigned char **iconData,
                         int *iconLen)
 {
     @autoreleasepool
     {
-        if (appName == NULL || nameLen <= 0 || windowTitle == NULL || titleLen <= 0 || iconData == NULL || iconLen == NULL)
+        if (appName == NULL || nameLen <= 0 || windowTitle == NULL || titleLen <= 0 || bundleId == NULL || bundleIdLen <= 0 || iconData == NULL || iconLen == NULL)
         {
             return AppMonitorResultCodeInvalidArgument;
         }
 
         appName[0] = '\0';
         windowTitle[0] = '\0';
+        bundleId[0] = '\0';
         *iconData = NULL;
         *iconLen = 0;
 
@@ -165,6 +168,7 @@ int GetFrontmostAppInfo(char *appName,
 
         CopyNSStringToBuffer(frontmostApp.localizedName, appName, nameLen);
         CopyNSStringToBuffer(GetFocusedWindowTitle(frontmostApp), windowTitle, titleLen);
+        CopyNSStringToBuffer(frontmostApp.bundleIdentifier ?: @"", bundleId, bundleIdLen);
 
         NSData *pngData = GetAppIconPngData(frontmostApp);
         if (pngData != nil && pngData.length > 0)

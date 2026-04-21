@@ -2,9 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+# 构建产物就落在 Plugins/macOS/AppMonitor.bundle（SCRIPT_DIR 的父目录）
+OUTPUT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_FILE="${SCRIPT_DIR}/AppMonitor.m"
-OUTPUT_BUNDLE="${PROJECT_ROOT}/Assets/Plugins/macOS/AppMonitor.bundle"
+OUTPUT_BUNDLE="${OUTPUT_DIR}/AppMonitor.bundle"
 SDK_PATH="$(xcrun --sdk macosx --show-sdk-path)"
 
 clang \
