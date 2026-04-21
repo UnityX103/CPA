@@ -14,6 +14,8 @@ namespace APP.Network.DTO
         public RemoteState state;
         public List<SnapshotEntry> players; // was: snapshot
         public string error;              // was: errorCode + message
+        public string bundleId;           // 新增：icon_need / icon_broadcast
+        public string iconBase64;         // 新增：icon_broadcast
     }
 
     [Serializable]

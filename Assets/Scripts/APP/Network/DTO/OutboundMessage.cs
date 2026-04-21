@@ -34,6 +34,19 @@ namespace APP.Network.DTO
     }
 
     [Serializable]
+    public sealed class OutboundIconUpload : OutboundMessage
+    {
+        public string bundleId;
+        public string iconBase64;
+    }
+
+    [Serializable]
+    public sealed class OutboundIconRequest : OutboundMessage
+    {
+        public string[] bundleIds;
+    }
+
+    [Serializable]
     public sealed class OutboundPing : OutboundMessage
     {
     }
