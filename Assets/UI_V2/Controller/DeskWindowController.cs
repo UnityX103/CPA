@@ -99,6 +99,7 @@ namespace APP.Pomodoro.Controller
         private void Update()
         {
             this.SendCommand(new Cmd_PomodoroTick(Time.deltaTime));
+            this.GetSystem<IActiveAppSystem>().Tick(Time.unscaledDeltaTime);
             this.GetSystem<IStateSyncSystem>().Tick(Time.unscaledDeltaTime);
         }
 
