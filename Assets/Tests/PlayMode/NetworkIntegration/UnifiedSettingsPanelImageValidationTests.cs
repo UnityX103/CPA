@@ -16,20 +16,14 @@ using UnityEditor.SceneManagement;
 namespace APP.NetworkIntegration.Tests
 {
     [TestFixture]
-    public sealed class UnifiedSettingsPanelImageValidationTests : VisualTestBase
+    public sealed class UnifiedSettingsPanelImageValidationTests : VisualImageTestBase
     {
         private const string ScenePath = "Assets/Scenes/MainV2.unity";
         private const string BaselineDirectory = "TestArtifacts/PencilReferences";
         private const BindingFlags InstancePrivate = BindingFlags.Instance | BindingFlags.NonPublic;
-        private const byte PixelTolerance = 24;
-        private const float MaxMismatchRatio = 0.12f;
-
-        protected override bool UseDedicatedTestCamera => false;
-
-        protected override bool RecordOnSetUp => false;
 
         [UnityTest]
-        public IEnumerator UnifiedSettingsPanel_ShouldMatchPencilBaselines_WhenSwitchingTabs()
+        public IEnumerator UnifiedSettingsPanel_ShouldCaptureExpectedStates()
         {
 #if !UNITY_EDITOR
             Assert.Ignore("图片视觉测试仅支持 Unity Editor PlayMode。");
@@ -59,10 +53,10 @@ namespace APP.NetworkIntegration.Tests
                 "psp-root",
                 60);
 
-            yield return CaptureAndCompareOverlay(
+            yield return CaptureOverlay(
                 uiDocument.rootVisualElement,
                 "pomodoro",
-                "unified-settings-pomodoro.png");
+                $"{BaselineDirectory}/unified-settings-pomodoro.png");
 
             InvokePrivate(settingsPanel, "SelectTab", "online");
             yield return WaitUntilReady(
@@ -71,10 +65,10 @@ namespace APP.NetworkIntegration.Tests
                 "osp-root",
                 60);
 
-            yield return CaptureAndCompareOverlay(
+            yield return CaptureOverlay(
                 uiDocument.rootVisualElement,
                 "online",
-                "unified-settings-online-not-joined.png");
+                $"{BaselineDirectory}/unified-settings-online-not-joined.png");
 
             InvokePrivate(settingsPanel, "SelectTab", "pet");
             yield return WaitUntilReady(
@@ -83,38 +77,64 @@ namespace APP.NetworkIntegration.Tests
                 "pet-root",
                 60);
 
-            yield return CaptureAndCompareOverlay(
+            yield return CaptureOverlay(
                 uiDocument.rootVisualElement,
                 "pet",
-                "unified-settings-pet.png");
+                $"{BaselineDirectory}/unified-settings-pet.png");
+
+            Assert.That(CurrentManifest.steps.Count, Is.EqualTo(3), "应登记三个 capture step。");
+            Assert.That(File.Exists(Path.Combine(CurrentRunDirectory, "01-pomodoro-actual.png")), Is.True);
+            Assert.That(File.Exists(Path.Combine(CurrentRunDirectory, "02-online-actual.png")), Is.True);
+            Assert.That(File.Exists(Path.Combine(CurrentRunDirectory, "03-pet-actual.png")), Is.True);
+            string manifestPath = Path.Combine(CurrentRunDirectory, "manifest.json");
+            Assert.That(File.Exists(manifestPath), Is.True);
+
+            string manifestJson = File.ReadAllText(manifestPath);
+            VisualImageTestRunManifest manifest = JsonUtility.FromJson<VisualImageTestRunManifest>(manifestJson);
+
+            Assert.That(manifest, Is.Not.Null, "manifest.json 应能反序列化为 VisualImageTestRunManifest。");
+            Assert.That(manifest.steps, Is.Not.Null, "manifest.json 中 steps 不应为空。");
+            Assert.That(manifest.steps.Count, Is.EqualTo(3), "manifest.json 中应登记三个 capture step。");
+
+            AssertManifestStep(
+                manifest.steps[0],
+                "pomodoro",
+                "01-pomodoro-actual.png",
+                $"{BaselineDirectory}/unified-settings-pomodoro.png");
+            AssertManifestStep(
+                manifest.steps[1],
+                "online",
+                "02-online-actual.png",
+                $"{BaselineDirectory}/unified-settings-online-not-joined.png");
+            AssertManifestStep(
+                manifest.steps[2],
+                "pet",
+                "03-pet-actual.png",
+                $"{BaselineDirectory}/unified-settings-pet.png");
 #endif
         }
 
-        private IEnumerator CaptureAndCompareOverlay(
+        private IEnumerator CaptureOverlay(
             VisualElement root,
-            string artifactSuffix,
-            string baselineFileName)
+            string stepName,
+            string baselinePath)
         {
             VisualElement overlay = root.Q<VisualElement>("settings-overlay");
             Assert.That(overlay, Is.Not.Null, "settings-overlay 必须存在。");
 
-            string actualPath = null;
-            yield return CaptureElementScreenshot(
-                overlay,
-                $"unified-settings-{artifactSuffix}-actual",
-                path => actualPath = path);
+            yield return CaptureStep(stepName, overlay, baselinePath, "settings-overlay");
+        }
 
-            string baselinePath = Path.Combine(
-                Path.GetFullPath(Path.Combine(Application.dataPath, "..")),
-                BaselineDirectory,
-                baselineFileName);
-
-            AssertScreenshotMatchesBaseline(
-                actualPath,
-                baselinePath,
-                $"unified-settings-{artifactSuffix}-diff",
-                PixelTolerance,
-                MaxMismatchRatio);
+        private static void AssertManifestStep(
+            VisualImageTestStepManifest step,
+            string expectedName,
+            string expectedActualImagePath,
+            string expectedBaselineImagePath)
+        {
+            Assert.That(step, Is.Not.Null, $"manifest step {expectedName} 不应为空。");
+            Assert.That(step.name, Is.EqualTo(expectedName));
+            Assert.That(step.actualImagePath, Is.EqualTo(expectedActualImagePath));
+            Assert.That(step.baselineImagePath, Is.EqualTo(expectedBaselineImagePath));
         }
 
         private static IEnumerator WaitUntilReady(
