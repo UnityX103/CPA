@@ -91,9 +91,9 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
 
             // 回填上次的用户名
-            if (_usernameField != null)
+            if (_usernameField != null && _sessionMemory != null)
             {
-                string savedName = _sessionMemory?.LastPlayerName.Value ?? string.Empty;
+                string savedName = _sessionMemory.LastPlayerName.Value;
                 if (!string.IsNullOrEmpty(savedName))
                 {
                     _usernameField.value = savedName;
@@ -286,6 +286,7 @@ namespace APP.Pomodoro.Controller
                     break;
                 case ConnectionStatus.Connected:
                 case ConnectionStatus.InRoom:
+                case ConnectionStatus.Disconnected:
                     _reconnectBanner.AddToClassList("osp-hidden");
                     break;
             }

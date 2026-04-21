@@ -4,6 +4,7 @@
     <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
     <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
     <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
+    <ui:Style src="../Styles/Components/ButtonIcon.uss"/>
     <ui:Style src="../Styles/Components/InputText.uss"/>
 
     <!--
