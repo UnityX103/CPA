@@ -21,6 +21,7 @@ namespace CPA.Monitoring
     public class AppInfo
     {
         public string AppName;
+        public string BundleId;
         public string WindowTitle;
         public Texture2D Icon;
         public bool IsSuccess;

@@ -11,6 +11,7 @@ namespace CPA.Monitoring
         private const string DllName = "AppMonitor";
         private const int MaxAppNameLength = 256;
         private const int MaxWindowTitleLength = 1024;
+        private const int MaxBundleIdLength = 256;
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         private static extern int GetFrontmostAppInfo(
@@ -18,6 +19,8 @@ namespace CPA.Monitoring
             int nameLen,
             [Out, MarshalAs(UnmanagedType.LPStr)] StringBuilder windowTitle,
             int titleLen,
+            [Out, MarshalAs(UnmanagedType.LPStr)] StringBuilder bundleId,
+            int bundleIdLen,
             out IntPtr iconData,
             out int iconLen);
 
@@ -76,6 +79,7 @@ namespace CPA.Monitoring
             Debug.Log("[MacOSAppMonitorImpl] GetCurrentApp: 开始调用原生插件");
             var appNameBuilder = new StringBuilder(MaxAppNameLength);
             var windowTitleBuilder = new StringBuilder(MaxWindowTitleLength);
+            var bundleIdBuilder = new StringBuilder(MaxBundleIdLength);
 
             int result;
             try
@@ -85,6 +89,8 @@ namespace CPA.Monitoring
                     MaxAppNameLength,
                     windowTitleBuilder,
                     MaxWindowTitleLength,
+                    bundleIdBuilder,
+                    MaxBundleIdLength,
                     out IntPtr iconDataTemp,
                     out int iconLenTemp);
                 Debug.Log($"[MacOSAppMonitorImpl] GetFrontmostAppInfo 返回码: {result} ({(AppMonitorResultCode)result})");
@@ -111,11 +117,13 @@ namespace CPA.Monitoring
 
                 string appName = appNameBuilder.ToString();
                 string windowTitle = windowTitleBuilder.ToString();
-                Debug.Log($"[MacOSAppMonitorImpl] 获取成功: AppName='{appName}', WindowTitle='{windowTitle}', iconLen={iconLenTemp}");
+                string bundleId = bundleIdBuilder.ToString();
+                Debug.Log($"[MacOSAppMonitorImpl] 获取成功: AppName='{appName}', BundleId='{bundleId}', WindowTitle='{windowTitle}', iconLen={iconLenTemp}");
 
                 var appInfo = new AppInfo
                 {
                     AppName = appName,
+                    BundleId = bundleId,
                     WindowTitle = windowTitle,
                     IsSuccess = true
                 };
@@ -212,6 +220,7 @@ namespace CPA.Monitoring
             return new AppInfo
             {
                 AppName = processName,
+                BundleId = string.Empty,
                 WindowTitle = string.Empty,
                 Icon = CreateFallbackIcon(),
                 IsSuccess = true,
