@@ -1,0 +1,11 @@
+{
+    "name": "APP.Utility.Tests",
+    "rootNamespace": "APP.Utility.Tests",
+    "references": [ "APP.Runtime" ],
+    "includePlatforms": [ "Editor" ],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [ "nunit.framework.dll" ],
+    "autoReferenced": false,
+    "defineConstraints": [ "UNITY_INCLUDE_TESTS" ]
+}
