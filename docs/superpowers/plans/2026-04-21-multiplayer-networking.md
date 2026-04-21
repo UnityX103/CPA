@@ -2145,15 +2145,15 @@ git commit -m "feat(net): IActiveAppSystem 接口"
 
 > 因 `IAppMonitor` 在 `NZ.AppMonitor.Runtime` 里，`APP.Runtime` asmdef 需要加对 `NZ.AppMonitor.Runtime` 的引用。先改 asmdef。
 
-- [ ] **Step 1：更新 APP.Runtime.asmdef**
+- [ ] **Step 1：更新 APP.Runtime.asmdef 引用 AppMonitor**
 
-`Assets/Scripts/APP/APP.Runtime.asmdef` （如果不存在先找实际位置——从 `APP.UI_V2.asmdef` 看它 `references` 了 `APP.Runtime`，那 `APP.Runtime.asmdef` 应在 Scripts 或 Scripts/APP 下）：
-
-```bash
-find /Users/xpy/Desktop/NanZhai/CPA/Assets/Scripts -name "APP.Runtime.asmdef"
+路径：`Assets/Scripts/APP.Runtime.asmdef`。打开后把 `references` 改成：
+```json
+"references": [
+    "Kirurobo.UniWindowController",
+    "NZ.AppMonitor.Runtime"
+],
 ```
-
-找到后打开，在 `references` 里追加 `"NZ.AppMonitor.Runtime"`。
 
 - [ ] **Step 2：测试（red）**
 
@@ -2308,7 +2308,7 @@ namespace APP.Network.System
             if (_sampleAccumulator < 1f) return;
             _sampleAccumulator = 0f;
 
-            IAppMonitor monitor = _monitor ?? AppMonitor.Instance;
+            IAppMonitor monitor = _monitor ?? ResolveDefaultMonitor();
             AppInfo info = monitor?.GetCurrentApp();
             if (info == null || !info.IsSuccess || string.IsNullOrEmpty(info.BundleId))
             {
@@ -2332,11 +2332,20 @@ namespace APP.Network.System
             if (_captureIconPng != null) return _captureIconPng();
             return info?.Icon != null ? info.Icon.EncodeToPNG() : null;
         }
+
+        private static IAppMonitor ResolveDefaultMonitor()
+        {
+            // AppMonitor 静态工厂 API 名字在恢复的包里叫什么，此处按实际调整。
+            // 常见模式 1: AppMonitor.Instance     （单例）
+            // 常见模式 2: AppMonitor.Create()    （工厂）
+            // 先读 localpackage/com.nz.appmonitor/Runtime/AppMonitor.cs 确认后使用：
+            return CPA.Monitoring.AppMonitor.Instance;
+        }
     }
 }
 ```
 
-> `AppMonitor.Instance` 是 `com.nz.appmonitor` 的静态工厂（见历史 `AppMonitor.cs`）。若工厂符号不叫 `Instance`，按实际改。
+> **实现注意**：上面 `ResolveDefaultMonitor` 假设 `AppMonitor.Instance` 是合法符号。在执行这一步前先打开 `localpackage/com.nz.appmonitor/Runtime/AppMonitor.cs` 读一下真实 API（可能是 `AppMonitor.Instance` / `AppMonitor.Create()` / `new MacOSAppMonitorImpl()` 之一），按实际改成可编译的写法。
 
 - [ ] **Step 5：跑测试确认全绿**
 
