@@ -121,7 +121,55 @@ namespace APP.NetworkIntegration.Tests
             yield return new WaitForSecondsRealtime(0.5f);
         }
 
-        // ─── 下面 Case 3/4 在后续 Task 里追加 ───
+        [UnityTest]
+        public IEnumerator IconUpload_Broadcast_CachedInA()
+        {
+            Assert.That(_server, Is.Not.Null);
+
+            bool roomCreated = false;
+            string roomCode = null;
+            IUnRegister r1 = GameApp.Interface.RegisterEvent<E_RoomCreated>(e => { roomCreated = true; roomCode = e.Code; });
+            GameApp.Interface.SendCommand(new Cmd_CreateRoom("Alice", _server.Url));
+
+            float timeout = 5f;
+            while (!roomCreated && timeout > 0f) { yield return null; timeout -= Time.unscaledDeltaTime; }
+            r1.UnRegister();
+            Assert.That(roomCreated);
+
+            ClientWebSocket wsB = null;
+            var t1 = Task.Run(async () => wsB = await OpenBareWsAsync(_server.Url));
+            while (!t1.IsCompleted) yield return null;
+
+            string joinJson = $"{{\"v\":1,\"type\":\"join_room\",\"roomCode\":\"{roomCode}\",\"playerName\":\"Bob\"}}";
+            var t2 = Task.Run(async () => await SendJsonAsync(wsB, joinJson));
+            while (!t2.IsCompleted) yield return null;
+            yield return new WaitForSecondsRealtime(0.5f);
+
+            const string testBundleId = "test.e2e.app";
+            const string onePxPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwAB/1EF5YwAAAAASUVORK5CYII=";
+
+            string state = $"{{\"v\":1,\"type\":\"player_state_update\",\"state\":{{\"pomodoro\":{{\"phase\":0,\"remainingSeconds\":1500,\"currentRound\":1,\"totalRounds\":4,\"isRunning\":false}},\"activeApp\":{{\"name\":\"Test\",\"bundleId\":\"{testBundleId}\"}}}}}}";
+            var t3 = Task.Run(async () => await SendJsonAsync(wsB, state));
+            while (!t3.IsCompleted) yield return null;
+
+            // B 直接上传图标（不读 B 的 inbox，简化）
+            string upload = $"{{\"v\":1,\"type\":\"icon_upload\",\"bundleId\":\"{testBundleId}\",\"iconBase64\":\"{onePxPngBase64}\"}}";
+            var t4 = Task.Run(async () => await SendJsonAsync(wsB, upload));
+            while (!t4.IsCompleted) yield return null;
+
+            // A 的 IconCache 应命中
+            var iconCache = GameApp.Interface.GetSystem<APP.Network.System.IIconCacheSystem>();
+            timeout = 5f;
+            while (!iconCache.HasIconFor(testBundleId) && timeout > 0f) { yield return null; timeout -= Time.unscaledDeltaTime; }
+            Assert.That(iconCache.HasIconFor(testBundleId), Is.True, "A 端 IconCache 未命中");
+
+            var close = Task.Run(async () => await wsB.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None));
+            while (!close.IsCompleted) yield return null;
+            GameApp.Interface.SendCommand(new Cmd_LeaveRoom());
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        // ─── 下面 Case 4 在后续 Task 里追加 ───
 
         // ─── 裸 WS helper ───
         private static async Task<ClientWebSocket> OpenBareWsAsync(string url)
