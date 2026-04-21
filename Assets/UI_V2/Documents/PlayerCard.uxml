@@ -45,7 +45,7 @@
         <!-- cwbeK: footer  row  align-center  margin-top:12  gap:6 -->
         <ui:VisualElement class="pc-footer">
             <!-- KN0dX: footIcon 13×13  lucide app-window → 色块占位  #B5A49A -->
-            <ui:VisualElement class="pc-foot-icon"/>
+            <ui:VisualElement name="pc-active-app-icon" class="pc-foot-icon"/>
             <!-- rFcKx: footText  fontSize:11  weight:500→normal  #A28B79 -->
             <ui:Label name="pc-app" class="pc-app" text="VS Code"/>
         </ui:VisualElement>
