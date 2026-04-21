@@ -466,7 +466,7 @@ namespace APP.Network.System
             room.SetStatus(ConnectionStatus.Error);
             string code = string.IsNullOrEmpty(inbound.error) ? "UNKNOWN" : inbound.error;
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Error));
-            this.SendEvent(new E_NetworkError(code, code));
+            this.SendEvent(new E_NetworkError(code, string.Empty));
         }
 
         private List<RemotePlayerData> BuildRemotePlayers(IList<SnapshotEntry> snapshot, string localPlayerId)

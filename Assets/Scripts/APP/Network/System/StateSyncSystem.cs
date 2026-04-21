@@ -70,8 +70,8 @@ namespace APP.Network.System
             this.GetSystem<INetworkSystem>().Send(new OutboundSyncState
             {
                 v = 1,
-                type = "sync_state",
-                data = state,
+                type = "player_state_update",
+                state = state,
             });
 
             _lastSent = state;

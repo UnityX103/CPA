@@ -30,7 +30,7 @@ namespace APP.Network.DTO
     [Serializable]
     public sealed class OutboundSyncState : OutboundMessage
     {
-        public RemoteState data;
+        public RemoteState state;
     }
 
     [Serializable]
