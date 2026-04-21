@@ -2,6 +2,7 @@ using APP.Network.Command;
 using APP.Network.Event;
 using APP.Network.Model;
 using APP.Pomodoro.Model;
+using APP.SessionMemory.Model;
 using QFramework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -22,6 +23,11 @@ namespace APP.Pomodoro.Controller
 
         // ─── 私有字段 ────────────────────────────────────────────
         private IRoomModel _roomModel;
+        private ISessionMemoryModel _sessionMemory;
+        private Toggle _autoToggle;
+        private Button _createBtn;
+        private Button _copyBtn;
+        private Label _reconnectBanner;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
         private VisualElement _joinCard;
@@ -42,6 +48,7 @@ namespace APP.Pomodoro.Controller
         public void Init(VisualElement container, IRoomModel roomModel, GameObject lifecycleOwner)
         {
             _roomModel = roomModel;
+            _sessionMemory = GameApp.Interface.GetModel<ISessionMemoryModel>();
 
             // 查询 UI 元素
             _joinCard      = container.Q<VisualElement>("osp-join-card");
@@ -53,10 +60,22 @@ namespace APP.Pomodoro.Controller
             _ospError      = container.Q<Label>("osp-error");
             _usernameField = container.Q<TextField>("osp-username");
             _roomIdField   = container.Q<TextField>("osp-room-id");
+            _autoToggle      = container.Q<Toggle>("osp-auto-toggle");
+            _createBtn       = container.Q<Button>("osp-create-btn");
+            _copyBtn         = container.Q<Button>("osp-copy-btn");
+            _reconnectBanner = container.Q<Label>("osp-reconnect-banner");
 
             // 按钮事件
             container.Q<Button>("osp-join-btn")?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
             container.Q<Button>("osp-exit-btn")?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
+            _createBtn?.RegisterCallback<PointerUpEvent>(_ => OnCreateClicked());
+            _copyBtn?.RegisterCallback<PointerUpEvent>(_ => OnCopyClicked());
+
+            if (_autoToggle != null)
+            {
+                _autoToggle.SetValueWithoutNotify(_sessionMemory.AutoReconnectEnabled.Value);
+                _autoToggle.RegisterValueChangedCallback(e => _sessionMemory.SetAutoReconnectEnabled(e.newValue));
+            }
 
             // Model/Event 订阅
             if (_roomModel != null)
@@ -68,10 +87,13 @@ namespace APP.Pomodoro.Controller
             this.RegisterEvent<E_NetworkError>(OnNetworkError)
                 .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
 
+            this.RegisterEvent<E_ConnectionStateChanged>(OnConnectionStateChanged)
+                .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+
             // 回填上次的用户名
-            if (_usernameField != null && _roomModel != null)
+            if (_usernameField != null)
             {
-                string savedName = _roomModel.LocalPlayerName.Value;
+                string savedName = _sessionMemory?.LastPlayerName.Value ?? string.Empty;
                 if (!string.IsNullOrEmpty(savedName))
                 {
                     _usernameField.value = savedName;
@@ -220,6 +242,53 @@ namespace APP.Pomodoro.Controller
 
             _ospError.text = message ?? string.Empty;
             _ospError.EnableInClassList("is-visible", !string.IsNullOrEmpty(message));
+        }
+
+        private void OnCreateClicked()
+        {
+            string username = _usernameField?.value ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                ShowError("请输入用户名");
+                return;
+            }
+
+            this.SendCommand(new Cmd_CreateRoom(username));
+        }
+
+        private void OnCopyClicked()
+        {
+            string code = _roomModel?.RoomCode.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(code)) return;
+            GUIUtility.systemCopyBuffer = code;
+            if (_copyBtn != null) _copyBtn.text = "已复制";
+            _copyBtn?.schedule.Execute(() =>
+            {
+                if (_copyBtn != null) _copyBtn.text = "复制";
+            }).StartingIn(2000);
+        }
+
+        private void OnConnectionStateChanged(E_ConnectionStateChanged e)
+        {
+            if (_reconnectBanner == null) return;
+
+            switch (e.Status)
+            {
+                case ConnectionStatus.Reconnecting:
+                    _reconnectBanner.text = "正在重新连接...";
+                    _reconnectBanner.RemoveFromClassList("osp-reconnect-banner--error");
+                    _reconnectBanner.RemoveFromClassList("osp-hidden");
+                    break;
+                case ConnectionStatus.Error:
+                    _reconnectBanner.text = "重连失败，请重试";
+                    _reconnectBanner.AddToClassList("osp-reconnect-banner--error");
+                    _reconnectBanner.RemoveFromClassList("osp-hidden");
+                    break;
+                case ConnectionStatus.Connected:
+                case ConnectionStatus.InRoom:
+                    _reconnectBanner.AddToClassList("osp-hidden");
+                    break;
+            }
         }
     }
 }
