@@ -1,3 +1,4 @@
+using APP.Network.Command;
 using APP.Network.System;
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Config;
@@ -92,6 +93,7 @@ namespace APP.Pomodoro.Controller
                 Debug.LogError("[DeskWindowController] 未找到 pomodoro-panel 节点，番茄钟面板无法初始化。");
             }
 
+            this.SendCommand(new Cmd_AutoReconnectOnStartup());
         }
 
         private void Update()
