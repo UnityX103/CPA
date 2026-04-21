@@ -221,3 +221,24 @@
 .osp-error.is-visible {
     display: flex;
 }
+
+.osp-room-name-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.osp-reconnect-banner {
+    background-color: #FFF4CC;
+    color: #8A6D00;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+    font-size: 12px;
+}
+
+.osp-reconnect-banner--error {
+    background-color: #FFD4D4;
+    color: #8A1A1A;
+}

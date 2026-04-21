@@ -36,14 +36,19 @@
             </ui:VisualElement>
             <!-- 加入按钮 -->
             <ui:Button name="osp-join-btn" text="加入房间" class="comp-btn-primary" />
+            <ui:Button name="osp-create-btn" text="创建新房间" class="comp-btn-secondary" />
         </ui:VisualElement>
 
         <!-- ══ 当前房间卡片（已加入时显示）══ -->
         <ui:VisualElement name="osp-room-card" class="osp-card osp-room-card">
+            <ui:Label name="osp-reconnect-banner" text="正在重新连接..." class="osp-reconnect-banner osp-hidden" />
             <!-- 房间头部：房间信息 + 退出按钮 -->
             <ui:VisualElement class="osp-room-head">
                 <ui:VisualElement class="osp-room-info">
-                    <ui:Label name="osp-room-name" text="ROOM-001" class="osp-room-name" />
+                    <ui:VisualElement class="osp-room-name-row">
+                        <ui:Label name="osp-room-name" text="ROOM-001" class="osp-room-name" />
+                        <ui:Button name="osp-copy-btn" text="复制" class="comp-btn-icon" />
+                    </ui:VisualElement>
                     <ui:Label name="osp-room-status" text="已连接 · 3 位成员" class="osp-room-status" />
                 </ui:VisualElement>
                 <ui:Button name="osp-exit-btn" text="退出房间" class="comp-btn-secondary" />
