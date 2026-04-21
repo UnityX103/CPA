@@ -33,6 +33,7 @@ namespace APP.Pomodoro.Controller
         private VisualElement _joinCard;
         private VisualElement _roomCard;
         private VisualElement _histCard;
+        private VisualElement _histList;
         private VisualElement _memberList;
         private Label _roomName;
         private Label _roomStatus;
@@ -54,6 +55,7 @@ namespace APP.Pomodoro.Controller
             _joinCard      = container.Q<VisualElement>("osp-join-card");
             _roomCard      = container.Q<VisualElement>("osp-room-card");
             _histCard      = container.Q<VisualElement>("osp-hist-card");
+            _histList      = container.Q<VisualElement>("osp-hist-list");
             _memberList    = container.Q<VisualElement>("osp-member-list");
             _roomName      = container.Q<Label>("osp-room-name");
             _roomStatus    = container.Q<Label>("osp-room-status");
@@ -90,6 +92,9 @@ namespace APP.Pomodoro.Controller
             this.RegisterEvent<E_ConnectionStateChanged>(OnConnectionStateChanged)
                 .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
 
+            this.RegisterEvent<APP.SessionMemory.Event.E_RecentRoomsChanged>(_ => RefreshHistoryList())
+                .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+
             // 回填上次的用户名
             if (_usernameField != null && _sessionMemory != null)
             {
@@ -116,6 +121,10 @@ namespace APP.Pomodoro.Controller
             if (inRoom)
             {
                 RefreshRoomInfo();
+            }
+            else
+            {
+                RefreshHistoryList();
             }
         }
 
@@ -290,6 +299,73 @@ namespace APP.Pomodoro.Controller
                     _reconnectBanner.AddToClassList("osp-hidden");
                     break;
             }
+        }
+
+        // ─── 历史房间列表 ────────────────────────────────────────
+
+        private void RefreshHistoryList()
+        {
+            if (_histList == null || _sessionMemory == null) return;
+
+            _histList.Clear();
+
+            var rooms = _sessionMemory.RecentRooms;
+            if (rooms == null || rooms.Count == 0)
+            {
+                var empty = new Label("暂无历史房间");
+                empty.AddToClassList("osp-hist-empty");
+                _histList.Add(empty);
+                return;
+            }
+
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                HistoryRoomEntry entry = rooms[i];
+
+                VisualElement item = new VisualElement();
+                item.AddToClassList("osp-hist-item");
+
+                Label codeLabel = new Label(entry.RoomCode);
+                codeLabel.AddToClassList("osp-hist-code");
+                item.Add(codeLabel);
+
+                Label nameLabel = new Label(entry.LastPlayerName ?? string.Empty);
+                nameLabel.AddToClassList("osp-hist-item-name");
+                item.Add(nameLabel);
+
+                Label timeLabel = new Label(RelativeTimeFormatter.Format(entry.LastJoinedAtUnixMs));
+                timeLabel.AddToClassList("osp-hist-item-time");
+                item.Add(timeLabel);
+
+                string capturedCode = entry.RoomCode;
+                Button joinBtn = new Button(() => OnHistoryJoinClicked(capturedCode)) { text = "加入" };
+                joinBtn.AddToClassList("comp-btn-icon");
+                joinBtn.AddToClassList("osp-hist-join-btn");
+                item.Add(joinBtn);
+
+                Button delBtn = new Button(() => OnHistoryDeleteClicked(capturedCode)) { text = "删除" };
+                delBtn.AddToClassList("comp-btn-icon");
+                delBtn.AddToClassList("osp-hist-del-btn");
+                item.Add(delBtn);
+
+                _histList.Add(item);
+            }
+        }
+
+        private void OnHistoryJoinClicked(string roomCode)
+        {
+            string username = _usernameField?.value ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                ShowError("请输入用户名");
+                return;
+            }
+            this.SendCommand(new Cmd_JoinRoom(roomCode, username));
+        }
+
+        private void OnHistoryDeleteClicked(string roomCode)
+        {
+            _sessionMemory.RemoveHistoryEntry(roomCode);
         }
     }
 }
