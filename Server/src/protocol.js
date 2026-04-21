@@ -8,6 +8,8 @@ const SUPPORTED_CLIENT_MESSAGE_TYPES = new Set([
     'leave_room',
     'player_state_update',
     'sync_state',
+    'icon_upload',
+    'icon_request',
     'ping',
     'pong'
 ]);
@@ -79,6 +81,21 @@ export function parseClientMessage(rawMessage)
                 type: 'player_state_update',
                 roomCode: normalizeOptionalRoomCode(parsedMessage.roomCode ?? parsedMessage.code),
                 state: normalizeRemoteState(parsedMessage.state ?? parsedMessage.data)
+            };
+
+        case 'icon_upload':
+            return {
+                v: PROTOCOL_VERSION,
+                type: 'icon_upload',
+                bundleId: normalizeBundleId(parsedMessage.bundleId),
+                iconBase64: normalizeIconBase64(parsedMessage.iconBase64)
+            };
+
+        case 'icon_request':
+            return {
+                v: PROTOCOL_VERSION,
+                type: 'icon_request',
+                bundleIds: normalizeBundleIdArray(parsedMessage.bundleIds)
             };
 
         case 'ping':
@@ -167,6 +184,16 @@ export function createErrorMessage(error)
         type: 'error',
         error: normalizeErrorCode(error)
     };
+}
+
+export function createIconNeedMessage({ bundleId })
+{
+    return { type: 'icon_need', bundleId };
+}
+
+export function createIconBroadcastMessage({ bundleId, iconBase64 })
+{
+    return { type: 'icon_broadcast', bundleId, iconBase64 };
 }
 
 function normalizePlayerName(playerName)
@@ -262,4 +289,31 @@ function stripUndefinedFields(message)
     return Object.fromEntries(
         Object.entries(message).filter(([, value]) => value !== undefined)
     );
+}
+
+function normalizeBundleId(bundleId)
+{
+    if (typeof bundleId !== 'string' || !bundleId.trim())
+    {
+        throw new ProtocolError('INVALID_MESSAGE', 'bundleId 不能为空');
+    }
+    return bundleId.trim();
+}
+
+function normalizeIconBase64(iconBase64)
+{
+    if (typeof iconBase64 !== 'string' || !iconBase64.trim())
+    {
+        throw new ProtocolError('INVALID_MESSAGE', 'iconBase64 不能为空');
+    }
+    return iconBase64;
+}
+
+function normalizeBundleIdArray(bundleIds)
+{
+    if (!Array.isArray(bundleIds) || bundleIds.length === 0)
+    {
+        throw new ProtocolError('INVALID_MESSAGE', 'bundleIds 必须是非空数组');
+    }
+    return bundleIds.map((bundleId) => normalizeBundleId(bundleId));
 }
