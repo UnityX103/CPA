@@ -81,6 +81,8 @@ namespace APP.Network.System
         private RemoteState CollectLocalState()
         {
             IPomodoroModel pomodoro = this.GetModel<IPomodoroModel>();
+            IActiveAppSystem activeApp = this.GetSystem<IActiveAppSystem>();
+            ActiveAppSnapshot snap = activeApp.Current;
 
             return new RemoteState
             {
@@ -92,7 +94,12 @@ namespace APP.Network.System
                     totalRounds = pomodoro.TotalRounds.Value,
                     isRunning = pomodoro.IsRunning.Value,
                 },
-                activeApp = null,
+                activeApp = string.IsNullOrEmpty(snap.BundleId) ? null : new ActiveAppDto
+                {
+                    name = snap.Name,
+                    bundleId = snap.BundleId,
+                    iconId = null,
+                },
             };
         }
     }
