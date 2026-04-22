@@ -47,6 +47,10 @@ namespace APP.Pomodoro.Model
         public bool AutoStartBreak = true;
         public int TargetMonitorIndex;
         public int CompletionClipIndex;
+        // 番茄钟面板位置（UI 坐标系）。旧存档解析出 (0,0)，靠 HasPomodoroPanelPosition 区分"未设置"
+        public float PomodoroPanelPositionX;
+        public float PomodoroPanelPositionY;
+        public bool HasPomodoroPanelPosition;
     }
 
     public static class PomodoroPersistence
@@ -93,6 +97,14 @@ namespace APP.Pomodoro.Model
                 state.AutoStartBreak = true;
             }
 
+            // 兼容旧版本持久化数据：缺少位置字段时保持 sentinel，让 View 首帧计算默认位置
+            if (!json.Contains("\"HasPomodoroPanelPosition\""))
+            {
+                state.HasPomodoroPanelPosition = false;
+                state.PomodoroPanelPositionX = 0f;
+                state.PomodoroPanelPositionY = 0f;
+            }
+
             ApplyState(model, state);
             _cachedJson = json;
             return true;
@@ -120,6 +132,10 @@ namespace APP.Pomodoro.Model
                 AutoStartBreak = model.AutoStartBreak.Value,
                 TargetMonitorIndex = Mathf.Max(0, model.TargetMonitorIndex.Value),
                 CompletionClipIndex = Mathf.Max(0, model.CompletionClipIndex.Value),
+                PomodoroPanelPositionX = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x) ? 0f : model.PomodoroPanelPosition.Value.x,
+                PomodoroPanelPositionY = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.y) ? 0f : model.PomodoroPanelPosition.Value.y,
+                HasPomodoroPanelPosition = !float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x)
+                                         && !float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.y),
             };
 
             string json = JsonUtility.ToJson(state);
@@ -159,6 +175,9 @@ namespace APP.Pomodoro.Model
             model.AutoStartBreak.Value = state.AutoStartBreak;
             model.TargetMonitorIndex.Value = Mathf.Max(0, state.TargetMonitorIndex);
             model.CompletionClipIndex.Value = Mathf.Max(0, state.CompletionClipIndex);
+            model.PomodoroPanelPosition.Value = state.HasPomodoroPanelPosition
+                ? new Vector2(state.PomodoroPanelPositionX, state.PomodoroPanelPositionY)
+                : new Vector2(float.NegativeInfinity, float.NegativeInfinity);
         }
 
         private static int ResolveRemainingSeconds(
