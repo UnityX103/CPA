@@ -1,6 +1,7 @@
 using System;
 using APP.Network.Model;
 using APP.Pomodoro.Model;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace APP.Pomodoro.Controller
@@ -19,11 +20,20 @@ namespace APP.Pomodoro.Controller
             "pc-phase-completed",
         };
 
+        // 玩家名自适应字号范围：基础=设计稿 14，最小=9，低于此保留 overflow 兜底
+        private const float NameBaseFontSize = 14f;
+        private const float NameMinFontSize = 9f;
+        // 安全系数，避免测量值与实际渲染舍入带来的溢出
+        private const float NameSafetyFactor = 0.98f;
+
         private readonly Label _nameLabel;
         private readonly Label _phaseLabel;
         private readonly Label _timeLabel;
         private readonly Label _roundsLabel;
         private readonly Label _appLabel;
+
+        // 防止 AutoFit 内部修改 fontSize 触发 GeometryChangedEvent 再次进入导致递归
+        private bool _isAutoFittingName;
 
         public VisualElement Root { get; }
         public string PlayerId { get; }
@@ -53,6 +63,13 @@ namespace APP.Pomodoro.Controller
             _roundsLabel = Root.Q<Label>("pc-rounds");
             _appLabel = Root.Q<Label>("pc-app");
 
+            // 玩家名容器布局变化时重新自适应字号（例如卡片被改宽）
+            if (_nameLabel != null)
+            {
+                var nameCol = _nameLabel.parent;
+                nameCol?.RegisterCallback<GeometryChangedEvent>(_ => AutoFitNameFontSize());
+            }
+
             Refresh(data);
         }
 
@@ -67,6 +84,8 @@ namespace APP.Pomodoro.Controller
             if (_nameLabel != null)
             {
                 _nameLabel.text = string.IsNullOrEmpty(data.PlayerName) ? "玩家" : data.PlayerName;
+                // 文本变化后触发自适应；schedule 下一帧让布局先完成一次 pass
+                _nameLabel.schedule.Execute(AutoFitNameFontSize).StartingIn(0);
             }
 
             if (_phaseLabel != null)
@@ -139,6 +158,45 @@ namespace APP.Pomodoro.Controller
                     return "pc-phase-completed";
                 default:
                     return "pc-phase-idle";
+            }
+        }
+
+        /// <summary>
+        /// 根据玩家名容器宽度逐步缩小字体，直到完整文本可在一行内显示为止。
+        /// 若缩到最小字号仍溢出，USS 的 overflow:hidden + text-overflow 作为兜底。
+        /// </summary>
+        private void AutoFitNameFontSize()
+        {
+            if (_isAutoFittingName) return;
+            if (_nameLabel == null) return;
+            if (string.IsNullOrEmpty(_nameLabel.text)) return;
+
+            var parent = _nameLabel.parent;
+            if (parent == null) return;
+
+            float available = parent.resolvedStyle.width;
+            if (available <= 0f) return; // 尚未完成布局
+
+            _isAutoFittingName = true;
+            try
+            {
+                // 从基础字号开始测量
+                _nameLabel.style.fontSize = NameBaseFontSize;
+                Vector2 measured = _nameLabel.MeasureTextSize(
+                    _nameLabel.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
+
+                if (measured.x <= available)
+                {
+                    return;
+                }
+
+                float ratio = available / measured.x;
+                float newSize = Mathf.Max(NameMinFontSize, NameBaseFontSize * ratio * NameSafetyFactor);
+                _nameLabel.style.fontSize = newSize;
+            }
+            finally
+            {
+                _isAutoFittingName = false;
             }
         }
 

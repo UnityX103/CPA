@@ -72,14 +72,14 @@ namespace APP.Pomodoro.Tests
             var mgr = new PlayerCardManager();
             mgr.InitializeForTests(_template, narrowLayer);
             // layerW=400, 右界=layerW-20=380, 每张 153+12 gap
-            // p1 @ (40,40), p2 @ (205,40), p3 候选 x=370 → 370+153=523>380 → 换行 x=40, y=40+113+12=165
+            // p1 @ (40,40), p2 @ (205,40), p3 候选 x=370 → 370+153=523>380 → 换行 x=40, y=40+94+12=146
             mgr.AddOrUpdate(NewPlayer("p1", "A"));
             mgr.AddOrUpdate(NewPlayer("p2", "B"));
             mgr.AddOrUpdate(NewPlayer("p3", "C"));
 
             var card3 = mgr.Cards["p3"].Root;
             Assert.That(card3.style.left.value.value, Is.EqualTo(40f));
-            Assert.That(card3.style.top.value.value,  Is.EqualTo(40f + 113f + 12f));
+            Assert.That(card3.style.top.value.value,  Is.EqualTo(40f + PlayerCardManager.CardHeight + PlayerCardManager.Gap));
         }
 
         [Test]

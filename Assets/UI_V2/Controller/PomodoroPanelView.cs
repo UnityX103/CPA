@@ -125,18 +125,18 @@ namespace APP.Pomodoro.Controller
             _ppBtnPrimary?.RegisterCallback<PointerUpEvent>(_ => OnPrimaryButtonClicked());
             _ppBtnSecondary?.RegisterCallback<PointerUpEvent>(_ => OnSecondaryButtonClicked());
 
-            // handleBar 拖拽 + 设置按钮
-            var handleBar = pomodoroTemplateContainer.Q<VisualElement>("pp-handle-bar");
-            var settingsBtn = pomodoroTemplateContainer.Q<VisualElement>("pp-settings-btn");
-            if (_ppRoot != null && handleBar != null)
+            // 整卡拖拽：以 pp-root 本身作为 handle，选中面板任意位置皆可拖动
+            if (_ppRoot != null)
             {
-                var dragController = DraggableElement.MakeDraggable(_ppRoot, handleBar);
+                var dragController = DraggableElement.MakeDraggable(_ppRoot);
                 dragController.OnDragEnd += pos =>
                     this.SendCommand(new Cmd_SetPomodoroPanelPosition(pos));
             }
+
+            // 设置齿轮按钮：在 PointerDown 阻断冒泡，避免触发整卡拖拽
+            var settingsBtn = pomodoroTemplateContainer.Q<VisualElement>("pp-settings-btn");
             if (settingsBtn != null)
             {
-                // 阻断冒泡到 handleBar，避免 DraggableElement 在 PointerDown 时捕获指针导致点击失效
                 settingsBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
                 settingsBtn.RegisterCallback<PointerUpEvent>(evt =>
                 {
@@ -144,6 +144,10 @@ namespace APP.Pomodoro.Controller
                     this.SendCommand(new Cmd_OpenUnifiedSettings());
                 });
             }
+
+            // 主/次操作按钮：在 PointerDown 阻断冒泡，避免点击按钮时误触发整卡拖拽
+            _ppBtnPrimary?.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+            _ppBtnSecondary?.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
         }
 
         // ─── Model 订阅 ──────────────────────────────────────────

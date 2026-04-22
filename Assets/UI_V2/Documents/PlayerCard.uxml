@@ -4,13 +4,9 @@
          editor-extension-mode="False">
     <ui:Style src="../Styles/PlayerCard.uss"/>
 
-    <!-- drqFB: PlayerCard 153×97  cornerRadius:20  padding:14  gap:12 vertical -->
+    <!-- drqFB: PlayerCard 153×94  cornerRadius:20  padding:14  gap:12 vertical -->
+    <!-- 整卡拖拽：移除 pc-handle-bar，选中卡片任意位置皆可拖动 -->
     <ui:VisualElement class="pc-root">
-
-        <!-- 顶部拖拽把手（Pencil: pc-handle-bar XntSv） -->
-        <ui:VisualElement name="pc-handle-bar" class="pc-handle-bar">
-            <ui:Label text="•••" class="pc-handle-drag"/>
-        </ui:VisualElement>
 
         <!-- tyyE3: head  row  align-center  gap:10 -->
         <ui:VisualElement class="pc-head">

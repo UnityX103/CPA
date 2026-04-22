@@ -22,7 +22,7 @@ namespace APP.Pomodoro.Controller
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
         public const float CardWidth  = 153f;
-        public const float CardHeight = 113f;
+        public const float CardHeight = 94f;
         public const float Gap        = 12f;
         public static readonly Vector2 FirstAnchor = new Vector2(40f, 40f);
 
@@ -148,11 +148,10 @@ namespace APP.Pomodoro.Controller
                 this.SendCommand(new Cmd_SetPlayerCardPosition(data.PlayerId, pos));
             }
 
+            // 整卡拖拽：以 pcRoot 本身作为 handle，选中卡片任意位置皆可拖动
             // 拖拽结束 → 持久化
-            var handle = pcRoot.Q<VisualElement>("pc-handle-bar");
-            if (handle != null)
             {
-                var drag = DraggableElement.MakeDraggable(pcRoot, handle);
+                var drag = DraggableElement.MakeDraggable(pcRoot);
                 var id = data.PlayerId;
                 drag.OnDragEnd += p => this.SendCommand(new Cmd_SetPlayerCardPosition(id, p));
             }

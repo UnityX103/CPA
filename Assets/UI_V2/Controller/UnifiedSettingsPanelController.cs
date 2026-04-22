@@ -84,7 +84,47 @@ namespace APP.Pomodoro.Controller
             _tabOnline?.RegisterCallback<PointerUpEvent>(_ => SelectTab("online"));
             _tabPet?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pet"));
 
+            // 整窗拖拽：以 overlay 本身作为 handle；注意 overlay 初始用 flex 居中于全屏锚点，
+            // 首次拖拽前需切换为 position:absolute 并把 left/top 锁定在当前布局位置。
+            if (_overlay != null)
+            {
+                _overlay.RegisterCallback<PointerDownEvent>(PinOverlayForDrag);
+                DraggableElement.MakeDraggable(_overlay);
+
+                // 交互子节点：阻断 PointerDown 冒泡，避免点击它们时误触整窗拖拽
+                _closeBtn?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+                _tabPomodoro?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+                _tabOnline?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+                _tabPet?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+                // 内容区（含 ScrollView、按钮、输入框等）统一阻断
+                var contentScroll = root.Q<ScrollView>("settings-content");
+                contentScroll?.contentContainer.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+            }
+
             SelectTab(_activeTab);
+        }
+
+        /// <summary>
+        /// 首次 PointerDown 时把 overlay 从 flex 居中切换为绝对定位，
+        /// 并把 left/top 钉在当前布局坐标，避免 DragController 读到 0 导致跳位。
+        /// </summary>
+        private void PinOverlayForDrag(PointerDownEvent _)
+        {
+            if (_overlay == null) return;
+            if (_overlay.style.position.keyword == StyleKeyword.Null
+                && _overlay.resolvedStyle.position == Position.Absolute)
+            {
+                return;
+            }
+            if (_overlay.style.position.value == Position.Absolute)
+            {
+                return;
+            }
+
+            var layout = _overlay.layout;
+            _overlay.style.position = Position.Absolute;
+            _overlay.style.left = layout.x;
+            _overlay.style.top = layout.y;
         }
 
         // ─── 显隐控制 ────────────────────────────────────────────

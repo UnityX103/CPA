@@ -12,28 +12,31 @@
 
 .pp-root {
     width: 230px;
-    height: 202px;
+    height: 145px;
     flex-direction: column;
     border-radius: 24px;
     border-width: 1px;
     border-color: rgb(239, 220, 205);
     background-color: rgba(255, 253, 251, 0.93);
-    padding-top: 18px;
-    padding-right: 18px;
-    padding-bottom: 18px;
-    padding-left: 18px;
+    padding-top: 12px;
+    padding-right: 12px;
+    padding-bottom: 12px;
+    padding-left: 12px;
     overflow: hidden;
     position: absolute;
+    cursor: move-arrow;
     /* box-shadow: 0_16px_24px_rgba(199,133,84,0.19) → border 模拟 */
 }
 
 /* ── 顶部 header ─────────────────────────────────────────── */
 
+/* S3Nbk: head 需要容纳绝对定位的 pp-settings-btn，保留 position:relative 作为定位参照 */
 .pp-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 18px;
+    position: relative;
 }
 
 .pp-title {
@@ -88,14 +91,24 @@
 }
 
 /* ── 操作按钮（样式已迁移至 Components/ButtonPrimary.uss + ButtonSecondary.uss）── */
+/* p4kgU: chipsRow vertical gap:8 width:fill_container                            */
 
 .pp-actions {
     flex-direction: column;
     flex-grow: 1;
 }
 
-/* 按钮 TemplateContainer 间距（Pencil chipsRow gap: 8） */
-.pp-btn-instance {
+/* 重置 Unity Button 默认 1px margin，确保精确控制 p4kgU gap:8 */
+.pp-actions > Button {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    width: auto;
+}
+
+/* Pencil p4kgU gap:8 → 主按钮下间距 8px（次按钮是 last child 无下间距） */
+.pp-actions > .comp-btn-primary {
     margin-bottom: 8px;
 }
 
@@ -104,48 +117,27 @@
     display: none;
 }
 
-/* ── 顶部拖拽把手（对齐 Pencil pp-handle-bar JZa3Q） ─────── */
-.pp-handle-bar {
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    height: 28px;
-}
-
-.pp-handle-spacer {
-    flex-grow: 1;
-    height: 28px;
-}
-
-.pp-handle-drag {
-    -unity-text-align: middle-center;
-    font-size: 14px;
-    -unity-font-style: bold;
-    color: rgb(196, 181, 168);
-    cursor: move-arrow;
-    flex-shrink: 0;
-}
-
-.pp-handle-right {
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    flex-shrink: 0;
-}
-
+/* ── 4qNnO: pp-settings-btn 绝对定位于 head 内 (x:66, y:3) 37×18 ─── */
+/* cornerRadius:17 与 h=18 下，四角实际不超过 h/2=9px                 */
 .pp-settings-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 11px;
+    position: absolute;
+    left: 66px;
+    top: 3px;
+    width: 37px;
+    height: 18px;
+    border-radius: 9px;
     background-color: rgb(240, 224, 208);
     align-items: center;
     justify-content: center;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    cursor: link;
 }
 
+/* cHy9C: lucide settings 色块占位（USS 不支持 icon_font） */
 .pp-settings-btn-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    color: rgb(162, 139, 121);
-    -unity-text-align: middle-center;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: rgb(140, 88, 48);
 }

@@ -23,25 +23,19 @@
       #pp-btn-primary   — 主操作按钮（开始/暂停）
       #pp-btn-secondary — 次操作按钮（跳过）
   -->
+  <!-- 整卡拖拽：移除 pp-handle-bar，选中面板任意位置皆可拖动 -->
   <ui:VisualElement name="pp-root" class="pp-root">
 
-    <!-- 顶部拖拽把手 + 设置按钮（Pencil: pp-handle-bar JZa3Q） -->
-    <ui:VisualElement name="pp-handle-bar" class="pp-handle-bar">
-      <ui:VisualElement class="pp-handle-spacer"/>
-      <ui:Label name="pp-handle-drag" text="•••" class="pp-handle-drag"/>
-      <ui:VisualElement class="pp-handle-right">
-        <ui:VisualElement name="pp-settings-btn" class="pp-settings-btn">
-          <ui:Label class="pp-settings-btn-icon"/>
-        </ui:VisualElement>
-      </ui:VisualElement>
-    </ui:VisualElement>
-
-    <!-- 顶部：标题 + 连续专注（Pencil head/S3Nbk: space-between） -->
+    <!-- 顶部：标题 + 连续专注 + 设置齿轮（Pencil head/S3Nbk: space-between + 绝对定位 4qNnO） -->
     <ui:VisualElement class="pp-header">
       <ui:Label name="pp-title" class="pp-title" text="番茄钟"/>
       <ui:VisualElement class="pp-streak">
         <ui:Label class="pp-streak-label" text="连续专注"/>
         <ui:Label name="pp-streak-value" class="pp-streak-value" text="3 次"/>
+      </ui:VisualElement>
+      <!-- 4qNnO: pp-settings-btn 绝对定位 (x:66, y:3) 37×18 -->
+      <ui:VisualElement name="pp-settings-btn" class="pp-settings-btn">
+        <ui:Label class="pp-settings-btn-icon"/>
       </ui:VisualElement>
     </ui:VisualElement>
 

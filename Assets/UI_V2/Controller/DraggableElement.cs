@@ -52,10 +52,15 @@ namespace APP.Pomodoro.Controller
 
             public void ProcessPointerDown(Vector2 pointerPosition, int pointerId)
             {
+                bool wasDragging = _dragging;
                 _pointerStart = pointerPosition;
                 _elementStart = new Vector2(GetCurrentLeft(_target), GetCurrentTop(_target));
                 _activePointerId = pointerId;
                 _dragging = true;
+                if (!wasDragging)
+                {
+                    FrameRateController.BeginDrag();
+                }
             }
 
             public void ProcessPointerMove(Vector2 pointerPosition)
@@ -97,9 +102,14 @@ namespace APP.Pomodoro.Controller
                     return;
                 }
 
+                bool wasDragging = _dragging;
                 var finalPos = new Vector2(GetCurrentLeft(_target), GetCurrentTop(_target));
                 _dragging = false;
                 _activePointerId = -1;
+                if (wasDragging)
+                {
+                    FrameRateController.EndDrag();
+                }
                 OnDragEnd?.Invoke(finalPos);
             }
 
@@ -109,6 +119,7 @@ namespace APP.Pomodoro.Controller
                 var finalPos = new Vector2(GetCurrentLeft(_target), GetCurrentTop(_target));
                 _dragging = false;
                 _activePointerId = -1;
+                FrameRateController.EndDrag();
                 OnDragEnd?.Invoke(finalPos);
             }
 
