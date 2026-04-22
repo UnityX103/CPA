@@ -12,7 +12,8 @@ namespace APP.Pomodoro.Tests
 {
     public sealed class UnifiedSettingsPanelControllerTests
     {
-        private const string DeskWindowPath = "Assets/UI_V2/Documents/DeskWindow.uxml";
+        // Task 15 重构后 settings-overlay 已从 DeskWindow 迁到独立 UnifiedSettingsPanel.uxml
+        private const string UnifiedSettingsPanelPath = "Assets/UI_V2/Documents/UnifiedSettingsPanel.uxml";
         private const string PomodoroPanelPath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
         private const string OnlinePanelPath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
         private const string PetPanelPath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
@@ -36,7 +37,7 @@ namespace APP.Pomodoro.Tests
         public void Init_LoadsPomodoroPanelIntoSingleHost()
         {
             var controller = new UnifiedSettingsPanelController();
-            VisualElement root = CreateDeskWindowRoot();
+            VisualElement root = CreateUnifiedSettingsPanelRoot();
 
             controller.Init(
                 root,
@@ -49,7 +50,7 @@ namespace APP.Pomodoro.Tests
 
             VisualElement host = root.Q<VisualElement>("settings-content-host");
 
-            Assert.That(host, Is.Not.Null, "DeskWindow 必须提供单一 settings-content-host 作为动态内容挂载槽。");
+            Assert.That(host, Is.Not.Null, "UnifiedSettingsPanel 必须提供单一 settings-content-host 作为动态内容挂载槽。");
             Assert.That(host.childCount, Is.EqualTo(1), "初始化后只应挂载一个当前 tab 面板。");
             Assert.That(host.Q<VisualElement>("psp-root"), Is.Not.Null, "默认应加载番茄钟设置面板。");
             Assert.That(host.Q<VisualElement>("osp-root"), Is.Null, "联机面板不应在初始化时同时常驻。");
@@ -60,7 +61,7 @@ namespace APP.Pomodoro.Tests
         public void SelectTab_ReplacesCurrentHostContent()
         {
             var controller = new UnifiedSettingsPanelController();
-            VisualElement root = CreateDeskWindowRoot();
+            VisualElement root = CreateUnifiedSettingsPanelRoot();
 
             controller.Init(
                 root,
@@ -90,10 +91,10 @@ namespace APP.Pomodoro.Tests
             Assert.That(root.Q<VisualElement>("tab-online").ClassListContains("sidebar-tab--active"), Is.False);
         }
 
-        private static VisualElement CreateDeskWindowRoot()
+        private static VisualElement CreateUnifiedSettingsPanelRoot()
         {
             var root = new VisualElement();
-            LoadTemplate(DeskWindowPath).CloneTree(root);
+            LoadTemplate(UnifiedSettingsPanelPath).CloneTree(root);
             return root;
         }
 
