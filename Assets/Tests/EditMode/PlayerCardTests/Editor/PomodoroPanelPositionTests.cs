@@ -74,5 +74,14 @@ namespace APP.Pomodoro.Tests
 
             PlayerPrefs.DeleteKey("APP.Pomodoro.PersistentState.v1");
         }
+
+        [Test]
+        public void Cmd_SetPomodoroPanelPosition_WritesModel()
+        {
+            var model = APP.Pomodoro.GameApp.Interface.GetModel<IPomodoroModel>();
+            APP.Pomodoro.GameApp.Interface.SendCommand(
+                new APP.Pomodoro.Command.Cmd_SetPomodoroPanelPosition(new Vector2(7f, 9f)));
+            Assert.That(model.PomodoroPanelPosition.Value, Is.EqualTo(new Vector2(7f, 9f)));
+        }
     }
 }
