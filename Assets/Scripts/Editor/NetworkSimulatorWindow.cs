@@ -43,7 +43,8 @@ namespace APP.Editor
         private readonly List<RealPlayer> _realPlayers = new List<RealPlayer>();
         private Vector2 _realScrollPos;
         private string _realQuickName = "";
-        private string _realServerUrl = "ws://127.0.0.1:8765";
+        // 与 Cmd_CreateRoom / Cmd_JoinRoom 的 DefaultServerUrl 保持一致
+        private string _realServerUrl = "ws://localhost:8765";
         private string _realRoomCodeOverride = "";
 
         private sealed class SimPlayer
