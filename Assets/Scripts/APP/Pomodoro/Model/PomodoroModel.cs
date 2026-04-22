@@ -97,14 +97,6 @@ namespace APP.Pomodoro.Model
                 state.AutoStartBreak = true;
             }
 
-            // 兼容旧版本持久化数据：缺少位置字段时保持 sentinel，让 View 首帧计算默认位置
-            if (!json.Contains("\"HasPomodoroPanelPosition\""))
-            {
-                state.HasPomodoroPanelPosition = false;
-                state.PomodoroPanelPositionX = 0f;
-                state.PomodoroPanelPositionY = 0f;
-            }
-
             ApplyState(model, state);
             _cachedJson = json;
             return true;
