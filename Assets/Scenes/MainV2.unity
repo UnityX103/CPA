@@ -515,6 +515,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2006383507}
   - component: {fileID: 2006383506}
+  - component: {fileID: 2006383508}
   m_Layer: 0
   m_Name: UnifiedSettingsPanel
   m_TagString: Untagged
@@ -541,6 +542,21 @@ MonoBehaviour:
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
+--- !u!114 &2006383508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2006383505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac6f88663f114f44967c7d41f5a7f7f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: APP.Pomodoro.Controller.UnifiedSettingsPanelDriver
+  _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
+  _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
+  _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
 --- !u!4 &2006383507
 Transform:
   m_ObjectHideFlags: 0
