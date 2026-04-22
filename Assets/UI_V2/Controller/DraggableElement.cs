@@ -27,6 +27,9 @@ namespace APP.Pomodoro.Controller
             private bool _dragging;
             private bool _callbacksRegistered;
 
+            /// <summary>拖拽结束（PointerUp / PointerCaptureOut）时触发，参数为 target 最终左上角（left, top）。</summary>
+            public event Action<Vector2> OnDragEnd;
+
             public DragController(VisualElement target, VisualElement handle)
             {
                 _target = target ?? throw new ArgumentNullException(nameof(target));
@@ -94,14 +97,19 @@ namespace APP.Pomodoro.Controller
                     return;
                 }
 
+                var finalPos = new Vector2(GetCurrentLeft(_target), GetCurrentTop(_target));
                 _dragging = false;
                 _activePointerId = -1;
+                OnDragEnd?.Invoke(finalPos);
             }
 
             public void ProcessPointerCaptureOut()
             {
+                if (!_dragging) { return; }
+                var finalPos = new Vector2(GetCurrentLeft(_target), GetCurrentTop(_target));
                 _dragging = false;
                 _activePointerId = -1;
+                OnDragEnd?.Invoke(finalPos);
             }
 
             private void OnPointerDown(PointerDownEvent evt)
