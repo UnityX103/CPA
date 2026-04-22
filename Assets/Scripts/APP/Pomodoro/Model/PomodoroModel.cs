@@ -21,6 +21,8 @@ namespace APP.Pomodoro.Model
         public BindableProperty<bool> AutoStartBreak { get; } = new BindableProperty<bool>(true);
         public BindableProperty<int> TargetMonitorIndex { get; } = new BindableProperty<int>(0);
         public BindableProperty<int> CompletionClipIndex { get; } = new BindableProperty<int>(0);
+        public BindableProperty<Vector2> PomodoroPanelPosition { get; }
+            = new BindableProperty<Vector2>(new Vector2(float.NegativeInfinity, float.NegativeInfinity));
 
         protected override void OnInit()
         {

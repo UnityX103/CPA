@@ -1,4 +1,5 @@
 using QFramework;
+using UnityEngine;
 
 namespace APP.Pomodoro.Model
 {
@@ -42,5 +43,11 @@ namespace APP.Pomodoro.Model
 
         /// <summary>选中的完成音效索引</summary>
         BindableProperty<int> CompletionClipIndex { get; }
+
+        /// <summary>
+        /// 番茄钟面板（YRqeB）在全屏主面板坐标系内的左上角位置。
+        /// 值为 Vector2.negativeInfinity 时代表"未初始化"——View 首帧计算默认右下角锚点后回写。
+        /// </summary>
+        BindableProperty<Vector2> PomodoroPanelPosition { get; }
     }
 }
