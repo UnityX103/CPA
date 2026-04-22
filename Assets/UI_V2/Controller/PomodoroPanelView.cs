@@ -134,8 +134,16 @@ namespace APP.Pomodoro.Controller
                 dragController.OnDragEnd += pos =>
                     this.SendCommand(new Cmd_SetPomodoroPanelPosition(pos));
             }
-            settingsBtn?.RegisterCallback<PointerUpEvent>(_ =>
-                this.SendCommand(new Cmd_OpenUnifiedSettings()));
+            if (settingsBtn != null)
+            {
+                // 阻断冒泡到 handleBar，避免 DraggableElement 在 PointerDown 时捕获指针导致点击失效
+                settingsBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                settingsBtn.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    this.SendCommand(new Cmd_OpenUnifiedSettings());
+                });
+            }
         }
 
         // ─── Model 订阅 ──────────────────────────────────────────

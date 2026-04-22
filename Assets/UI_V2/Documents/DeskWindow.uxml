@@ -8,6 +8,6 @@
     <!-- DeskWindow 主面板：透明全屏，只做 pomodoro + card-layer 宿主 -->
     <ui:VisualElement name="dw-canvas" class="dw-canvas">
         <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-floating" />
-        <ui:VisualElement name="card-layer" class="dw-card-layer" />
+        <ui:VisualElement name="card-layer" class="dw-card-layer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

@@ -44,6 +44,9 @@ namespace APP.Pomodoro.Controller
                 return;
             }
 
+            // 全屏透明 + flex 居中，承载居中的 .settings-overlay 浮窗
+            _root.AddToClassList("usp-root-anchor");
+
             // 初始隐藏（UXML 本身已设 style display:none，再保险一次）
             _root.style.display = DisplayStyle.None;
 

@@ -4,15 +4,25 @@
  * 对应 Pencil vnYnS: Unified Settings Panel
  */
 
-/* ── 统一设置面板（独立 UIDocument 根）───────────────────── */
-.settings-overlay {
+/* ── UIDocument root 锚定（全屏透明窗口坐标系 + flex 居中）── */
+.usp-root-anchor {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── 统一设置面板（Pencil vnYnS: 460×394，居中浮窗） ─────── */
+.settings-overlay {
+    width: 460px;
+    height: 394px;
     background-color: rgb(255, 255, 255);
     border-radius: 20px;
+    border-width: 1px;
+    border-color: rgb(241, 229, 216);
     padding: 20px;
     flex-direction: column;
 }
