@@ -20,22 +20,11 @@ namespace APP.Pomodoro.Tests
 
             var serializedObject = new SerializedObject(controller);
 
+            // 仅检查玩家卡片模板（设置面板模板已迁移到 UnifiedSettingsPanelDriver）
             AssertTemplateReference(
                 serializedObject,
                 "_playerCardTemplate",
                 "Assets/UI_V2/Documents/PlayerCard.uxml");
-            AssertTemplateReference(
-                serializedObject,
-                "_pomodoroSettingsTemplate",
-                "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml");
-            AssertTemplateReference(
-                serializedObject,
-                "_onlineSettingsTemplate",
-                "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml");
-            AssertTemplateReference(
-                serializedObject,
-                "_petSettingsTemplate",
-                "Assets/UI_V2/Documents/PetSettingsPanel.uxml");
         }
 
         private static void AssertTemplateReference(

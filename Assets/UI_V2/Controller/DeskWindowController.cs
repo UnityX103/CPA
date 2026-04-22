@@ -18,9 +18,6 @@ namespace APP.Pomodoro.Controller
     public sealed class DeskWindowController : MonoBehaviour, IController
     {
         private const string PlayerCardTemplatePath = "Assets/UI_V2/Documents/PlayerCard.uxml";
-        private const string PomodoroSettingsTemplatePath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
-        private const string OnlineSettingsTemplatePath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
-        private const string PetSettingsTemplatePath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
 
         // ─── Inspector 引用 ──────────────────────────────────────
         [Header("配置表")]
@@ -35,19 +32,12 @@ namespace APP.Pomodoro.Controller
         [Header("玩家卡片 UXML 模板")]
         [SerializeField] private VisualTreeAsset _playerCardTemplate;
 
-        [Header("设置面板 UXML 模板")]
-        [SerializeField] private VisualTreeAsset _pomodoroSettingsTemplate;
-        [SerializeField] private VisualTreeAsset _onlineSettingsTemplate;
-        [SerializeField] private VisualTreeAsset _petSettingsTemplate;
-
         // ─── 私有字段 ────────────────────────────────────────────
         private UIDocument     _uiDocument;
         private IPomodoroModel _model;
         private PlayerCardManager _playerCardManager;
-        private UnifiedSettingsPanelController _settingsPanel;
 
         // 主容器元素
-        private VisualElement    _dwWrap;
         private TemplateContainer _pomodoroPanelContainer;
 
         // ─── QFramework ──────────────────────────────────────────
@@ -129,68 +119,19 @@ namespace APP.Pomodoro.Controller
         private void BindUI()
         {
             VisualElement root = _uiDocument.rootVisualElement;
-
             root.AddToClassList("dw-root-anchor");
 
-            _dwWrap = root.Q<VisualElement>("dw-wrap");
             _pomodoroPanelContainer = root.Q<TemplateContainer>("pomodoro-panel");
+            var cardLayer = root.Q<VisualElement>("card-layer");
 
-            // 拖拽手柄
-            var dragHandle = root.Q<Label>("drag-handle");
-            if (dragHandle != null && _dwWrap != null)
-            {
-                DraggableElement.MakeDraggable(_dwWrap, dragHandle);
-            }
-
-            // 统一设置面板
-            EnsureSettingsTemplatesLoaded();
-            var roomModel = this.GetModel<APP.Network.Model.IRoomModel>();
-            _settingsPanel = new UnifiedSettingsPanelController();
-            _settingsPanel.Init(
-                root,
-                _model,
-                roomModel,
-                _pomodoroSettingsTemplate,
-                _onlineSettingsTemplate,
-                _petSettingsTemplate,
-                gameObject);
-
-            // 多人番茄钟：卡片管理器（嵌入 card-list ScrollView）
+            // 玩家卡片管理器（挂在 #card-layer 上，绝对定位 + NextSlot 算法）
             _playerCardTemplate = EnsureEditorTemplateLoaded(
                 _playerCardTemplate,
                 PlayerCardTemplatePath,
                 "PlayerCard.uxml");
 
             _playerCardManager = new PlayerCardManager();
-            var cardListScrollView = root.Q<ScrollView>("card-list");
-            _playerCardManager.Initialize(_playerCardTemplate, cardListScrollView?.contentContainer, gameObject);
-
-            // 齿轮按钮切换设置面板
-            root.Q("settings-btn")?.RegisterCallback<PointerUpEvent>(_ =>
-            {
-                if (_settingsPanel.IsVisible)
-                    _settingsPanel.Hide();
-                else
-                    _settingsPanel.Show();
-            });
-        }
-
-        private void EnsureSettingsTemplatesLoaded()
-        {
-            _pomodoroSettingsTemplate = EnsureEditorTemplateLoaded(
-                _pomodoroSettingsTemplate,
-                PomodoroSettingsTemplatePath,
-                "PomodoroSettingsPanel.uxml");
-
-            _onlineSettingsTemplate = EnsureEditorTemplateLoaded(
-                _onlineSettingsTemplate,
-                OnlineSettingsTemplatePath,
-                "OnlineSettingsPanel.uxml");
-
-            _petSettingsTemplate = EnsureEditorTemplateLoaded(
-                _petSettingsTemplate,
-                PetSettingsTemplatePath,
-                "PetSettingsPanel.uxml");
+            _playerCardManager.Initialize(_playerCardTemplate, cardLayer, gameObject);
         }
 
         private static VisualTreeAsset EnsureEditorTemplateLoaded(
