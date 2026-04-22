@@ -30,9 +30,11 @@ namespace APP.Pomodoro.Controller
         private Label _reconnectBanner;
 
         // 用户点加入（或从历史快捷加入）后的 pending 态：若服务端回 ROOM_NOT_FOUND，
-        // 自动回退为 create_room。自动重连（Cmd_AutoReconnectOnStartup）不走这个分支。
+        // 自动回退为 create_room（用用户当时输入的房间号作为 key）。
+        // 自动重连（Cmd_AutoReconnectOnStartup）不走这个分支。
         private bool _userJoinAutoCreateOnMissing;
         private string _userJoinFallbackName;
+        private string _userJoinFallbackRoomCode;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
         private VisualElement _joinCard;
@@ -233,6 +235,7 @@ namespace APP.Pomodoro.Controller
 
             _userJoinAutoCreateOnMissing = true;
             _userJoinFallbackName = username;
+            _userJoinFallbackRoomCode = roomId;
             this.SendCommand(new Cmd_JoinRoom(roomId, username));
         }
 
@@ -245,23 +248,28 @@ namespace APP.Pomodoro.Controller
 
         private void OnNetworkError(E_NetworkError e)
         {
-            // 用户点了加入，但服务端说房间不存在 —— 自动走创建
+            // 用户点了加入，但服务端说房间不存在 —— 用输入的房间号作为 key 创建新房间
             if (_userJoinAutoCreateOnMissing
                 && !string.IsNullOrEmpty(e.Code)
                 && e.Code == "ROOM_NOT_FOUND"
                 && !string.IsNullOrWhiteSpace(_userJoinFallbackName))
             {
                 string name = _userJoinFallbackName;
+                string desiredCode = _userJoinFallbackRoomCode;
                 _userJoinAutoCreateOnMissing = false;
                 _userJoinFallbackName = null;
+                _userJoinFallbackRoomCode = null;
 
-                ShowError("房间不存在，已为你创建新房间");
-                this.SendCommand(new Cmd_CreateRoom(name));
+                ShowError(string.IsNullOrWhiteSpace(desiredCode)
+                    ? "房间不存在，已为你创建新房间"
+                    : $"房间 {desiredCode} 不存在，已为你创建");
+                this.SendCommand(new Cmd_CreateRoom(name, null, desiredCode));
                 return;
             }
 
             _userJoinAutoCreateOnMissing = false;
             _userJoinFallbackName = null;
+            _userJoinFallbackRoomCode = null;
 
             string message = string.IsNullOrEmpty(e.Message) ? e.Code : e.Message;
             ShowError(message);
@@ -387,6 +395,7 @@ namespace APP.Pomodoro.Controller
             }
             _userJoinAutoCreateOnMissing = true;
             _userJoinFallbackName = username;
+            _userJoinFallbackRoomCode = roomCode;
             this.SendCommand(new Cmd_JoinRoom(roomCode, username));
         }
 

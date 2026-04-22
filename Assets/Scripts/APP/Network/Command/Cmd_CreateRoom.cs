@@ -13,11 +13,13 @@ namespace APP.Network.Command
 
         private readonly string _playerName;
         private readonly string _serverUrl;
+        private readonly string _desiredRoomCode;
 
-        public Cmd_CreateRoom(string playerName, string serverUrl = null)
+        public Cmd_CreateRoom(string playerName, string serverUrl = null, string desiredRoomCode = null)
         {
             _playerName = playerName;
             _serverUrl = string.IsNullOrEmpty(serverUrl) ? DefaultServerUrl : serverUrl;
+            _desiredRoomCode = desiredRoomCode;
         }
 
         protected override void OnExecute()
@@ -33,6 +35,9 @@ namespace APP.Network.Command
             {
                 type = "create_room",
                 playerName = _playerName,
+                roomCode = string.IsNullOrWhiteSpace(_desiredRoomCode)
+                    ? string.Empty
+                    : _desiredRoomCode.Trim().ToUpperInvariant(),
             });
         }
     }

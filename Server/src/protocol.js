@@ -57,7 +57,8 @@ export function parseClientMessage(rawMessage)
             return {
                 v: PROTOCOL_VERSION,
                 type: 'create_room',
-                playerName: normalizePlayerName(parsedMessage.playerName)
+                playerName: normalizePlayerName(parsedMessage.playerName),
+                roomCode: normalizeOptionalRoomCode(parsedMessage.roomCode ?? parsedMessage.code)
             };
 
         case 'join_room':

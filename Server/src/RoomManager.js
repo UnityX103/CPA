@@ -30,10 +30,29 @@ export class RoomManager
         this._rooms = new Map();
     }
 
-    createRoom({ playerId, playerName, ws })
+    createRoom({ playerId, playerName, ws, roomCode })
     {
         const normalizedName = normalizePlayerName(playerName);
-        const roomCode = this._generateUniqueRoomCode();
+        const desiredCode = normalizeRoomCode(roomCode ?? '');
+
+        let code;
+        if (desiredCode.length === ROOM_CODE_LENGTH)
+        {
+            if (this._rooms.has(desiredCode))
+            {
+                throw new RoomManagerError('ROOM_CODE_TAKEN', '房间号已被占用');
+            }
+            code = desiredCode;
+        }
+        else if (desiredCode.length > 0)
+        {
+            throw new RoomManagerError('INVALID_ROOM_CODE', `房间号长度必须为 ${ROOM_CODE_LENGTH}`);
+        }
+        else
+        {
+            code = this._generateUniqueRoomCode();
+        }
+
         const now = this._now();
         const player = this._createPlayer({
             playerId,
@@ -42,13 +61,13 @@ export class RoomManager
             now
         });
         const room = {
-            code: roomCode,
+            code,
             createdAt: now,
             destroyTimer: null,
             players: new Map([[playerId, player]])
         };
 
-        this._rooms.set(roomCode, room);
+        this._rooms.set(code, room);
         return room;
     }
 

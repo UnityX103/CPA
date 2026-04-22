@@ -240,7 +240,8 @@ function handleCreateRoom(message, context)
     const room = context.roomManager.createRoom({
         playerId,
         playerName: message.playerName,
-        ws: context.connection.socket
+        ws: context.connection.socket,
+        roomCode: message.roomCode
     });
 
     context.connection.roomCode = room.code;

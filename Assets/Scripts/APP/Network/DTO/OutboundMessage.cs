@@ -13,6 +13,7 @@ namespace APP.Network.DTO
     public sealed class OutboundCreateRoom : OutboundMessage
     {
         public string playerName;
+        public string roomCode;   // 可选：指定房间号作为 key；空串则由服务端随机生成
     }
 
     [Serializable]
