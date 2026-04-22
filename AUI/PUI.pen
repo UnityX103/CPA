@@ -2312,7 +2312,7 @@
       "reusable": true,
       "clip": true,
       "width": 153,
-      "height": 97,
+      "height": 113,
       "fill": "#FFFDFBF2",
       "cornerRadius": 20,
       "stroke": {
@@ -2323,6 +2323,27 @@
       "gap": 12,
       "padding": 14,
       "children": [
+        {
+          "type": "frame",
+          "id": "XntSv",
+          "name": "pc-handle-bar",
+          "width": "fill_container",
+          "height": 16,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "AHsVX",
+              "name": "pc-handle-drag",
+              "fill": "#C4B5A8",
+              "content": "•••",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "700"
+            }
+          ]
+        },
         {
           "type": "frame",
           "id": "tyyE3",
