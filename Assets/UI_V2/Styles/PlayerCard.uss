@@ -9,15 +9,18 @@
  *   bI6eO  dot         6×6   → 6/2   = 3px（正圆）
  */
 
-/* ── drqFB: 根容器 153×97 ──────────────────────────────── */
+/* ── drqFB: 根容器 153×113 ──────────────────────────────── */
 /* cornerRadius: 20（设计稿显式值）                          */
 /* fill: #FFFDFBF2 → F2=242 → 242/255≈0.95                 */
 /* padding: 14（四边）                                       */
 /* gap: 12 → divider/footer 分别用 margin-top:12px 实现     */
-/* margin-right: 12 → cardListWrap gap 替代（USS 不支持 gap）*/
+/* position: absolute 初始 (0,0)，C# 运行时会覆写            */
 .pc-root {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 153px;
-    height: 97px;
+    height: 113px;
     padding: 14px;
     border-radius: 20px;
     background-color: rgba(255, 253, 251, 0.95);
@@ -26,7 +29,6 @@
     flex-direction: column;
     overflow: hidden;
     flex-shrink: 0;
-    margin-right: 12px;
 }
 
 /* ── tyyE3: head row align-center fill ─────────────────── */
@@ -195,4 +197,22 @@
 
 .pc-phase-completed .pc-phase-badge {
     background-color: rgb(99, 102, 241);
+}
+
+/* ── 顶部拖拽把手（Pencil pc-handle-bar XntSv） ──────────── */
+.pc-handle-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 16px;
+    cursor: move-arrow;
+    flex-shrink: 0;
+}
+
+.pc-handle-drag {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(196, 181, 168);
+    -unity-text-align: middle-center;
 }
