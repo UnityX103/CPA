@@ -35,18 +35,22 @@ namespace APP.NetworkIntegration.Tests
 
             yield return WaitForFrames(10);
 
-            DeskWindowController controller = UnityEngine.Object.FindFirstObjectByType<DeskWindowController>();
-            Assert.That(controller, Is.Not.Null, "MainV2 场景中必须存在 DeskWindowController。");
+            // Task 15+18 后：settings 面板独立 UIDocument + UnifiedSettingsPanelDriver
+            UnifiedSettingsPanelDriver driver =
+                UnityEngine.Object.FindFirstObjectByType<UnifiedSettingsPanelDriver>();
+            Assert.That(driver, Is.Not.Null, "MainV2 场景中必须存在 UnifiedSettingsPanelDriver。");
 
-            UIDocument uiDocument = controller.GetComponent<UIDocument>();
-            Assert.That(uiDocument, Is.Not.Null, "DeskWindowController 所在对象必须挂有 UIDocument。");
+            UIDocument uiDocument = driver.GetComponent<UIDocument>();
+            Assert.That(uiDocument, Is.Not.Null, "UnifiedSettingsPanelDriver GameObject 必须挂 UIDocument。");
 
-            yield return WaitUntilFieldAssigned(controller, "_settingsPanel", 60);
+            yield return WaitUntilFieldAssigned(driver, "_controller", 60);
 
-            object settingsPanel = GetPrivateField(controller, "_settingsPanel");
-            Assert.That(settingsPanel, Is.Not.Null, "_settingsPanel 应在 Start 之后完成初始化。");
+            object settingsPanel = GetPrivateField(driver, "_controller");
+            Assert.That(settingsPanel, Is.Not.Null, "Driver._controller 应在 Start 之后完成初始化。");
 
-            InvokePublic(settingsPanel, "Show");
+            // 通过 Cmd_OpenUnifiedSettings 触发显示（走 Architecture 事件系统，Driver 订阅后 Show）
+            APP.Pomodoro.GameApp.Interface.SendCommand(
+                new APP.Pomodoro.Command.Cmd_OpenUnifiedSettings());
             yield return WaitUntilReady(
                 uiDocument.rootVisualElement,
                 "settings-overlay",
