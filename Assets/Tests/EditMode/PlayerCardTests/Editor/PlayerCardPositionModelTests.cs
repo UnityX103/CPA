@@ -68,6 +68,17 @@ namespace APP.Pomodoro.Tests
             Assert.That(model, Is.Not.Null, "GameApp 应注册 IPlayerCardPositionModel");
         }
 
+        [Test]
+        public void Cmd_SetPlayerCardPosition_WritesModel()
+        {
+            var model = APP.Pomodoro.GameApp.Interface.GetModel<IPlayerCardPositionModel>();
+            APP.Pomodoro.GameApp.Interface.SendCommand(
+                new APP.Pomodoro.Command.Cmd_SetPlayerCardPosition("px", new Vector2(11f, 22f)));
+            Assert.That(model.TryGet("px", out Vector2 got), Is.True);
+            Assert.That(got, Is.EqualTo(new Vector2(11f, 22f)));
+            model.Remove("px"); // 清场
+        }
+
         // 为每个用例建独立 Architecture（否则 QFramework 单例模式会污染）
         private static IPlayerCardPositionModel CreateModel()
         {
