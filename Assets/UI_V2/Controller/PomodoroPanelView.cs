@@ -74,6 +74,13 @@ namespace APP.Pomodoro.Controller
             SubscribeModel();
             SubscribeEvents();
 
+            // 位置 Model 订阅 → 写 style.left/top
+            _model = _model ?? this.GetModel<IPomodoroModel>();
+            _model.PomodoroPanelPosition.RegisterWithInitValue(OnPomodoroPositionChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            _ppRoot?.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChanged);
+
             _isInitialized = true;
         }
 
@@ -117,6 +124,18 @@ namespace APP.Pomodoro.Controller
             // 注册按钮事件
             _ppBtnPrimary?.RegisterCallback<PointerUpEvent>(_ => OnPrimaryButtonClicked());
             _ppBtnSecondary?.RegisterCallback<PointerUpEvent>(_ => OnSecondaryButtonClicked());
+
+            // handleBar 拖拽 + 设置按钮
+            var handleBar = pomodoroTemplateContainer.Q<VisualElement>("pp-handle-bar");
+            var settingsBtn = pomodoroTemplateContainer.Q<VisualElement>("pp-settings-btn");
+            if (_ppRoot != null && handleBar != null)
+            {
+                var dragController = DraggableElement.MakeDraggable(_ppRoot, handleBar);
+                dragController.OnDragEnd += pos =>
+                    this.SendCommand(new Cmd_SetPomodoroPanelPosition(pos));
+            }
+            settingsBtn?.RegisterCallback<PointerUpEvent>(_ =>
+                this.SendCommand(new Cmd_OpenUnifiedSettings()));
         }
 
         // ─── Model 订阅 ──────────────────────────────────────────
@@ -270,6 +289,38 @@ namespace APP.Pomodoro.Controller
             }
 
             _audioSource.PlayOneShot(clip, _config.CompletionVolume);
+        }
+
+        // ─── 位置持久化 ──────────────────────────────────────────
+
+        private void OnPomodoroPositionChanged(Vector2 pos)
+        {
+            if (_ppRoot == null) return;
+            if (float.IsNegativeInfinity(pos.x) || float.IsNegativeInfinity(pos.y))
+            {
+                return; // sentinel：等 GeometryChanged 算默认位置
+            }
+            _ppRoot.style.left = pos.x;
+            _ppRoot.style.top  = pos.y;
+        }
+
+        private void OnRootGeometryChanged(GeometryChangedEvent _)
+        {
+            if (_model == null || _ppRoot == null) return;
+            var current = _model.PomodoroPanelPosition.Value;
+            if (!float.IsNegativeInfinity(current.x) && !float.IsNegativeInfinity(current.y))
+                return; // 已有持久化值，不覆盖
+
+            var parentLayout = _ppRoot.parent?.layout ?? _ppRoot.layout;
+            if (parentLayout.width <= 0 || parentLayout.height <= 0) return;
+            if (_ppRoot.layout.width <= 0 || _ppRoot.layout.height <= 0) return;
+
+            // Q6a=B: 屏幕右下角默认（距右/下各 20px）
+            float x = parentLayout.width  - _ppRoot.layout.width  - 20f;
+            float y = parentLayout.height - _ppRoot.layout.height - 20f;
+            x = Mathf.Max(0, x);
+            y = Mathf.Max(0, y);
+            this.SendCommand(new Cmd_SetPomodoroPanelPosition(new Vector2(x, y)));
         }
     }
 }
