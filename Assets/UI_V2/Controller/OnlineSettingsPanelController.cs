@@ -29,6 +29,11 @@ namespace APP.Pomodoro.Controller
         private Button _copyBtn;
         private Label _reconnectBanner;
 
+        // 用户点加入（或从历史快捷加入）后的 pending 态：若服务端回 ROOM_NOT_FOUND，
+        // 自动回退为 create_room。自动重连（Cmd_AutoReconnectOnStartup）不走这个分支。
+        private bool _userJoinAutoCreateOnMissing;
+        private string _userJoinFallbackName;
+
         // ─── UXML 元素引用 ────────────────────────────────────────
         private VisualElement _joinCard;
         private VisualElement _roomCard;
@@ -226,6 +231,8 @@ namespace APP.Pomodoro.Controller
                 return;
             }
 
+            _userJoinAutoCreateOnMissing = true;
+            _userJoinFallbackName = username;
             this.SendCommand(new Cmd_JoinRoom(roomId, username));
         }
 
@@ -238,6 +245,24 @@ namespace APP.Pomodoro.Controller
 
         private void OnNetworkError(E_NetworkError e)
         {
+            // 用户点了加入，但服务端说房间不存在 —— 自动走创建
+            if (_userJoinAutoCreateOnMissing
+                && !string.IsNullOrEmpty(e.Code)
+                && e.Code == "ROOM_NOT_FOUND"
+                && !string.IsNullOrWhiteSpace(_userJoinFallbackName))
+            {
+                string name = _userJoinFallbackName;
+                _userJoinAutoCreateOnMissing = false;
+                _userJoinFallbackName = null;
+
+                ShowError("房间不存在，已为你创建新房间");
+                this.SendCommand(new Cmd_CreateRoom(name));
+                return;
+            }
+
+            _userJoinAutoCreateOnMissing = false;
+            _userJoinFallbackName = null;
+
             string message = string.IsNullOrEmpty(e.Message) ? e.Code : e.Message;
             ShowError(message);
         }
@@ -360,6 +385,8 @@ namespace APP.Pomodoro.Controller
                 ShowError("请输入用户名");
                 return;
             }
+            _userJoinAutoCreateOnMissing = true;
+            _userJoinFallbackName = username;
             this.SendCommand(new Cmd_JoinRoom(roomCode, username));
         }
 
