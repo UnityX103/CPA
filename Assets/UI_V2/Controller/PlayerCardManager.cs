@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using APP.Network.Event;
 using APP.Network.Model;
 using APP.Pomodoro;
+using APP.Pomodoro.Command;
+using APP.Pomodoro.Model;
 using QFramework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,59 +11,47 @@ using UnityEngine.UIElements;
 namespace APP.Pomodoro.Controller
 {
     /// <summary>
-    /// 玩家卡片管理器：订阅网络事件，管理嵌入式 PlayerCardController 的生命周期。
-    /// 每个远程玩家对应一个从 PlayerCard.uxml CloneTree 得到的 VisualElement。
+    /// 玩家卡片管理器：订阅网络事件，管理 PlayerCardController 的生命周期。
+    /// 卡片以绝对定位方式挂在主面板 #card-layer 上：
+    ///  - 已持久化位置 → 恢复上次坐标
+    ///  - 否则按"上一张右侧 + 右界换行"算法摆放（首张固定 (40,40)）
+    /// 拖拽结束后通过 Cmd_SetPlayerCardPosition 持久化。
     /// </summary>
     public sealed class PlayerCardManager : IController
     {
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
+        public const float CardWidth  = 153f;
+        public const float CardHeight = 113f;
+        public const float Gap        = 12f;
+        public static readonly Vector2 FirstAnchor = new Vector2(40f, 40f);
+
         private readonly Dictionary<string, PlayerCardController> _cards = new Dictionary<string, PlayerCardController>();
+        private readonly List<string> _joinOrder = new List<string>();
 
         private VisualTreeAsset _cardTemplate;
-        private VisualElement _cardContainer;
+        private VisualElement _cardLayer;
         private bool _initialized;
 
-        /// <summary>当前活跃的卡片（只读，供测试使用）。</summary>
         public IReadOnlyDictionary<string, PlayerCardController> Cards => _cards;
 
-        /// <summary>
-        /// 初始化：注册网络事件订阅。
-        /// </summary>
-        /// <param name="cardTemplate">PlayerCard.uxml VisualTreeAsset</param>
-        /// <param name="cardContainer">卡片挂载的容器（ScrollView 的 contentContainer）</param>
-        /// <param name="lifecycleOwner">用于自动反注册事件的 GameObject</param>
-        public void Initialize(VisualTreeAsset cardTemplate, VisualElement cardContainer, GameObject lifecycleOwner)
+        public void Initialize(VisualTreeAsset cardTemplate, VisualElement cardLayer, GameObject lifecycleOwner)
         {
             if (_initialized) return;
-
             _cardTemplate = cardTemplate;
-            _cardContainer = cardContainer;
+            _cardLayer = cardLayer;
 
-            if (_cardTemplate == null)
-            {
-                Debug.LogError("[PlayerCardManager] PlayerCard.uxml 未分配。");
-            }
-
-            if (_cardContainer == null)
-            {
-                Debug.LogError("[PlayerCardManager] cardContainer 未分配。");
-            }
+            if (_cardTemplate == null) Debug.LogError("[PlayerCardManager] PlayerCard.uxml 未分配。");
+            if (_cardLayer == null)    Debug.LogError("[PlayerCardManager] cardLayer 未分配。");
 
             if (lifecycleOwner != null)
             {
-                this.RegisterEvent<E_PlayerJoined>(OnPlayerJoined)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_PlayerLeft>(OnPlayerLeft)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_RemoteStateUpdated>(OnStateUpdated)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_RoomSnapshot>(OnSnapshot)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_RoomJoined>(OnRoomJoined)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_IconUpdated>(OnIconUpdated)
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_PlayerJoined>(OnPlayerJoined).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_PlayerLeft>(OnPlayerLeft).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_RemoteStateUpdated>(OnStateUpdated).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_RoomSnapshot>(OnSnapshot).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_RoomJoined>(OnRoomJoined).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_IconUpdated>(OnIconUpdated).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
             else
             {
@@ -76,152 +66,178 @@ namespace APP.Pomodoro.Controller
             _initialized = true;
         }
 
-        /// <summary>
-        /// 测试专用：显式初始化但不订阅事件，允许调用方手动驱动 AddOrUpdate/Remove。
-        /// </summary>
-        public void InitializeForTests(VisualTreeAsset cardTemplate, VisualElement cardContainer)
+        public void InitializeForTests(VisualTreeAsset cardTemplate, VisualElement cardLayer)
         {
             _cardTemplate = cardTemplate;
-            _cardContainer = cardContainer;
+            _cardLayer = cardLayer;
             _initialized = true;
         }
 
-        // ─── 事件回调 ────────────────────────────────────────
+        // ─── 事件回调 ────────────────────────────────────────────
 
-        private void OnPlayerJoined(E_PlayerJoined e)
-        {
-            if (e.Player == null) return;
-            AddOrUpdate(e.Player);
-        }
-
-        private void OnPlayerLeft(E_PlayerLeft e)
-        {
-            Remove(e.PlayerId);
-        }
+        private void OnPlayerJoined(E_PlayerJoined e) { if (e.Player != null) AddOrUpdate(e.Player); }
+        private void OnPlayerLeft(E_PlayerLeft e)     { Remove(e.PlayerId); }
 
         private void OnStateUpdated(E_RemoteStateUpdated e)
         {
             if (string.IsNullOrEmpty(e.PlayerId)) return;
-
-            IRoomModel room = this.GetModel<IRoomModel>();
-            RemotePlayerData data = FindRemotePlayer(room, e.PlayerId);
+            var room = this.GetModel<IRoomModel>();
+            var data = FindRemotePlayer(room, e.PlayerId);
             if (data == null) return;
-
-            if (_cards.TryGetValue(e.PlayerId, out PlayerCardController card))
-            {
-                card.Refresh(data);
-            }
-            else
-            {
-                AddOrUpdate(data);
-            }
+            if (_cards.TryGetValue(e.PlayerId, out var card)) card.Refresh(data);
+            else AddOrUpdate(data);
         }
 
-        private void OnRoomJoined(E_RoomJoined e)
-        {
-            RebuildFromSnapshot(e.InitialPlayers);
-        }
-
-        private void OnSnapshot(E_RoomSnapshot e)
-        {
-            RebuildFromSnapshot(e.Players);
-        }
+        private void OnRoomJoined(E_RoomJoined e)   { RebuildFromSnapshot(e.InitialPlayers); }
+        private void OnSnapshot(E_RoomSnapshot e)   { RebuildFromSnapshot(e.Players); }
 
         private void OnIconUpdated(E_IconUpdated e)
         {
             if (string.IsNullOrEmpty(e.BundleId)) return;
-
-            IRoomModel room = this.GetModel<IRoomModel>();
+            var room = this.GetModel<IRoomModel>();
             foreach (var kv in _cards)
             {
-                RemotePlayerData data = FindRemotePlayer(room, kv.Key);
-                if (data != null && data.ActiveAppBundleId == e.BundleId)
-                {
-                    kv.Value.Refresh(data);
-                }
+                var data = FindRemotePlayer(room, kv.Key);
+                if (data != null && data.ActiveAppBundleId == e.BundleId) kv.Value.Refresh(data);
             }
         }
 
-        // ─── 暴露给测试/事件回调的操作 ──────────────────────────
+        // ─── 核心 CRUD ──────────────────────────────────────────
 
         public void AddOrUpdate(RemotePlayerData data)
         {
             if (data == null || string.IsNullOrEmpty(data.PlayerId)) return;
 
-            // 已存在 → 刷新
-            if (_cards.TryGetValue(data.PlayerId, out PlayerCardController existing))
+            if (_cards.TryGetValue(data.PlayerId, out var existing))
             {
                 existing.Refresh(data);
                 return;
             }
 
-            // 新建 → CloneTree 创建卡片 VisualElement
             if (_cardTemplate == null)
             {
-                Debug.LogError($"[PlayerCardManager] 无法创建卡片：PlayerCard.uxml 未分配。" +
-                    $" 玩家 '{data.PlayerName}' (id={data.PlayerId}) 被跳过。");
+                Debug.LogError($"[PlayerCardManager] 无法创建卡片：PlayerCard.uxml 未分配。玩家 '{data.PlayerName}' (id={data.PlayerId}) 被跳过。");
                 return;
             }
-
-            if (_cardContainer == null)
+            if (_cardLayer == null)
             {
-                Debug.LogError($"[PlayerCardManager] 无法创建卡片：cardContainer 未分配。");
+                Debug.LogError($"[PlayerCardManager] 无法创建卡片：cardLayer 未分配。");
                 return;
             }
 
-            TemplateContainer tplContainer = _cardTemplate.CloneTree();
-            VisualElement pcRoot = tplContainer.Q<VisualElement>(className: "pc-root") ?? tplContainer;
-            tplContainer.style.flexShrink = 0;
-            _cardContainer.Add(tplContainer);
+            var tpl = _cardTemplate.CloneTree();
+            var pcRoot = tpl.Q<VisualElement>(className: "pc-root") ?? tpl;
+            tpl.style.flexShrink = 0;
+            _cardLayer.Add(tpl);
 
-            var controller = new PlayerCardController(pcRoot);
-            controller.Setup(data);
-            _cards[data.PlayerId] = controller;
+            // 位置：持久化 > NextSlot（隔壁规则）
+            Vector2 pos = ResolveInitialPosition(data.PlayerId);
+            pcRoot.style.position = Position.Absolute;
+            pcRoot.style.left = pos.x;
+            pcRoot.style.top  = pos.y;
+
+            var ctrl = new PlayerCardController(pcRoot);
+            ctrl.Setup(data);
+            _cards[data.PlayerId] = ctrl;
+            _joinOrder.Add(data.PlayerId);
+
+            // 新玩家（Model 里没有位置记录）→ 把 NextSlot 的结果写回 Model 持久化
+            var posModel = this.GetModel<IPlayerCardPositionModel>();
+            if (posModel != null && !posModel.TryGet(data.PlayerId, out _))
+            {
+                this.SendCommand(new Cmd_SetPlayerCardPosition(data.PlayerId, pos));
+            }
+
+            // 拖拽结束 → 持久化
+            var handle = pcRoot.Q<VisualElement>("pc-handle-bar");
+            if (handle != null)
+            {
+                var drag = DraggableElement.MakeDraggable(pcRoot, handle);
+                var id = data.PlayerId;
+                drag.OnDragEnd += p => this.SendCommand(new Cmd_SetPlayerCardPosition(id, p));
+            }
         }
 
         public void Remove(string playerId)
         {
             if (string.IsNullOrEmpty(playerId)) return;
-
-            if (_cards.TryGetValue(playerId, out PlayerCardController card))
+            if (_cards.TryGetValue(playerId, out var card))
             {
                 card.Root.parent?.Remove(card.Root);
                 _cards.Remove(playerId);
+                _joinOrder.Remove(playerId);
             }
         }
 
         public void Clear()
         {
-            _cardContainer?.Clear();
+            _cardLayer?.Clear();
             _cards.Clear();
+            _joinOrder.Clear();
         }
 
         private void RebuildFromSnapshot(IList<RemotePlayerData> players)
         {
             Clear();
             if (players == null) return;
-
-            for (int i = 0; i < players.Count; i++)
-            {
-                AddOrUpdate(players[i]);
-            }
+            for (int i = 0; i < players.Count; i++) AddOrUpdate(players[i]);
         }
 
         private static RemotePlayerData FindRemotePlayer(IRoomModel room, string playerId)
         {
             if (room == null) return null;
-
-            IReadOnlyList<RemotePlayerData> players = room.RemotePlayers;
+            var players = room.RemotePlayers;
             if (players == null) return null;
-
             for (int i = 0; i < players.Count; i++)
             {
-                RemotePlayerData p = players[i];
-                if (p != null && p.PlayerId == playerId)
-                    return p;
+                var p = players[i];
+                if (p != null && p.PlayerId == playerId) return p;
             }
-
             return null;
+        }
+
+        // ─── 初始位置解析 ────────────────────────────────────────
+
+        private Vector2 ResolveInitialPosition(string playerId)
+        {
+            var posModel = this.GetModel<IPlayerCardPositionModel>();
+            if (posModel != null && posModel.TryGet(playerId, out Vector2 saved))
+            {
+                return saved;
+            }
+            return NextSlot();
+        }
+
+        /// <summary>
+        /// 下一空位：
+        ///  - joinOrder 空 → FirstAnchor (40,40)
+        ///  - 否则 → prev 右侧 153+12；越过 layerW-20 → 换行 y += 113+12, x 归 40
+        ///  - 下界 clamp 到 layerH-113-20（允许最后一行堆叠）
+        /// </summary>
+        public Vector2 NextSlot()
+        {
+            if (_joinOrder.Count == 0) return FirstAnchor;
+            var prevId = _joinOrder[_joinOrder.Count - 1];
+            if (!_cards.TryGetValue(prevId, out var prev)) return FirstAnchor;
+            float prevX = prev.Root.style.left.value.value;
+            float prevY = prev.Root.style.top.value.value;
+
+            float layerW = (_cardLayer?.resolvedStyle.width  ?? 0) > 0
+                ? _cardLayer.resolvedStyle.width
+                : (_cardLayer?.style.width.value.value ?? Screen.width);
+            float layerH = (_cardLayer?.resolvedStyle.height ?? 0) > 0
+                ? _cardLayer.resolvedStyle.height
+                : (_cardLayer?.style.height.value.value ?? Screen.height);
+
+            float x = prevX + CardWidth + Gap;
+            float y = prevY;
+            if (x + CardWidth > layerW - 20f)
+            {
+                x = FirstAnchor.x;
+                y = prevY + CardHeight + Gap;
+            }
+            y = Mathf.Min(y, layerH - CardHeight - 20f);
+            return new Vector2(x, y);
         }
     }
 }
