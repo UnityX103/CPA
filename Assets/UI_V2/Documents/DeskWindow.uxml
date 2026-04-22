@@ -1,49 +1,13 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="PomodoroPanel" src="project://database/Assets/UI_V2/Documents/PomodoroPanel.uxml?fileID=9197481963319205126&amp;guid=cbf5638ad0ab048998be547920a9d8ca&amp;type=3#PomodoroPanel" />
     <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
     <Style src="project://database/Assets/UI_V2/Styles/DeskWindow.uss?fileID=7433441132597879392&amp;guid=1fd1c07e4450e431fad56cc90cc090fb&amp;type=3#DeskWindow" />
     <Style src="project://database/Assets/UI_V2/Styles/PlayerCard.uss?fileID=7433441132597879392&amp;guid=23b0113cd0f2a41b3bf91059f3d0d0b9&amp;type=3#PlayerCard" />
-    <Style src="project://database/Assets/UI_V2/Styles/PomodoroSettingsPanel.uss?fileID=7433441132597879392&amp;guid=fdc2e9c1c8f98438f9e4baf0d67697f0&amp;type=3#PomodoroSettingsPanel" />
-    <Style src="project://database/Assets/UI_V2/Styles/OnlineSettingsPanel.uss?fileID=7433441132597879392&amp;guid=3549485af0add4718a0e181438a7522a&amp;type=3#OnlineSettingsPanel" />
-    <Style src="project://database/Assets/UI_V2/Styles/PetSettingsPanel.uss?fileID=7433441132597879392&amp;guid=42cff34867d5d4df59f935304292c781&amp;type=3#PetSettingsPanel" />
-    <ui:VisualElement name="dw-wrap" class="dw-wrap">
-        <ui:VisualElement name="handle-bar" class="handle-bar">
-            <ui:VisualElement class="handle-spacer" />
-            <ui:Label name="drag-handle" text="•••" class="drag-handle" />
-            <ui:VisualElement class="handle-right">
-                <ui:VisualElement name="settings-btn" class="settings-btn">
-                    <ui:Label class="settings-btn-icon" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="content-row" class="content-row">
-            <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-pomodoro" />
-        </ui:VisualElement>
-        <ui:ScrollView name="card-list" mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" class="card-list" />
-        <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display: none;">
-            <ui:VisualElement class="settings-header">
-                <ui:Label text="设置" class="settings-title" />
-                <ui:VisualElement class="settings-spacer" />
-                <ui:VisualElement name="settings-close" class="settings-close">
-                    <ui:Label text="✕" class="settings-close-icon" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement class="settings-body">
-                <ui:VisualElement class="settings-sidebar">
-                    <ui:VisualElement name="tab-pomodoro" class="sidebar-tab sidebar-tab--active">
-                        <ui:Label text="番茄钟" class="sidebar-tab-label" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="tab-online" class="sidebar-tab">
-                        <ui:Label text="联机" class="sidebar-tab-label" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="tab-pet" class="sidebar-tab">
-                        <ui:Label text="宠物" class="sidebar-tab-label" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:ScrollView name="settings-content" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" class="settings-content">
-                    <ui:VisualElement name="settings-content-host" class="settings-content-host" />
-                </ui:ScrollView>
-            </ui:VisualElement>
-        </ui:VisualElement>
+    <!-- DeskWindow 主面板：透明全屏，只做 pomodoro + card-layer 宿主 -->
+    <ui:VisualElement name="dw-canvas" class="dw-canvas">
+        <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-floating" />
+        <ui:VisualElement name="card-layer" class="dw-card-layer" />
     </ui:VisualElement>
 </ui:UXML>
