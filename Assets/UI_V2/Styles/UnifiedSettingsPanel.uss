@@ -1,0 +1,104 @@
+/*
+ * UnifiedSettingsPanel.uss
+ * 设置面板独立 UIDocument 的样式（从 DeskWindow.uss 迁入）
+ * 对应 Pencil vnYnS: Unified Settings Panel
+ */
+
+/* ── 统一设置面板（独立 UIDocument 根）───────────────────── */
+.settings-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    padding: 20px;
+    flex-direction: column;
+}
+
+.settings-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.settings-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
+}
+
+.settings-spacer {
+    flex-grow: 1;
+}
+
+.settings-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: rgb(243, 237, 231);
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-close-icon {
+    font-size: 14px;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+}
+
+.settings-body {
+    flex-direction: row;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.settings-sidebar {
+    width: 71px;
+    background-color: rgb(243, 237, 231);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    flex-direction: column;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.sidebar-tab {
+    padding: 10px 14px;
+}
+
+.sidebar-tab-label {
+    font-size: 13px;
+    color: rgb(158, 142, 128);
+    -unity-font-style: normal;
+}
+
+.sidebar-tab--active {
+    background-color: rgb(255, 255, 255);
+    border-top-left-radius: 0;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 0;
+}
+
+.sidebar-tab--active .sidebar-tab-label {
+    color: rgb(209, 95, 61);
+    -unity-font-style: bold;
+}
+
+.settings-content {
+    flex-grow: 1;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.settings-content-host {
+    flex-direction: column;
+    width: 100%;
+}
+
+.settings-content .unity-scroll-view__content-container {
+    flex-direction: column;
+    width: 100%;
+}

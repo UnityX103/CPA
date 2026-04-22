@@ -1,0 +1,38 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <Style src="../Styles/Variables.uss"/>
+    <Style src="../Styles/UnifiedSettingsPanel.uss"/>
+    <Style src="../Styles/PomodoroSettingsPanel.uss"/>
+    <Style src="../Styles/OnlineSettingsPanel.uss"/>
+    <Style src="../Styles/PetSettingsPanel.uss"/>
+
+    <!-- 设置面板：独立 UIDocument 根（对应 Pencil vnYnS） -->
+    <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display: none;">
+        <ui:VisualElement class="settings-header">
+            <ui:Label text="设置" class="settings-title" />
+            <ui:VisualElement class="settings-spacer" />
+            <ui:VisualElement name="settings-close" class="settings-close">
+                <ui:Label text="✕" class="settings-close-icon" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="settings-body">
+            <ui:VisualElement class="settings-sidebar">
+                <ui:VisualElement name="tab-pomodoro" class="sidebar-tab sidebar-tab--active">
+                    <ui:Label text="番茄钟" class="sidebar-tab-label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="tab-online" class="sidebar-tab">
+                    <ui:Label text="联机" class="sidebar-tab-label" />
+                </ui:VisualElement>
+                <ui:VisualElement name="tab-pet" class="sidebar-tab">
+                    <ui:Label text="宠物" class="sidebar-tab-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:ScrollView name="settings-content" vertical-scroller-visibility="Auto"
+                           horizontal-scroller-visibility="Hidden" class="settings-content">
+                <ui:VisualElement name="settings-content-host" class="settings-content-host" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
