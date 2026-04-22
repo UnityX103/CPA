@@ -27,7 +27,12 @@ namespace APP.NetworkIntegration.Tests
                 Assert.Ignore($"测试服务器脚本不存在: {serverScript}");
             }
 
-            string nodeBin = Environment.GetEnvironmentVariable("NODE_BIN") ?? "node";
+            string nodeBin = ResolveNodeBin();
+            if (string.IsNullOrEmpty(nodeBin))
+            {
+                Assert.Ignore("未找到 node 可执行（试过 $NODE_BIN 与常见 Homebrew/系统路径）");
+                return null;
+            }
 
             var psi = new ProcessStartInfo
             {
@@ -59,6 +64,30 @@ namespace APP.NetworkIntegration.Tests
             string url = ParseUrl(firstLine);
 
             return new TestServerHarness { _process = p, Port = port, Url = url };
+        }
+
+        private static string ResolveNodeBin()
+        {
+            string env = Environment.GetEnvironmentVariable("NODE_BIN");
+            if (!string.IsNullOrEmpty(env) && File.Exists(env)) return env;
+
+            // Unity 子进程的 PATH 经常缺常用路径，直接试一组绝对路径
+            string[] candidates =
+            {
+                "/opt/homebrew/bin/node",                  // Apple Silicon Homebrew
+                "/opt/homebrew/opt/node@22/bin/node",
+                "/opt/homebrew/opt/node@20/bin/node",
+                "/usr/local/bin/node",                     // Intel Homebrew / 手动安装
+                "/usr/local/opt/node@22/bin/node",
+                "/usr/bin/node",
+            };
+            foreach (string path in candidates)
+            {
+                if (File.Exists(path)) return path;
+            }
+
+            // 兜底：在 PATH 里让系统解析
+            return "node";
         }
 
         private static int ParsePort(string line)

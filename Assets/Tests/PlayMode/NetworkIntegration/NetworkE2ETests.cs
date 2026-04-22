@@ -3,9 +3,11 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using APP.Network;
 using APP.Network.Command;
 using APP.Network.Event;
 using APP.Network.Model;
+using APP.Network.System;
 using APP.Pomodoro;
 using NUnit.Framework;
 using QFramework;
@@ -18,17 +20,24 @@ namespace APP.NetworkIntegration.Tests
     public sealed class NetworkE2ETests
     {
         private TestServerHarness _server;
+        private GameObject _dispatcherHost;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _server = TestServerHarness.Start();
+
+            // PlayMode 测试场景是空的，没有 NetworkDispatcherBehaviour，
+            // 后台 WebSocket 线程的消息进不了主线程事件总线。补一个。
+            _dispatcherHost = new GameObject("TestNetworkDispatcher");
+            _dispatcherHost.AddComponent<NetworkDispatcherBehaviour>();
         }
 
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
             _server?.Dispose();
+            if (_dispatcherHost != null) Object.Destroy(_dispatcherHost);
         }
 
         [UnityTest]
