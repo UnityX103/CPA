@@ -671,6 +671,67 @@
       "children": [
         {
           "type": "frame",
+          "id": "JZa3Q",
+          "name": "pp-handle-bar",
+          "width": "fill_container",
+          "height": 28,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "i5B6h",
+              "name": "spacer-left",
+              "width": "fill_container",
+              "height": 28
+            },
+            {
+              "type": "text",
+              "id": "PvmHR",
+              "name": "pp-handle-drag",
+              "fill": "#C4B5A8",
+              "content": "•••",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "OiDm6",
+              "name": "pp-handle-right",
+              "width": "fill_container",
+              "height": 28,
+              "justifyContent": "end",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "4qNnO",
+                  "name": "pp-settings-btn",
+                  "width": 28,
+                  "height": 28,
+                  "fill": "#F0E0D0",
+                  "cornerRadius": 11,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "TtYq7",
+                      "name": "pp-gear-icon",
+                      "width": 16,
+                      "height": 16,
+                      "fill": "#A28B79",
+                      "cornerRadius": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
           "id": "S3Nbk",
           "name": "head",
           "theme": {},
@@ -1040,7 +1101,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 18
+          "y": 64
         },
         "TqjjH": {
           "y": 2
@@ -1059,7 +1120,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 60
+          "y": 106
         },
         "6SX3a": {
           "height": "fit_content(0)",
@@ -1118,7 +1179,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 18
+          "y": 64
         },
         "TqjjH": {
           "y": 2
@@ -1136,7 +1197,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 60
+          "y": 106
         },
         "6SX3a": {
           "height": "fit_content(0)",
@@ -1290,7 +1351,7 @@
                   "width": "fill_container",
                   "height": "fit_content",
                   "x": 18,
-                  "y": 18
+                  "y": 64
                 },
                 "TqjjH": {
                   "y": 2
@@ -1308,7 +1369,7 @@
                   "width": "fill_container",
                   "height": "fit_content",
                   "x": 18,
-                  "y": 60
+                  "y": 106
                 },
                 "p4kgU": {
                   "width": "fill_container",
@@ -1397,7 +1458,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 18
+          "y": 64
         },
         "TqjjH": {
           "y": 2
@@ -1416,7 +1477,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 60
+          "y": 106
         },
         "6SX3a/mMujP": {
           "fill": "#E0D9D3"
@@ -2175,7 +2236,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 18
+          "y": 64
         },
         "TqjjH": {
           "y": 2
@@ -2195,7 +2256,7 @@
           "width": "fill_container",
           "height": "fit_content",
           "x": 18,
-          "y": 60
+          "y": 106
         },
         "6SX3a": {
           "height": "fit_content(0)",
