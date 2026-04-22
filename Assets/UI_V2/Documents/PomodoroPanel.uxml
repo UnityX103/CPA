@@ -25,6 +25,17 @@
   -->
   <ui:VisualElement name="pp-root" class="pp-root">
 
+    <!-- 顶部拖拽把手 + 设置按钮（Pencil: pp-handle-bar JZa3Q） -->
+    <ui:VisualElement name="pp-handle-bar" class="pp-handle-bar">
+      <ui:VisualElement class="pp-handle-spacer"/>
+      <ui:Label name="pp-handle-drag" text="•••" class="pp-handle-drag"/>
+      <ui:VisualElement class="pp-handle-right">
+        <ui:VisualElement name="pp-settings-btn" class="pp-settings-btn">
+          <ui:Label class="pp-settings-btn-icon"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+
     <!-- 顶部：标题 + 连续专注（Pencil head/S3Nbk: space-between） -->
     <ui:VisualElement class="pp-header">
       <ui:Label name="pp-title" class="pp-title" text="番茄钟"/>

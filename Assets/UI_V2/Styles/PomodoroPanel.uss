@@ -22,6 +22,7 @@
     padding-bottom: 18px;
     padding-left: 18px;
     overflow: hidden;
+    position: absolute;
     /* box-shadow: 0_16px_24px_rgba(199,133,84,0.19) → border 模拟 */
 }
 
@@ -100,4 +101,50 @@
 /* ── 通用隐藏（由 C# class 切换，不写 inline style）─────── */
 .pp-hidden {
     display: none;
+}
+
+/* ── 顶部拖拽把手（对齐 Pencil pp-handle-bar JZa3Q） ─────── */
+.pp-handle-bar {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 28px;
+}
+
+.pp-handle-spacer {
+    flex-grow: 1;
+    height: 28px;
+}
+
+.pp-handle-drag {
+    -unity-text-align: middle-center;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(196, 181, 168);
+    cursor: move-arrow;
+    flex-shrink: 0;
+}
+
+.pp-handle-right {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.pp-settings-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 11px;
+    background-color: rgb(240, 224, 208);
+    align-items: center;
+    justify-content: center;
+}
+
+.pp-settings-btn-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
 }
