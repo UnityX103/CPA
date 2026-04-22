@@ -401,6 +401,18 @@
                   "content": "加入房间"
                 }
               }
+            },
+            {
+              "id": "X1i0q",
+              "type": "ref",
+              "ref": "RPLJq",
+              "name": "onlCreateBtn",
+              "width": "fill_container",
+              "descendants": {
+                "zgOkx": {
+                  "content": "创建新房间"
+                }
+              }
             }
           ]
         },
@@ -422,6 +434,31 @@
           "children": [
             {
               "type": "frame",
+              "id": "rjTse",
+              "name": "onlReconnectBanner",
+              "width": "fill_container",
+              "fill": "#FFF4CC",
+              "cornerRadius": 6,
+              "padding": [
+                6,
+                10
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "0UC2y",
+                  "fill": "#8A6D00",
+                  "content": "正在重新连接...",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 12,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
               "id": "LSMa7",
               "name": "onlRoomHead",
               "width": "fill_container",
@@ -436,14 +473,39 @@
                   "gap": 2,
                   "children": [
                     {
-                      "type": "text",
-                      "id": "p2Em5",
-                      "name": "onlRoomName",
-                      "fill": "#166534",
-                      "content": "ROOM-001",
-                      "fontFamily": "MaokenAssortedSans",
-                      "fontSize": 16,
-                      "fontWeight": "700"
+                      "type": "frame",
+                      "id": "wRsZd",
+                      "name": "onlRoomNameRow",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF00",
+                      "stroke": {
+                        "thickness": 0
+                      },
+                      "gap": 8,
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "p2Em5",
+                          "name": "onlRoomName",
+                          "fill": "#166534",
+                          "content": "ROOM-001",
+                          "fontFamily": "MaokenAssortedSans",
+                          "fontSize": 16,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "yAaJQ",
+                          "name": "onlCopyBtn",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#166534"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
@@ -593,7 +655,7 @@
       "type": "frame",
       "id": "YRqeB",
       "x": 701,
-      "y": -398,
+      "y": -399,
       "name": "pomodoroPanel",
       "reusable": true,
       "width": "fit_content(230)",
@@ -1119,7 +1181,7 @@
       "fill": {
         "type": "gradient",
         "gradientType": "linear",
-        "enabled": true,
+        "enabled": false,
         "rotation": 180,
         "size": {
           "height": 1
@@ -1128,29 +1190,14 @@
           {
             "color": "#F5E6D8",
             "position": 0
-          },
-          {
-            "color": "#EDE0D4",
-            "position": 0.5
-          },
-          {
-            "color": "#E8D5C4",
-            "position": 1
           }
         ]
       },
-      "cornerRadius": 28,
       "stroke": {
-        "thickness": 1
+        "thickness": 0
       },
       "layout": "vertical",
       "gap": 12,
-      "padding": [
-        5,
-        20,
-        20,
-        20
-      ],
       "alignItems": "center",
       "children": [
         {
@@ -1227,7 +1274,7 @@
               "id": "iUCdM",
               "type": "ref",
               "ref": "YRqeB",
-              "x": 124,
+              "x": 144,
               "y": 0,
               "width": "fit_content(230)",
               "name": "pomodoro",
