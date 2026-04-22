@@ -25,14 +25,14 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void Instance_IsNotNull()
         {
-            Assert.IsNotNull(AppMonitorSingleton.Instance, "AppMonitorSingleton.Instance 不应为 null");
+            Assert.IsNotNull(CPA.Monitoring.AppMonitor.Instance, "CPA.Monitoring.AppMonitor.Instance 不应为 null");
         }
 
         [Test]
         public void Instance_IsSameObject()
         {
-            AppMonitorSingleton a = AppMonitorSingleton.Instance;
-            AppMonitorSingleton b = AppMonitorSingleton.Instance;
+            CPA.Monitoring.AppMonitor a = CPA.Monitoring.AppMonitor.Instance;
+            CPA.Monitoring.AppMonitor b = CPA.Monitoring.AppMonitor.Instance;
             Assert.AreSame(a, b, "每次访问 Instance 应返回同一对象");
         }
 
@@ -44,7 +44,7 @@ namespace NZ.AppMonitor.Tests
         public void IsPermissionGranted_DoesNotThrow()
         {
             bool granted = false;
-            Assert.DoesNotThrow(() => granted = AppMonitorSingleton.Instance.IsPermissionGranted,
+            Assert.DoesNotThrow(() => granted = CPA.Monitoring.AppMonitor.Instance.IsPermissionGranted,
                 "IsPermissionGranted 属性访问不应抛出异常");
             Debug.Log($"[AppMonitorPlayerTest] IsPermissionGranted = {granted}");
         }
@@ -52,7 +52,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void RequestPermission_DoesNotThrow()
         {
-            Assert.DoesNotThrow(() => AppMonitorSingleton.Instance.RequestPermission(),
+            Assert.DoesNotThrow(() => CPA.Monitoring.AppMonitor.Instance.RequestPermission(),
                 "RequestPermission() 不应抛出异常");
         }
 
@@ -60,7 +60,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void IsPermissionGranted_NonMacOS_ReturnsFalse()
         {
-            Assert.IsFalse(AppMonitorSingleton.Instance.IsPermissionGranted,
+            Assert.IsFalse(CPA.Monitoring.AppMonitor.Instance.IsPermissionGranted,
                 "非 macOS 平台 IsPermissionGranted 应始终返回 false");
         }
 #endif
@@ -72,14 +72,14 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_ReturnsNonNull()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             Assert.IsNotNull(result, "GetCurrentApp() 不应返回 null");
         }
 
         [Test]
         public void GetCurrentApp_AppInfo_ErrorMessageNullWhenSuccess()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             if (result.IsSuccess)
             {
                 // 成功时 ErrorCode 应为 null（AccessibilityDenied Fallback 时 IsSuccess=true 但 ErrorCode 有值）
@@ -91,7 +91,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_FailureState_HasErrorMessage()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             if (!result.IsSuccess)
             {
                 Assert.IsNotNull(result.ErrorMessage, "IsSuccess=false 时 ErrorMessage 不应为 null");
@@ -107,7 +107,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_macOS_ReturnsAppName()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             Assert.IsNotNull(result, "macOS 上 GetCurrentApp() 不应返回 null");
             // 成功或 AccessibilityDenied fallback 两种情况下 AppName 都应有值
             Assert.IsNotNull(result.AppName, "macOS 上 AppName 不应为 null");
@@ -118,7 +118,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_macOS_WindowTitle_IsString()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             if (result.IsSuccess && result.ErrorCode == null)
             {
                 // 完全成功时 WindowTitle 不为 null（但可以是空字符串，某些应用无窗口）
@@ -129,7 +129,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_macOS_ErrorMessage_NotUnsupportedPlatform()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             // macOS 上绝不应出现"当前平台不支持"的错误
             if (result.ErrorMessage != null)
             {
@@ -141,7 +141,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetCurrentApp_NonMacOS_ReturnsPlatformUnsupported()
         {
-            AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
             Assert.IsFalse(result.IsSuccess, "非 macOS 平台 GetCurrentApp() 应返回失败");
             Assert.AreEqual("当前平台不支持", result.ErrorMessage,
                 "非 macOS 平台错误消息应为 '当前平台不支持'");
@@ -156,7 +156,7 @@ namespace NZ.AppMonitor.Tests
         public void GetAppIcon_DoesNotThrow()
         {
             Texture2D icon = null;
-            Assert.DoesNotThrow(() => icon = AppMonitorSingleton.Instance.GetAppIcon(),
+            Assert.DoesNotThrow(() => icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon(),
                 "GetAppIcon() 不应抛出异常");
             Debug.Log($"[AppMonitorPlayerTest] GetAppIcon = {(icon != null ? $"{icon.width}x{icon.height}" : "null")}");
         }
@@ -165,7 +165,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetAppIcon_macOS_ReturnsTexture()
         {
-            Texture2D icon = AppMonitorSingleton.Instance.GetAppIcon();
+            Texture2D icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon();
             Assert.IsNotNull(icon, "macOS 上 GetAppIcon() 应返回非 null 的 Texture2D（真实图标或 Fallback 图标）");
             Assert.Greater(icon.width, 0, "图标宽度应 > 0");
             Assert.Greater(icon.height, 0, "图标高度应 > 0");
@@ -179,7 +179,7 @@ namespace NZ.AppMonitor.Tests
         [Test]
         public void GetAppIcon_NonMacOS_ReturnsNull()
         {
-            Texture2D icon = AppMonitorSingleton.Instance.GetAppIcon();
+            Texture2D icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon();
             Assert.IsNull(icon, "非 macOS 平台 GetAppIcon() 应返回 null");
         }
 #endif
@@ -242,7 +242,7 @@ namespace NZ.AppMonitor.Tests
             for (int i = 0; i < 5; i++)
             {
                 AppInfo result = null;
-                Assert.DoesNotThrow(() => result = AppMonitorSingleton.Instance.GetCurrentApp(),
+                Assert.DoesNotThrow(() => result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp(),
                     $"第 {i + 1} 次调用 GetCurrentApp() 不应抛出");
                 Assert.IsNotNull(result, $"第 {i + 1} 次调用应返回非 null");
 
@@ -268,7 +268,7 @@ namespace NZ.AppMonitor.Tests
 
             for (int i = 0; i < 10; i++)
             {
-                AppInfo result = AppMonitorSingleton.Instance.GetCurrentApp();
+                AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
                 if (result?.Icon != null)
                 {
                     UnityEngine.Object.Destroy(result.Icon);

@@ -68,11 +68,11 @@ namespace APP.Network.Tests
             Assert.That(_fakeNetworkSystem.SentMessages[0], Is.TypeOf<OutboundSyncState>());
 
             var message = (OutboundSyncState)_fakeNetworkSystem.SentMessages[0];
-            Assert.That(message.data.pomodoro.phase, Is.EqualTo((int)PomodoroPhase.Break));
-            Assert.That(message.data.pomodoro.remainingSeconds, Is.EqualTo(180));
-            Assert.That(message.data.pomodoro.currentRound, Is.EqualTo(2));
-            Assert.That(message.data.pomodoro.totalRounds, Is.EqualTo(4));
-            Assert.That(message.data.pomodoro.isRunning, Is.True);
+            Assert.That(message.state.pomodoro.phase, Is.EqualTo((int)PomodoroPhase.Break));
+            Assert.That(message.state.pomodoro.remainingSeconds, Is.EqualTo(180));
+            Assert.That(message.state.pomodoro.currentRound, Is.EqualTo(2));
+            Assert.That(message.state.pomodoro.totalRounds, Is.EqualTo(4));
+            Assert.That(message.state.pomodoro.isRunning, Is.True);
         }
 
         [Test]

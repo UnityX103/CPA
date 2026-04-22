@@ -121,8 +121,8 @@ namespace APP.Network.Tests
             var message = new OutboundSyncState
             {
                 v = 1,
-                type = "sync_state",
-                data = new RemoteState
+                type = "player_state_update",
+                state = new RemoteState
                 {
                     pomodoro = new PomodoroStateDto
                     {
@@ -139,10 +139,10 @@ namespace APP.Network.Tests
             string json = JsonUtility.ToJson(message);
             OutboundSyncState restored = JsonUtility.FromJson<OutboundSyncState>(json);
 
-            Assert.That(restored.type, Is.EqualTo("sync_state"));
-            Assert.That(restored.data.pomodoro.phase, Is.EqualTo(2));
-            Assert.That(restored.data.pomodoro.currentRound, Is.EqualTo(4));
-            Assert.That(restored.data.pomodoro.isRunning, Is.False);
+            Assert.That(restored.type, Is.EqualTo("player_state_update"));
+            Assert.That(restored.state.pomodoro.phase, Is.EqualTo(2));
+            Assert.That(restored.state.pomodoro.currentRound, Is.EqualTo(4));
+            Assert.That(restored.state.pomodoro.isRunning, Is.False);
         }
     }
 }

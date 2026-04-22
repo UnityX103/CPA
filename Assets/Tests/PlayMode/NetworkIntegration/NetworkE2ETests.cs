@@ -201,14 +201,15 @@ namespace APP.NetworkIntegration.Tests
             }
 
             // 严格集成测试目标无法达到（端口变了），放松为"状态机未卡死在 Connecting"
-            Assert.That(room.Status.Value,
-                Is.AnyOf(
-                    ConnectionStatus.Error,
-                    ConnectionStatus.Disconnected,
-                    ConnectionStatus.Reconnecting,
-                    ConnectionStatus.Connected,
-                    ConnectionStatus.InRoom),
-                "状态机卡住");
+            var acceptedStatuses = new[]
+            {
+                ConnectionStatus.Error,
+                ConnectionStatus.Disconnected,
+                ConnectionStatus.Reconnecting,
+                ConnectionStatus.Connected,
+                ConnectionStatus.InRoom,
+            };
+            Assert.That(acceptedStatuses, Contains.Item(room.Status.Value), "状态机卡住");
 
             GameApp.Interface.SendCommand(new Cmd_LeaveRoom());
             yield return new WaitForSecondsRealtime(0.5f);
@@ -227,7 +228,7 @@ namespace APP.NetworkIntegration.Tests
             byte[] bytes = Encoding.UTF8.GetBytes(json);
             return ws.SendAsync(
                 new System.ArraySegment<byte>(bytes),
-                WebSocketMessageType.Text, true, CancellationToken.None).AsTask();
+                WebSocketMessageType.Text, true, CancellationToken.None);
         }
     }
 }

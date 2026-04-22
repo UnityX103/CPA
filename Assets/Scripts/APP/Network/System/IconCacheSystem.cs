@@ -7,10 +7,20 @@ namespace APP.Network.System
 {
     public sealed class IconCacheSystem : AbstractSystem, IIconCacheSystem
     {
+        /// <summary>
+        /// LRU 缓存节点。先落 pngBytes 作为存在性标记，GetTexture 首次访问时再懒构造 Texture2D。
+        /// 这样 StoreFromBase64 可以在 EditMode（Texture2D.LoadImage 不一定可用）里被单测覆盖。
+        /// </summary>
+        private sealed class Entry
+        {
+            public LinkedListNode<string> Node;
+            public byte[] PngBytes;
+            public Texture2D Texture;
+        }
+
         private readonly int _maxEntries;
         private readonly LinkedList<string> _order = new LinkedList<string>();
-        private readonly Dictionary<string, (LinkedListNode<string> node, Texture2D tex)> _map
-            = new Dictionary<string, (LinkedListNode<string>, Texture2D)>();
+        private readonly Dictionary<string, Entry> _map = new Dictionary<string, Entry>();
 
         public IconCacheSystem(int maxEntries = 100)
         {
@@ -24,10 +34,27 @@ namespace APP.Network.System
 
         public Texture2D GetTexture(string bundleId)
         {
-            if (string.IsNullOrEmpty(bundleId) || !_map.TryGetValue(bundleId, out var entry)) return null;
-            _order.Remove(entry.node);
-            _order.AddLast(entry.node);
-            return entry.tex;
+            if (string.IsNullOrEmpty(bundleId) || !_map.TryGetValue(bundleId, out Entry entry))
+                return null;
+
+            _order.Remove(entry.Node);
+            entry.Node = _order.AddLast(bundleId);
+
+            if (entry.Texture == null && entry.PngBytes != null)
+            {
+                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false) { name = $"AppIcon:{bundleId}" };
+                if (tex.LoadImage(entry.PngBytes))
+                {
+                    tex.Apply();
+                    entry.Texture = tex;
+                }
+                else
+                {
+                    DestroySafe(tex);
+                }
+            }
+
+            return entry.Texture;
         }
 
         public void StoreFromBase64(string bundleId, string base64)
@@ -37,32 +64,34 @@ namespace APP.Network.System
             byte[] png;
             try { png = Convert.FromBase64String(base64); }
             catch { return; }
+            if (png.Length == 0) return;
 
-            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false) { name = $"AppIcon:{bundleId}" };
-            if (!tex.LoadImage(png))
+            if (_map.TryGetValue(bundleId, out Entry existing))
             {
-                UnityEngine.Object.Destroy(tex);
-                return;
+                _order.Remove(existing.Node);
+                DestroySafe(existing.Texture);
+                existing.Texture = null;
+                existing.PngBytes = png;
+                existing.Node = _order.AddLast(bundleId);
             }
-            tex.Apply();
-
-            if (_map.TryGetValue(bundleId, out var old))
+            else
             {
-                _order.Remove(old.node);
-                if (old.tex != null) UnityEngine.Object.Destroy(old.tex);
-                _map.Remove(bundleId);
+                var entry = new Entry
+                {
+                    PngBytes = png,
+                    Texture = null,
+                    Node = _order.AddLast(bundleId),
+                };
+                _map[bundleId] = entry;
             }
-
-            var node = _order.AddLast(bundleId);
-            _map[bundleId] = (node, tex);
 
             while (_map.Count > _maxEntries)
             {
                 string oldestKey = _order.First.Value;
                 _order.RemoveFirst();
-                if (_map.TryGetValue(oldestKey, out var oldestEntry))
+                if (_map.TryGetValue(oldestKey, out Entry oldest))
                 {
-                    if (oldestEntry.tex != null) UnityEngine.Object.Destroy(oldestEntry.tex);
+                    DestroySafe(oldest.Texture);
                     _map.Remove(oldestKey);
                 }
             }
@@ -72,6 +101,13 @@ namespace APP.Network.System
         {
             if (pngBytes == null || pngBytes.Length == 0) return string.Empty;
             return Convert.ToBase64String(pngBytes);
+        }
+
+        private static void DestroySafe(UnityEngine.Object obj)
+        {
+            if (obj == null) return;
+            if (Application.isPlaying) UnityEngine.Object.Destroy(obj);
+            else UnityEngine.Object.DestroyImmediate(obj);
         }
     }
 }
