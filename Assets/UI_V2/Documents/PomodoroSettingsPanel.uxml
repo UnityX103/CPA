@@ -5,11 +5,8 @@
     <ui:Style src="../Styles/Components/InputTextSuffix.uss"/>
 
     <ui:VisualElement name="psp-root" class="psp-root">
-        <!-- Pencil: BYfx5 — 启用番茄钟开关行 -->
-        <ui:VisualElement class="psp-row">
-            <ui:Label text="启用番茄钟" class="psp-row-label" />
-            <ui:Toggle name="psp-toggle" value="true" class="comp-toggle-switch" />
-        </ui:VisualElement>
+        <!-- Pencil: pspApply — 应用按钮（默认隐藏，草稿与 Model 不一致时浮出） -->
+        <ui:Button name="psp-apply-btn" text="应用" class="psp-apply-btn psp-apply-btn--hidden" />
 
         <!-- Pencil: pomoGrid — 专注/休息时长卡片 -->
         <ui:VisualElement class="psp-metrics">
