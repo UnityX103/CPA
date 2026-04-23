@@ -83,5 +83,33 @@ namespace APP.Pomodoro.Tests
                 new APP.Pomodoro.Command.Cmd_SetPomodoroPanelPosition(new Vector2(7f, 9f)));
             Assert.That(model.PomodoroPanelPosition.Value, Is.EqualTo(new Vector2(7f, 9f)));
         }
+
+        [Test]
+        public void IsPinned_RoundTripsThroughPersistence()
+        {
+            PlayerPrefs.DeleteKey("APP.Pomodoro.PersistentState.v1");
+
+            IPomodoroModel save = new PomodoroModel();
+            save.IsPinned.Value = true;
+            PomodoroPersistence.Save(save, flushToDisk: true);
+
+            IPomodoroModel load = new PomodoroModel();
+            bool ok = PomodoroPersistence.TryLoad(load);
+
+            Assert.IsTrue(ok);
+            Assert.IsTrue(load.IsPinned.Value);
+
+            PlayerPrefs.DeleteKey("APP.Pomodoro.PersistentState.v1");
+        }
+
+        [Test]
+        public void IsPinned_DefaultFalse_WhenNoSavedState()
+        {
+            PlayerPrefs.DeleteKey("APP.Pomodoro.PersistentState.v1");
+
+            IPomodoroModel model = new PomodoroModel();
+
+            Assert.IsFalse(model.IsPinned.Value);
+        }
     }
 }
