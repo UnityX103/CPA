@@ -708,6 +708,7 @@ namespace APP.Editor
             var data = ToRemotePlayerData(player);
             var roomModel = GameApp.Interface.GetModel<IRoomModel>();
             roomModel.AddOrUpdateRemotePlayer(data);
+            GameApp.Interface.GetModel<IPlayerCardModel>().AddOrGet(player.Id);
 
             GameApp.Interface.SendEvent(new E_PlayerJoined(data));
 
@@ -718,6 +719,7 @@ namespace APP.Editor
         {
             var roomModel = GameApp.Interface.GetModel<IRoomModel>();
             roomModel.RemoveRemotePlayer(playerId);
+            GameApp.Interface.GetModel<IPlayerCardModel>().Remove(playerId);
 
             GameApp.Interface.SendEvent(new E_PlayerLeft(playerId));
 
@@ -745,9 +747,14 @@ namespace APP.Editor
 
             var roomModel = GameApp.Interface.GetModel<IRoomModel>();
             roomModel.ClearRemotePlayers();
+            var cardModel = GameApp.Interface.GetModel<IPlayerCardModel>();
+            var cardIds = new List<string>(cardModel.Cards.Count);
+            for (int i = 0; i < cardModel.Cards.Count; i++) cardIds.Add(cardModel.Cards[i].PlayerId);
+            for (int i = 0; i < cardIds.Count; i++) cardModel.Remove(cardIds[i]);
             foreach (var d in list)
             {
                 roomModel.AddOrUpdateRemotePlayer(d);
+                cardModel.AddOrGet(d.PlayerId);
             }
 
             GameApp.Interface.SendEvent(new E_RoomSnapshot(list));

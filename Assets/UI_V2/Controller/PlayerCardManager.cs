@@ -92,8 +92,8 @@ namespace APP.Pomodoro.Controller
             var room = this.GetModel<IRoomModel>();
             var data = FindRemotePlayer(room, e.PlayerId);
             if (data == null) return;
+            // E_PlayerCardAdded 是唯一的建卡入口；未建卡的 state update 忽略，等 NetworkSystem 下一次 AddOrGet
             if (_cards.TryGetValue(e.PlayerId, out var card)) card.Refresh(data);
-            else AddOrUpdate(data);
         }
 
         private void OnIconUpdated(E_IconUpdated e)
