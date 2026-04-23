@@ -1,4 +1,3 @@
-using System.Reflection;
 using APP.Network.Model;
 using APP.Pomodoro;
 using APP.Pomodoro.Controller;
@@ -17,6 +16,7 @@ namespace APP.Pomodoro.Tests
         private const string PomodoroPanelPath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
         private const string OnlinePanelPath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
         private const string PetPanelPath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
+        private const string UnsavedDialogPath = "Assets/UI_V2/Documents/UnsavedChangesDialog.uxml";
 
         private GameObject _lifecycleOwner;
 
@@ -46,6 +46,7 @@ namespace APP.Pomodoro.Tests
                 LoadTemplate(PomodoroPanelPath),
                 LoadTemplate(OnlinePanelPath),
                 LoadTemplate(PetPanelPath),
+                LoadTemplate(UnsavedDialogPath),
                 _lifecycleOwner);
 
             VisualElement host = root.Q<VisualElement>("settings-content-host");
@@ -70,9 +71,10 @@ namespace APP.Pomodoro.Tests
                 LoadTemplate(PomodoroPanelPath),
                 LoadTemplate(OnlinePanelPath),
                 LoadTemplate(PetPanelPath),
+                LoadTemplate(UnsavedDialogPath),
                 _lifecycleOwner);
 
-            InvokeSelectTab(controller, "online");
+            controller.SelectTab("online");
 
             VisualElement host = root.Q<VisualElement>("settings-content-host");
             Assert.That(host, Is.Not.Null);
@@ -82,7 +84,7 @@ namespace APP.Pomodoro.Tests
             Assert.That(root.Q<VisualElement>("tab-online").ClassListContains("sidebar-tab--active"), Is.True);
             Assert.That(root.Q<VisualElement>("tab-pomodoro").ClassListContains("sidebar-tab--active"), Is.False);
 
-            InvokeSelectTab(controller, "pet");
+            controller.SelectTab("pet");
 
             Assert.That(host.childCount, Is.EqualTo(1), "切换到宠物 tab 后仍应只保留一个面板实例。");
             Assert.That(host.Q<VisualElement>("osp-root"), Is.Null, "切换后旧的联机面板应被移除。");
@@ -103,15 +105,6 @@ namespace APP.Pomodoro.Tests
             VisualTreeAsset asset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(path);
             Assert.That(asset, Is.Not.Null, $"无法加载模板：{path}");
             return asset;
-        }
-
-        private static void InvokeSelectTab(UnifiedSettingsPanelController controller, string tabName)
-        {
-            MethodInfo method = typeof(UnifiedSettingsPanelController)
-                .GetMethod("SelectTab", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            Assert.That(method, Is.Not.Null, "UnifiedSettingsPanelController.SelectTab 不应被移除。");
-            method.Invoke(controller, new object[] { tabName });
         }
     }
 }

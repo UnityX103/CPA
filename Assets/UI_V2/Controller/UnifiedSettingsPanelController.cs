@@ -1,3 +1,4 @@
+using System;
 using APP.Network.Model;
 using APP.Pomodoro.Model;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace APP.Pomodoro.Controller
     /// 统一设置面板控制器（纯 C# 类）。
     /// 管理 DeskWindow.uxml 中 settings-overlay 的显隐、侧边栏 tab 切换、内容区加载。
     /// 持有并初始化三个设置面板子控制器。
+    /// 关闭 / 切 tab 前若番茄钟面板有未应用草稿，弹出 UnsavedChangesDialog 拦截。
     /// </summary>
     public sealed class UnifiedSettingsPanelController
     {
@@ -19,6 +21,7 @@ namespace APP.Pomodoro.Controller
         private VisualElement _tabOnline;
         private VisualElement _tabPet;
         private VisualElement _closeBtn;
+        private VisualElement _unsavedDialogHost;
 
         // ─── 状态 ────────────────────────────────────────────────
         private string _activeTab = "pomodoro";
@@ -27,6 +30,7 @@ namespace APP.Pomodoro.Controller
         private PomodoroSettingsPanelController _pomodoroSettings;
         private OnlineSettingsPanelController _onlineSettings;
         private PetSettingsPanelController _petSettings;
+        private UnsavedChangesDialogController _unsavedDialog;
 
         // ─── 模板与缓存实例 ──────────────────────────────────────
         private VisualTreeAsset _pomodoroTemplate;
@@ -42,18 +46,14 @@ namespace APP.Pomodoro.Controller
         // ─── 公开属性 ────────────────────────────────────────────
         public bool IsVisible => _overlay != null && _overlay.resolvedStyle.display == DisplayStyle.Flex;
 
+        /// <summary>供测试检查未保存对话框当前是否浮出。</summary>
+        public bool IsUnsavedDialogVisible => _unsavedDialog?.IsVisible == true;
+
         // ─── 初始化 ──────────────────────────────────────────────
 
         /// <summary>
         /// 初始化统一设置面板。
         /// </summary>
-        /// <param name="root">DeskWindow 的 rootVisualElement</param>
-        /// <param name="model">番茄钟 Model</param>
-        /// <param name="roomModel">房间 Model</param>
-        /// <param name="pomodoroTemplate">PomodoroSettingsPanel.uxml 资源</param>
-        /// <param name="onlineTemplate">OnlineSettingsPanel.uxml 资源</param>
-        /// <param name="petTemplate">PetSettingsPanel.uxml 资源</param>
-        /// <param name="lifecycleOwner">事件解绑生命周期宿主 GameObject</param>
         public void Init(
             VisualElement root,
             IPomodoroModel model,
@@ -61,6 +61,7 @@ namespace APP.Pomodoro.Controller
             VisualTreeAsset pomodoroTemplate,
             VisualTreeAsset onlineTemplate,
             VisualTreeAsset petTemplate,
+            VisualTreeAsset unsavedDialogTemplate,
             GameObject lifecycleOwner)
         {
             _model = model;
@@ -77,9 +78,17 @@ namespace APP.Pomodoro.Controller
             _tabOnline = root.Q("tab-online");
             _tabPet = root.Q("tab-pet");
             _closeBtn = root.Q("settings-close");
+            _unsavedDialogHost = root.Q("unsaved-dialog-host");
+
+            // 初始化未保存提示对话框
+            _unsavedDialog = new UnsavedChangesDialogController();
+            if (_unsavedDialogHost != null && unsavedDialogTemplate != null)
+            {
+                _unsavedDialog.Init(_unsavedDialogHost, unsavedDialogTemplate);
+            }
 
             // 注册关闭与 tab 切换事件
-            _closeBtn?.RegisterCallback<PointerUpEvent>(_ => Hide());
+            _closeBtn?.RegisterCallback<PointerUpEvent>(_ => RequestClose(null));
             _tabPomodoro?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pomodoro"));
             _tabOnline?.RegisterCallback<PointerUpEvent>(_ => SelectTab("online"));
             _tabPet?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pet"));
@@ -101,7 +110,7 @@ namespace APP.Pomodoro.Controller
                 contentScroll?.contentContainer.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
             }
 
-            SelectTab(_activeTab);
+            DoSelectTab(_activeTab);
         }
 
         /// <summary>
@@ -137,10 +146,39 @@ namespace APP.Pomodoro.Controller
             }
 
             _overlay.style.display = DisplayStyle.Flex;
-            SelectTab(_activeTab);
+            DoSelectTab(_activeTab);
         }
 
-        public void Hide()
+        /// <summary>
+        /// 请求关闭面板。若番茄钟面板有未应用草稿，弹出确认对话框；
+        /// 否则立即执行关闭并回调 <paramref name="onCloseConfirmed"/>。
+        /// </summary>
+        /// <param name="onCloseConfirmed">
+        /// 面板真正关闭后执行（Driver 用它把 UIDocument 根也隐藏掉）。
+        /// Cancel 时不会被调用。
+        /// </param>
+        public void RequestClose(Action onCloseConfirmed)
+        {
+            _pomodoroSettings?.ForceCommitPendingEdits();
+
+            if (_pomodoroSettings?.IsDirty == true && _unsavedDialog != null)
+            {
+                _unsavedDialog.Show(
+                    onConfirm: () =>
+                    {
+                        _pomodoroSettings.TryApply();
+                        DoHide();
+                        onCloseConfirmed?.Invoke();
+                    },
+                    onCancel: null);
+                return;
+            }
+
+            DoHide();
+            onCloseConfirmed?.Invoke();
+        }
+
+        private void DoHide()
         {
             if (_overlay == null)
             {
@@ -150,9 +188,43 @@ namespace APP.Pomodoro.Controller
             _overlay.style.display = DisplayStyle.None;
         }
 
+        // 保留旧 API 供未来直接隐藏场景使用（不走 dirty 检查）
+        public void Hide() => DoHide();
+
         // ─── Tab 切换 ────────────────────────────────────────────
 
-        private void SelectTab(string tabName)
+        /// <summary>
+        /// 切换设置面板 tab。从 pomodoro 切到别的 tab 前若有未应用草稿，弹出确认对话框。
+        /// 同 tab 重选或切到 pomodoro 本身不触发拦截。
+        /// </summary>
+        public void SelectTab(string tabName)
+        {
+            if (tabName == _activeTab)
+            {
+                DoSelectTab(tabName);
+                return;
+            }
+
+            _pomodoroSettings?.ForceCommitPendingEdits();
+
+            if (_activeTab == "pomodoro"
+                && _pomodoroSettings?.IsDirty == true
+                && _unsavedDialog != null)
+            {
+                _unsavedDialog.Show(
+                    onConfirm: () =>
+                    {
+                        _pomodoroSettings.TryApply();
+                        DoSelectTab(tabName);
+                    },
+                    onCancel: null);
+                return;
+            }
+
+            DoSelectTab(tabName);
+        }
+
+        private void DoSelectTab(string tabName)
         {
             _activeTab = tabName;
 

@@ -23,6 +23,9 @@ namespace APP.Pomodoro.Controller
         [SerializeField] private VisualTreeAsset _onlineSettingsTemplate;
         [SerializeField] private VisualTreeAsset _petSettingsTemplate;
 
+        [Header("未保存更改提示对话框模板")]
+        [SerializeField] private VisualTreeAsset _unsavedChangesDialogTemplate;
+
         private UIDocument _doc;
         private UnifiedSettingsPanelController _controller;
         private VisualElement _root;
@@ -61,6 +64,7 @@ namespace APP.Pomodoro.Controller
                 _pomodoroSettingsTemplate,
                 _onlineSettingsTemplate,
                 _petSettingsTemplate,
+                _unsavedChangesDialogTemplate,
                 gameObject);
 
             this.RegisterEvent<E_OpenUnifiedSettings>(_ => OpenPanel())
@@ -79,8 +83,10 @@ namespace APP.Pomodoro.Controller
         private void ClosePanel()
         {
             if (_root == null || _controller == null) return;
-            _controller.Hide();
-            _root.style.display = DisplayStyle.None;
+            _controller.RequestClose(() =>
+            {
+                _root.style.display = DisplayStyle.None;
+            });
         }
     }
 }

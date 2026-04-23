@@ -190,9 +190,6 @@ MonoBehaviour:
   _uwc: {fileID: 0}
   _pomodoroPanelView: {fileID: 183578049}
   _playerCardTemplate: {fileID: 9197481963319205126, guid: 29186224ae6024713aab7af6b8291689, type: 3}
-  _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
-  _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
-  _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
 --- !u!82 &183578048
 AudioSource:
   m_ObjectHideFlags: 0
@@ -505,6 +502,79 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1753601267
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626842, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626844, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: m_Name
+      value: UniWindowController
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626845, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: forceWindowed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626845, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: _isTransparent
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626845, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: _shouldFitMonitor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416199871598626845, guid: e893aefd93740714b999573b02916984, type: 3}
+      propertyPath: _isFreePositioningEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e893aefd93740714b999573b02916984, type: 3}
 --- !u!1 &2006383505
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,21 +612,6 @@ MonoBehaviour:
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
---- !u!114 &2006383508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2006383505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cac6f88663f114f44967c7d41f5a7f7f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: APP.Pomodoro.Controller.UnifiedSettingsPanelDriver
-  _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
-  _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
-  _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
 --- !u!4 &2006383507
 Transform:
   m_ObjectHideFlags: 0
@@ -572,6 +627,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2006383508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2006383505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac6f88663f114f44967c7d41f5a7f7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: APP.Pomodoro.Controller.UnifiedSettingsPanelDriver
+  _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
+  _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
+  _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
+  _unsavedChangesDialogTemplate: {fileID: 9197481963319205126, guid: 7cdeb4982d46b4f91ab58210a1dbf869, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -580,3 +651,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 183578046}
   - {fileID: 2006383507}
+  - {fileID: 1753601267}
