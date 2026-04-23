@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using APP.Network.Model;
 using APP.Network.System;
+using APP.Pomodoro.Command;
 using APP.Pomodoro.Model;
+using QFramework;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,8 +14,10 @@ namespace APP.Pomodoro.Controller
     /// 每个远程玩家对应一个从 PlayerCard.uxml CloneTree 得到的 VisualElement。
     /// 只读展示 RemotePlayerData，不持有业务写能力。
     /// </summary>
-    public sealed class PlayerCardController
+    public sealed class PlayerCardController : IController
     {
+        IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
+
         private static readonly string[] PhaseClasses =
         {
             "pc-phase-idle",
@@ -34,6 +39,9 @@ namespace APP.Pomodoro.Controller
         private Label _roundsLabel;
         private Label _appLabel;
         private VisualElement _appIcon;
+        private IPlayerCard _card;
+        private VisualElement _pinBtn;
+        private readonly List<IUnRegister> _unRegisters = new List<IUnRegister>();
 
         /// <summary>该卡片对应的远端玩家 ID。</summary>
         public string PlayerId { get; private set; }
@@ -74,6 +82,17 @@ namespace APP.Pomodoro.Controller
             _roundsLabel = _root.Q<Label>("pc-rounds");
             _appLabel = _root.Q<Label>("pc-app");
             _appIcon = _root.Q<VisualElement>("pc-active-app-icon");
+            _pinBtn = _root.Q<VisualElement>("pc-pin-btn");
+            if (_pinBtn != null)
+            {
+                _pinBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+                _pinBtn.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    if (_card == null) return;
+                    this.SendCommand(new Cmd_SetPlayerCardPinned(_card.PlayerId, !_card.IsPinned.Value));
+                });
+            }
         }
 
         private void ApplyData(RemotePlayerData data)
@@ -157,6 +176,44 @@ namespace APP.Pomodoro.Controller
                     _root.RemoveFromClassList(cls);
                 }
             }
+        }
+
+        /// <summary>
+        /// 绑定卡片 Model 实例。由 PlayerCardManager 在创建后调用。
+        /// 订阅 IsPinned 与 GameModel.IsAppFocused；解除由 Dispose 负责。
+        /// </summary>
+        public void Bind(IPlayerCard card)
+        {
+            _card = card;
+            if (_card == null) return;
+
+            _unRegisters.Add(_card.IsPinned.RegisterWithInitValue(OnPinnedChanged));
+            _unRegisters.Add(GameApp.Interface.GetModel<IGameModel>()
+                .IsAppFocused.RegisterWithInitValue(_ => RefreshVisibility()));
+        }
+
+        /// <summary>
+        /// 由 PlayerCardManager 在移除卡片前调用，解除 Bindable 订阅，防止泄漏。
+        /// </summary>
+        public void Dispose()
+        {
+            for (int i = 0; i < _unRegisters.Count; i++) _unRegisters[i].UnRegister();
+            _unRegisters.Clear();
+            _card = null;
+        }
+
+        private void OnPinnedChanged(bool pinned)
+        {
+            _pinBtn?.EnableInClassList("pc-pin-btn--unpinned", !pinned);
+            RefreshVisibility();
+        }
+
+        private void RefreshVisibility()
+        {
+            if (_root == null || _card == null) return;
+            bool focused = GameApp.Interface.GetModel<IGameModel>().IsAppFocused.Value;
+            bool visible = focused || _card.IsPinned.Value;
+            _root.EnableInClassList("pc-hidden", !visible);
         }
     }
 }
