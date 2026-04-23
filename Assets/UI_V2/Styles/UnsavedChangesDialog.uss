@@ -90,34 +90,36 @@
 }
 
 .dlg-btn {
-    height: 36px;
-    min-width: 100px;
-    padding: 0 20px;
-    border-radius: 999px;
+    /* 对齐 Pencil ydQod/AW4FD：width 120, padding [7,12], fontSize 13, 无显式 height（≈30px），
+       cornerRadius 999 → Unity 写 height/2 = 15px 保证药丸形。
+       描边由子类控制：primary 无描边、secondary 1px。 */
+    width: 120px;
+    height: 30px;
+    padding: 7px 12px;
+    border-radius: 15px;
     font-size: 13px;
     -unity-font-style: bold;
-    border-width: 1px;
+    -unity-text-align: middle-center;
+    border-width: 0;
     margin-left: 12px;
 }
 
 .dlg-btn--primary {
     background-color: rgb(209, 95, 61);
-    border-color: rgb(209, 95, 61);
     color: rgb(255, 255, 255);
 }
 
 .dlg-btn--primary:hover {
     background-color: rgb(232, 130, 74);
-    border-color: rgb(232, 130, 74);
 }
 
 .dlg-btn--primary:active {
     background-color: rgb(188, 82, 50);
-    border-color: rgb(188, 82, 50);
 }
 
 .dlg-btn--secondary {
     background-color: rgb(255, 255, 255);
+    border-width: 1px;
     border-color: rgb(232, 196, 168);
     color: rgb(162, 139, 121);
 }

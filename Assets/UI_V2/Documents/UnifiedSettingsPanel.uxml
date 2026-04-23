@@ -35,8 +35,10 @@
                 <ui:VisualElement name="settings-content-host" class="settings-content-host" />
             </ui:ScrollView>
         </ui:VisualElement>
-        <!-- 未保存更改对话框宿主：绝对定位覆盖整个 overlay，默认不显示。
+        <!-- 未保存更改对话框宿主：绝对定位覆盖整个 overlay。
+             宿主自身 picking-mode=Ignore，避免空闲时遮挡下方设置面板的点击；
+             对话框显示时由内部 .dlg-root（默认 pickingMode=Position）接管交互。
              UnsavedChangesDialogController.Init 时把 UnsavedChangesDialog.uxml 克隆进来。 -->
-        <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" />
+        <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>
