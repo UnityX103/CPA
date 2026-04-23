@@ -165,6 +165,7 @@ namespace APP.Pomodoro.Controller
             if (string.IsNullOrEmpty(playerId)) return;
             if (_cards.TryGetValue(playerId, out var card))
             {
+                card.Dispose();
                 card.Root.parent?.Remove(card.Root);
                 _cards.Remove(playerId);
                 _joinOrder.Remove(playerId);
@@ -177,6 +178,7 @@ namespace APP.Pomodoro.Controller
 
         public void Clear()
         {
+            foreach (var kv in _cards) kv.Value.Dispose();
             _cardLayer?.Clear();
             _cards.Clear();
             _joinOrder.Clear();
