@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/UnsavedChangesDialog.uss"/>
+
+    <!-- Pencil: ikREg — 未保存更改确认对话框（默认隐藏） -->
+    <ui:VisualElement name="dlg-root" class="dlg-root" style="display: none;">
+        <ui:VisualElement class="dlg-card">
+            <ui:VisualElement class="dlg-header">
+                <ui:VisualElement class="dlg-title-wrap">
+                    <ui:Label text="有未保存的更改" class="dlg-title" />
+                    <ui:Label text="请先应用或取消后再继续" class="dlg-subtitle" />
+                </ui:VisualElement>
+                <ui:VisualElement name="dlg-close" class="dlg-close">
+                    <ui:Label text="✕" class="dlg-close-icon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label text="你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？" class="dlg-body" />
+
+            <ui:VisualElement class="dlg-actions">
+                <ui:Button name="dlg-cancel" text="取消" class="dlg-btn dlg-btn--secondary" />
+                <ui:Button name="dlg-confirm" text="保存并继续" class="dlg-btn dlg-btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

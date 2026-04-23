@@ -7,6 +7,7 @@
     <Style src="../Styles/PomodoroSettingsPanel.uss"/>
     <Style src="../Styles/OnlineSettingsPanel.uss"/>
     <Style src="../Styles/PetSettingsPanel.uss"/>
+    <Style src="../Styles/UnsavedChangesDialog.uss"/>
 
     <!-- 设置面板：独立 UIDocument 根（对应 Pencil vnYnS） -->
     <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display: none;">
@@ -34,5 +35,8 @@
                 <ui:VisualElement name="settings-content-host" class="settings-content-host" />
             </ui:ScrollView>
         </ui:VisualElement>
+        <!-- 未保存更改对话框宿主：绝对定位覆盖整个 overlay，默认不显示。
+             UnsavedChangesDialogController.Init 时把 UnsavedChangesDialog.uxml 克隆进来。 -->
+        <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" />
     </ui:VisualElement>
 </ui:UXML>

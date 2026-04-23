@@ -1,0 +1,127 @@
+/*
+ * UnsavedChangesDialog.uss
+ * 对应 Pencil 组件: Unsaved Changes Dialog (id = ikREg)
+ */
+
+/* ── 遮罩根 ──────────────────────────────────────────────── */
+
+.dlg-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    justify-content: center;
+    align-items: center;
+}
+
+/* ── 卡片 ────────────────────────────────────────────────── */
+
+.dlg-card {
+    width: 420px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    padding: 24px;
+    flex-direction: column;
+}
+
+/* ── 头部（标题 + 关闭按钮）─────────────────────────────── */
+
+.dlg-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.dlg-title-wrap {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.dlg-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(26, 26, 26);
+    -unity-text-align: middle-left;
+    margin-bottom: 4px;
+}
+
+.dlg-subtitle {
+    font-size: 12px;
+    color: rgb(107, 114, 128);
+    -unity-text-align: middle-left;
+}
+
+.dlg-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    justify-content: center;
+    align-items: center;
+}
+
+.dlg-close:hover {
+    background-color: rgb(243, 244, 246);
+}
+
+.dlg-close-icon {
+    font-size: 16px;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+}
+
+/* ── 正文 ────────────────────────────────────────────────── */
+
+.dlg-body {
+    font-size: 14px;
+    color: rgb(75, 85, 99);
+    white-space: normal;
+    margin-bottom: 16px;
+}
+
+/* ── 操作按钮行 ──────────────────────────────────────────── */
+
+.dlg-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.dlg-btn {
+    height: 36px;
+    min-width: 100px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    border-width: 1px;
+    margin-left: 12px;
+}
+
+.dlg-btn--primary {
+    background-color: rgb(209, 95, 61);
+    border-color: rgb(209, 95, 61);
+    color: rgb(255, 255, 255);
+}
+
+.dlg-btn--primary:hover {
+    background-color: rgb(232, 130, 74);
+    border-color: rgb(232, 130, 74);
+}
+
+.dlg-btn--primary:active {
+    background-color: rgb(188, 82, 50);
+    border-color: rgb(188, 82, 50);
+}
+
+.dlg-btn--secondary {
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(232, 196, 168);
+    color: rgb(162, 139, 121);
+}
+
+.dlg-btn--secondary:hover {
+    background-color: rgb(250, 243, 236);
+}

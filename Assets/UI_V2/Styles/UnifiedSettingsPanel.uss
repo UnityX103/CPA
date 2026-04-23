@@ -112,3 +112,13 @@
     flex-direction: column;
     width: 100%;
 }
+
+/* ── 未保存更改对话框宿主（绝对定位覆盖整个 overlay）───── */
+.unsaved-dialog-host {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+}
