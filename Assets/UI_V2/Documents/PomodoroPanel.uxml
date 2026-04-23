@@ -48,6 +48,12 @@
         <ui:Button name="pp-btn-primary"   class="comp-btn-primary"   text="开始"/>
         <ui:Button name="pp-btn-secondary" class="comp-btn-secondary" text="跳过"/>
       </ui:VisualElement>
+
+      <!-- HApJ0: pp-pin-btn 22×22 cornerRadius:11 absolute(193,69) 默认已置顶(on) -->
+      <ui:VisualElement name="pp-pin-btn" class="pp-pin-btn">
+        <!-- 3eDk5: icon 14×14 lucide pin/pin-off #D15F3D -->
+        <ui:VisualElement name="pp-pin-btn-icon" class="pp-pin-btn-icon"/>
+      </ui:VisualElement>
     </ui:VisualElement>
 
   </ui:VisualElement>

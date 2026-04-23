@@ -17,51 +17,21 @@
       "gap": 16,
       "children": [
         {
-          "type": "frame",
-          "id": "BYfx5",
-          "name": "onlAutoRow",
+          "id": "PBXgQ",
+          "type": "ref",
+          "ref": "Za5wE",
           "width": "fill_container",
-          "fill": "#F6F7F8",
-          "cornerRadius": 16,
           "padding": [
-            14,
+            10,
             16
           ],
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "text",
-              "id": "XPWC1",
-              "name": "onlAutoLabel",
-              "fill": "#1A1A1A",
-              "content": "启用番茄钟",
-              "fontFamily": "MaokenAssortedSans",
-              "fontSize": 14,
-              "fontWeight": "500"
-            },
-            {
-              "id": "85MsI",
-              "type": "ref",
-              "ref": "NGo9f",
-              "name": "pomoStatus",
-              "fill": "#6366F1",
-              "cornerRadius": 16,
-              "height": 26,
-              "padding": 4,
-              "width": 44,
-              "x": 512,
-              "y": 14,
-              "descendants": {
-                "hTGM9": {
-                  "width": 18,
-                  "height": 18,
-                  "x": 22,
-                  "y": 4
-                }
-              }
+          "name": "pspApply",
+          "descendants": {
+            "oNDTH": {
+              "content": "应用",
+              "fontSize": 14
             }
-          ]
+          }
         },
         {
           "type": "frame",
@@ -658,7 +628,8 @@
       "y": -399,
       "name": "pomodoroPanel",
       "reusable": true,
-      "width": "fit_content(230)",
+      "width": "fill_container(233)",
+      "height": "fill_container(155)",
       "fill": "#FFFDFBEE",
       "cornerRadius": 24,
       "stroke": {
@@ -809,7 +780,7 @@
                       "descendants": {
                         "oNDTH": {
                           "content": "开始",
-                          "x": 25,
+                          "x": 26.5,
                           "y": 7
                         }
                       }
@@ -825,12 +796,31 @@
                       "descendants": {
                         "zgOkx": {
                           "content": "跳过",
-                          "x": 25,
+                          "x": 26.5,
                           "y": 7
                         }
                       }
                     }
                   ]
+                },
+                {
+                  "id": "HApJ0",
+                  "type": "ref",
+                  "ref": "cM79C",
+                  "name": "pp-pin-btn",
+                  "layoutPosition": "absolute",
+                  "x": 193,
+                  "y": 69,
+                  "fill": "#F5D7C3",
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#E7C6AF"
+                  },
+                  "descendants": {
+                    "3eDk5": {
+                      "fill": "#D15F3D"
+                    }
+                  }
                 }
               ]
             }
@@ -1068,40 +1058,10 @@
       ]
     },
     {
-      "id": "eqbXq",
-      "type": "ref",
-      "ref": "YRqeB",
-      "name": "pomodoroPanel/paused",
-      "x": 1436,
-      "y": -399,
-      "width": "fit_content(230)",
-      "height": "fit_content"
-    },
-    {
-      "id": "wtvxa",
-      "type": "ref",
-      "ref": "YRqeB",
-      "name": "pomodoroPanel/focus",
-      "x": 1799,
-      "y": -399,
-      "width": "fit_content(230)",
-      "height": "fit_content"
-    },
-    {
-      "id": "rYzp2",
-      "type": "ref",
-      "ref": "YRqeB",
-      "name": "pomodoroPanel/idle",
-      "width": "fit_content(230)",
-      "height": "fit_content",
-      "x": 1078,
-      "y": -399
-    },
-    {
       "type": "frame",
       "id": "ce62U",
-      "x": -1086,
-      "y": -515,
+      "x": -402,
+      "y": -686,
       "name": "Component Library",
       "width": 774,
       "height": 1478,
@@ -1800,18 +1760,42 @@
               "fontWeight": "600"
             }
           ]
+        },
+        {
+          "type": "group",
+          "id": "N50aW",
+          "layout": "horizontal",
+          "gap": 23,
+          "children": [
+            {
+              "id": "cM79C",
+              "type": "ref",
+              "reusable": true,
+              "ref": "G6VSO",
+              "name": "Button/Pin",
+              "x": 0,
+              "y": 0,
+              "descendants": {
+                "3eDk5": {
+                  "iconFontName": "$pin-icon-name",
+                  "fill": "#8F7766"
+                }
+              }
+            },
+            {
+              "id": "9s9Qu",
+              "type": "ref",
+              "ref": "cM79C",
+              "name": "Button/Pin - Off Preview",
+              "theme": {
+                "pin-state": "off"
+              },
+              "x": 45,
+              "y": 0
+            }
+          ]
         }
       ]
-    },
-    {
-      "id": "RFBCi",
-      "type": "ref",
-      "ref": "YRqeB",
-      "name": "pomodoroPanel/not-started",
-      "x": 2176,
-      "y": -399,
-      "width": "fit_content(230)",
-      "height": "fit_content"
     },
     {
       "type": "frame",
@@ -1980,6 +1964,21 @@
                   "fontWeight": "500"
                 }
               ]
+            },
+            {
+              "id": "epxz9",
+              "type": "ref",
+              "ref": "cM79C",
+              "name": "pc-pin-btn",
+              "layoutPosition": "absolute",
+              "x": 110,
+              "y": 50,
+              "fill": "#E9D5C3",
+              "descendants": {
+                "3eDk5": {
+                  "fill": "#7A5F4D"
+                }
+              }
             }
           ]
         }
@@ -2210,6 +2209,120 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "ikREg",
+      "x": 3411,
+      "y": 561,
+      "name": "Unsaved Changes Dialog",
+      "reusable": true,
+      "width": 420,
+      "fill": "#FFFFFF",
+      "cornerRadius": 20,
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000033",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32
+      },
+      "layout": "vertical",
+      "gap": 16,
+      "padding": 24,
+      "children": [
+        {
+          "type": "frame",
+          "id": "MUrck",
+          "name": "dlgHeader",
+          "width": "fill_container",
+          "justifyContent": "space_between",
+          "children": [
+            {
+              "type": "frame",
+              "id": "QF73I",
+              "name": "dlgTitleWrap",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BPaCU",
+                  "fill": "#1A1A1A",
+                  "content": "有未保存的更改",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "wNvs0",
+                  "fill": "#6B7280",
+                  "content": "请先应用或取消后再继续",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 12,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "id": "se1NP",
+              "type": "ref",
+              "ref": "UAbZg",
+              "name": "dlgClose"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "qVnmb",
+          "fill": "#4B5563",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？",
+          "lineHeight": 1.5,
+          "fontFamily": "MaokenAssortedSans",
+          "fontSize": 14,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "NRube",
+          "name": "dlgActions",
+          "width": "fill_container",
+          "gap": 12,
+          "justifyContent": "end",
+          "children": [
+            {
+              "id": "ydQod",
+              "type": "ref",
+              "ref": "RPLJq",
+              "name": "dlgCancel",
+              "descendants": {
+                "zgOkx": {
+                  "content": "取消",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "id": "AW4FD",
+              "type": "ref",
+              "ref": "Za5wE",
+              "name": "dlgConfirm",
+              "descendants": {
+                "oNDTH": {
+                  "content": "保存并继续",
+                  "fontSize": 13
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "themes": {
@@ -2229,6 +2342,10 @@
     "settingsBtnState": [
       "show",
       "hide"
+    ],
+    "pin-state": [
+      "on",
+      "off"
     ]
   },
   "variables": {
@@ -2450,6 +2567,23 @@
           "value": 0,
           "theme": {
             "settingsBtnState": "hide"
+          }
+        }
+      ]
+    },
+    "pin-icon-name": {
+      "type": "string",
+      "value": [
+        {
+          "value": "pin",
+          "theme": {
+            "pin-state": "on"
+          }
+        },
+        {
+          "value": "pin-off",
+          "theme": {
+            "pin-state": "off"
           }
         }
       ]

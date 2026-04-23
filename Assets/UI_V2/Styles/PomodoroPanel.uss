@@ -11,8 +11,8 @@
 /* ── 根容器 ──────────────────────────────────────────────── */
 
 .pp-root {
-    width: 230px;
-    height: 145px;
+    width: 233px;
+    height: 155px;
     flex-direction: column;
     border-radius: 24px;
     border-width: 1px;
@@ -73,6 +73,8 @@
     padding-left: 16px;
     padding-right: 16px;
     /* gap-[22px] → margin-right on clock */
+    /* 需要作为 pp-pin-btn 的 position:absolute 定位参照 */
+    position: relative;
 }
 
 /* ── Clock Instance 外部布局 ─────────────────────────────
@@ -134,10 +136,45 @@
     cursor: link;
 }
 
-/* cHy9C: lucide settings 色块占位（USS 不支持 icon_font） */
+/* cHy9C: lucide settings  #8c5830  白色 PNG + tint
+   PNG 源文件非正方形（213×235），需 scale-to-fit 保持比例 */
 .pp-settings-btn-icon {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-    background-color: rgb(140, 88, 48);
+    width: 14px;
+    height: 14px;
+    background-image: url("project://database/Assets/UI_V2/Icons/settings.png");
+    -unity-background-image-tint-color: rgb(140, 88, 48);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ── HApJ0: pp-pin-btn 22×22 cornerRadius:11 absolute(193,69) ──
+   fill:#F5D7C3  stroke:#E7C6AF 1px  icon 14×14 lucide pin #D15F3D
+   默认已置顶(on)，切 .pp-pin-btn--unpinned 进 off 态              */
+.pp-pin-btn {
+    position: absolute;
+    left: 193px;
+    top: 69px;
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: rgb(245, 215, 195);
+    border-width: 1px;
+    border-color: rgb(231, 198, 175);
+    align-items: center;
+    justify-content: center;
+    cursor: link;
+}
+
+/* PNG 源 pin.png 171×235、pin-off.png 235×235 非正方形，需 scale-to-fit */
+.pp-pin-btn-icon {
+    width: 14px;
+    height: 14px;
+    background-image: url("project://database/Assets/UI_V2/Icons/pin.png");
+    -unity-background-image-tint-color: rgb(209, 95, 61);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* off 态：换图标 + 降饱和 */
+.pp-pin-btn--unpinned .pp-pin-btn-icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/pin-off.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
 }

@@ -154,13 +154,13 @@
     margin-top: 12px;
 }
 
-/* ── KN0dX: footIcon 13×13 #B5A49A ─────────────────────── */
-/* icon_font lucide app-window → 色块占位（USS 不支持 icon_font）*/
+/* ── KN0dX: footIcon 13×13  lucide app-window  #B5A49A ──── */
+/* 白色 PNG + tint-color，保证不同上下文可换色                 */
 .pc-foot-icon {
     width: 13px;
     height: 13px;
-    border-radius: 2px;
-    background-color: rgb(181, 164, 154);
+    background-image: url("project://database/Assets/UI_V2/Icons/app-window.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
     margin-right: 6px;
     flex-shrink: 0;
 }
@@ -177,6 +177,35 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* ── epxz9: pc-pin-btn 22×22 cornerRadius:11 absolute(110,50) ──
+   fill:#E9D5C3  icon 14×14 lucide pin  #7A5F4D
+   默认已置顶(on)，切 .pc-pin-btn--unpinned 进 off 态             */
+.pc-pin-btn {
+    position: absolute;
+    left: 110px;
+    top: 50px;
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: rgb(233, 213, 195);
+    align-items: center;
+    justify-content: center;
+    cursor: link;
+}
+
+.pc-pin-btn-icon {
+    width: 14px;
+    height: 14px;
+    background-image: url("project://database/Assets/UI_V2/Icons/pin.png");
+    -unity-background-image-tint-color: rgb(122, 95, 77);
+}
+
+/* off 态：换图标 + 降饱和 */
+.pc-pin-btn--unpinned .pc-pin-btn-icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/pin-off.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
 }
 
 /* ── 阶段配色：切换 .pc-root 上的 class 驱动 badge 背景 ──── */
