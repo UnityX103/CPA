@@ -3,6 +3,7 @@ using APP.Network.Event;
 using APP.Network.Model;
 using APP.Pomodoro;
 using APP.Pomodoro.Command;
+using APP.Pomodoro.Event;
 using APP.Pomodoro.Model;
 using QFramework;
 using UnityEngine;
@@ -46,20 +47,16 @@ namespace APP.Pomodoro.Controller
 
             if (lifecycleOwner != null)
             {
-                this.RegisterEvent<E_PlayerJoined>(OnPlayerJoined).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_PlayerLeft>(OnPlayerLeft).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_PlayerCardAdded>(OnCardAdded).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                this.RegisterEvent<E_PlayerCardRemoved>(OnCardRemoved).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
                 this.RegisterEvent<E_RemoteStateUpdated>(OnStateUpdated).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_RoomSnapshot>(OnSnapshot).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                this.RegisterEvent<E_RoomJoined>(OnRoomJoined).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
                 this.RegisterEvent<E_IconUpdated>(OnIconUpdated).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
             else
             {
-                this.RegisterEvent<E_PlayerJoined>(OnPlayerJoined);
-                this.RegisterEvent<E_PlayerLeft>(OnPlayerLeft);
+                this.RegisterEvent<E_PlayerCardAdded>(OnCardAdded);
+                this.RegisterEvent<E_PlayerCardRemoved>(OnCardRemoved);
                 this.RegisterEvent<E_RemoteStateUpdated>(OnStateUpdated);
-                this.RegisterEvent<E_RoomSnapshot>(OnSnapshot);
-                this.RegisterEvent<E_RoomJoined>(OnRoomJoined);
                 this.RegisterEvent<E_IconUpdated>(OnIconUpdated);
             }
 
@@ -75,8 +72,19 @@ namespace APP.Pomodoro.Controller
 
         // ─── 事件回调 ────────────────────────────────────────────
 
-        private void OnPlayerJoined(E_PlayerJoined e) { if (e.Player != null) AddOrUpdate(e.Player); }
-        private void OnPlayerLeft(E_PlayerLeft e)     { Remove(e.PlayerId); }
+        private void OnCardAdded(E_PlayerCardAdded e)
+        {
+            if (string.IsNullOrEmpty(e.PlayerId)) return;
+            var room = this.GetModel<IRoomModel>();
+            var data = FindRemotePlayer(room, e.PlayerId);
+            if (data == null) return; // RoomModel 尚未同步；NetworkSystem 保证先写 Room 再写 Card，不应发生
+            AddOrUpdate(data);
+        }
+
+        private void OnCardRemoved(E_PlayerCardRemoved e)
+        {
+            Remove(e.PlayerId);
+        }
 
         private void OnStateUpdated(E_RemoteStateUpdated e)
         {
@@ -87,9 +95,6 @@ namespace APP.Pomodoro.Controller
             if (_cards.TryGetValue(e.PlayerId, out var card)) card.Refresh(data);
             else AddOrUpdate(data);
         }
-
-        private void OnRoomJoined(E_RoomJoined e)   { RebuildFromSnapshot(e.InitialPlayers); }
-        private void OnSnapshot(E_RoomSnapshot e)   { RebuildFromSnapshot(e.Players); }
 
         private void OnIconUpdated(E_IconUpdated e)
         {
@@ -141,15 +146,15 @@ namespace APP.Pomodoro.Controller
             _cards[data.PlayerId] = ctrl;
             _joinOrder.Add(data.PlayerId);
 
-            // 新玩家（Model 里没有位置记录）→ 把 NextSlot 的结果写回 Model 持久化
-            // TODO(Task 7): NetworkSystem 将接管 IPlayerCardModel 生命周期；Manager 不应驱动 Model 生命周期。
-            var cardModel = this.GetModel<IPlayerCardModel>();
-            var card = cardModel?.AddOrGet(data.PlayerId);
-            // sentinel: NextSlot 起点 (40,40) 永不产出 (0,0)；新建 IPlayerCard 默认 Position=(0,0) 即"未持久化"
+            // NetworkSystem 已通过 AddOrGet 确保 IPlayerCard 存在；此处只在"无持久化位置"时写回 NextSlot 结果
+            var card = this.GetModel<IPlayerCardModel>().Find(data.PlayerId);
             if (card != null && card.Position.Value == Vector2.zero)
             {
                 this.SendCommand(new Cmd_SetPlayerCardPosition(data.PlayerId, pos));
             }
+
+            // 订阅 Model 实例（pin 态 + 失焦可见性）
+            if (card != null) ctrl.Bind(card);
 
             // 整卡拖拽：以 pcRoot 本身作为 handle，选中卡片任意位置皆可拖动
             // 拖拽结束 → 持久化
@@ -169,10 +174,6 @@ namespace APP.Pomodoro.Controller
                 card.Root.parent?.Remove(card.Root);
                 _cards.Remove(playerId);
                 _joinOrder.Remove(playerId);
-
-                // TODO(Task 7): NetworkSystem 将接管 IPlayerCardModel 的生命周期；
-                // 此处 Manager 临时对称调用 Remove，避免离线玩家在 _entries 里泄漏。
-                this.GetModel<IPlayerCardModel>()?.Remove(playerId);
             }
         }
 
@@ -182,13 +183,6 @@ namespace APP.Pomodoro.Controller
             _cardLayer?.Clear();
             _cards.Clear();
             _joinOrder.Clear();
-        }
-
-        private void RebuildFromSnapshot(IList<RemotePlayerData> players)
-        {
-            Clear();
-            if (players == null) return;
-            for (int i = 0; i < players.Count; i++) AddOrUpdate(players[i]);
         }
 
         private static RemotePlayerData FindRemotePlayer(IRoomModel room, string playerId)
