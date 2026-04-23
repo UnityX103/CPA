@@ -142,8 +142,10 @@ namespace APP.Pomodoro.Controller
             _joinOrder.Add(data.PlayerId);
 
             // 新玩家（Model 里没有位置记录）→ 把 NextSlot 的结果写回 Model 持久化
-            var posModel = this.GetModel<IPlayerCardPositionModel>();
-            if (posModel != null && !posModel.TryGet(data.PlayerId, out _))
+            var cardModel = this.GetModel<IPlayerCardModel>();
+            var card = cardModel?.AddOrGet(data.PlayerId);
+            // 首次出现（仓库无位置记录）：NextSlot 结果写回
+            if (card != null && card.Position.Value == Vector2.zero)
             {
                 this.SendCommand(new Cmd_SetPlayerCardPosition(data.PlayerId, pos));
             }
@@ -199,10 +201,11 @@ namespace APP.Pomodoro.Controller
 
         private Vector2 ResolveInitialPosition(string playerId)
         {
-            var posModel = this.GetModel<IPlayerCardPositionModel>();
-            if (posModel != null && posModel.TryGet(playerId, out Vector2 saved))
+            var cardModel = this.GetModel<IPlayerCardModel>();
+            var card = cardModel?.Find(playerId);
+            if (card != null && card.Position.Value != Vector2.zero)
             {
-                return saved;
+                return card.Position.Value;
             }
             return NextSlot();
         }

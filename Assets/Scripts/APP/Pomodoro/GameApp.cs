@@ -18,7 +18,8 @@ namespace APP.Pomodoro
             RegisterModel<IPomodoroModel>(new PomodoroModel());
             RegisterModel<IRoomModel>(new RoomModel());
             RegisterModel<ISessionMemoryModel>(new SessionMemoryModel());
-            RegisterModel<IPlayerCardPositionModel>(new PlayerCardPositionModel());
+            RegisterModel<IGameModel>(new GameModel());
+            RegisterModel<IPlayerCardModel>(new PlayerCardModel());
 
             RegisterSystem<IPomodoroTimerSystem>(new PomodoroTimerSystem());
             RegisterSystem<IWindowPositionSystem>(new WindowPositionSystem());

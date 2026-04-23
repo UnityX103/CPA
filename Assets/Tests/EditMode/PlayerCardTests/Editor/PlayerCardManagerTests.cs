@@ -26,16 +26,16 @@ namespace APP.Pomodoro.Tests
             Assert.That(_template, Is.Not.Null, "PlayerCard.uxml 必须存在");
 
             // 清空持久化位置，避免跨用例污染
-            PlayerPrefs.DeleteKey("CPA.PlayerCardPositions");
-            var posModel = GameApp.Interface.GetModel<IPlayerCardPositionModel>();
-            posModel.Remove("p1"); posModel.Remove("p2"); posModel.Remove("p3");
+            PlayerPrefs.DeleteKey("CPA.PlayerCards");
+            var cardModel = GameApp.Interface.GetModel<IPlayerCardModel>();
+            cardModel.Remove("p1"); cardModel.Remove("p2"); cardModel.Remove("p3");
         }
 
         [TearDown]
         public void TearDown()
         {
-            var posModel = GameApp.Interface.GetModel<IPlayerCardPositionModel>();
-            posModel.Remove("p1"); posModel.Remove("p2"); posModel.Remove("p3");
+            var cardModel = GameApp.Interface.GetModel<IPlayerCardModel>();
+            cardModel.Remove("p1"); cardModel.Remove("p2"); cardModel.Remove("p3");
             _cardLayer = null;
         }
 
@@ -85,18 +85,19 @@ namespace APP.Pomodoro.Tests
         [Test]
         public void ReturningPlayer_RestoresPersistedPosition()
         {
-            var posModel = GameApp.Interface.GetModel<IPlayerCardPositionModel>();
-            posModel.Set("p1", new Vector2(333f, 444f));
+            var cardModel = GameApp.Interface.GetModel<IPlayerCardModel>();
+            var card = cardModel.AddOrGet("p1");
+            card.Position.Value = new Vector2(333f, 444f);
 
             var mgr = new PlayerCardManager();
             mgr.InitializeForTests(_template, _cardLayer);
             mgr.AddOrUpdate(NewPlayer("p1", "Alice"));
 
-            var card = mgr.Cards["p1"].Root;
-            Assert.That(card.style.left.value.value, Is.EqualTo(333f));
-            Assert.That(card.style.top.value.value,  Is.EqualTo(444f));
+            var uiCard = mgr.Cards["p1"].Root;
+            Assert.That(uiCard.style.left.value.value, Is.EqualTo(333f));
+            Assert.That(uiCard.style.top.value.value,  Is.EqualTo(444f));
 
-            posModel.Remove("p1");
+            cardModel.Remove("p1");
         }
 
         [Test]

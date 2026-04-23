@@ -18,7 +18,13 @@ namespace APP.Pomodoro.Command
 
         protected override void OnExecute()
         {
-            this.GetModel<IPlayerCardPositionModel>().Set(_playerId, _position);
+            var card = this.GetModel<IPlayerCardModel>().Find(_playerId);
+            if (card == null)
+            {
+                Debug.LogWarning($"[Cmd_SetPlayerCardPosition] 未找到 playerId={_playerId}");
+                return;
+            }
+            card.Position.Value = _position;
         }
     }
 }
