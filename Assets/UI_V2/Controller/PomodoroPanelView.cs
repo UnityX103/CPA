@@ -161,6 +161,7 @@ namespace APP.Pomodoro.Controller
             _ppPinBtn.RegisterCallback<PointerUpEvent>(evt =>
             {
                 evt.StopPropagation();
+                if (_model == null) return;
                 bool next = !_model.IsPinned.Value;
                 this.SendCommand(new Cmd_SetPomodoroPinned(next));
             });
