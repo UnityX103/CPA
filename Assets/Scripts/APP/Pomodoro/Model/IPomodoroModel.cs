@@ -29,6 +29,9 @@ namespace APP.Pomodoro.Model
         /// <summary>窗口是否置顶（isTopmost）</summary>
         BindableProperty<bool> IsTopmost { get; }
 
+        /// <summary>番茄钟面板是否被 pin（不因失焦隐藏）。默认 false。</summary>
+        BindableProperty<bool> IsPinned { get; }
+
         /// <summary>窗口吸附位置</summary>
         BindableProperty<PomodoroWindowAnchor> WindowAnchor { get; }
 
