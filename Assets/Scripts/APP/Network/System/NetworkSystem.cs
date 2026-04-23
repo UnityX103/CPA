@@ -398,6 +398,7 @@ namespace APP.Network.System
 
             // room_created 不含 players，等随后的 room_snapshot 补齐
             room.ApplySnapshot(new List<RemotePlayerData>());
+            ClearAllPlayerCards();
 
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
             this.SendEvent(new E_RoomCreated(inbound.roomCode));
@@ -417,6 +418,7 @@ namespace APP.Network.System
             room.SetStatus(ConnectionStatus.InRoom);
 
             room.ApplySnapshot(new List<RemotePlayerData>());
+            ClearAllPlayerCards();
 
             this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
             this.SendEvent(new E_RoomJoined(inbound.roomCode, new List<RemotePlayerData>()));
@@ -629,7 +631,8 @@ namespace APP.Network.System
             var liveIds = new HashSet<string>();
             for (int i = 0; i < snapshot.Count; i++)
             {
-                liveIds.Add(snapshot[i].PlayerId);
+                var p = snapshot[i];
+                if (p != null) liveIds.Add(p.PlayerId);
             }
 
             // 先收集要移除的 id（避免遍历时修改集合）
