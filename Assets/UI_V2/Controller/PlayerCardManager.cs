@@ -142,9 +142,10 @@ namespace APP.Pomodoro.Controller
             _joinOrder.Add(data.PlayerId);
 
             // 新玩家（Model 里没有位置记录）→ 把 NextSlot 的结果写回 Model 持久化
+            // TODO(Task 7): NetworkSystem 将接管 IPlayerCardModel 生命周期；Manager 不应驱动 Model 生命周期。
             var cardModel = this.GetModel<IPlayerCardModel>();
             var card = cardModel?.AddOrGet(data.PlayerId);
-            // 首次出现（仓库无位置记录）：NextSlot 结果写回
+            // sentinel: NextSlot 起点 (40,40) 永不产出 (0,0)；新建 IPlayerCard 默认 Position=(0,0) 即"未持久化"
             if (card != null && card.Position.Value == Vector2.zero)
             {
                 this.SendCommand(new Cmd_SetPlayerCardPosition(data.PlayerId, pos));
@@ -167,6 +168,10 @@ namespace APP.Pomodoro.Controller
                 card.Root.parent?.Remove(card.Root);
                 _cards.Remove(playerId);
                 _joinOrder.Remove(playerId);
+
+                // TODO(Task 7): NetworkSystem 将接管 IPlayerCardModel 的生命周期；
+                // 此处 Manager 临时对称调用 Remove，避免离线玩家在 _entries 里泄漏。
+                this.GetModel<IPlayerCardModel>()?.Remove(playerId);
             }
         }
 
@@ -203,6 +208,7 @@ namespace APP.Pomodoro.Controller
         {
             var cardModel = this.GetModel<IPlayerCardModel>();
             var card = cardModel?.Find(playerId);
+            // sentinel: NextSlot 起点 (40,40) 永不产出 (0,0)；!= Vector2.zero 等同于"有持久化位置"
             if (card != null && card.Position.Value != Vector2.zero)
             {
                 return card.Position.Value;
