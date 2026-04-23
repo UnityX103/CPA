@@ -230,3 +230,7 @@
     background-color: rgb(99, 102, 241);
 }
 
+/* ── 通用隐藏（由 C# class 切换，不写 inline style）────────── */
+.pc-hidden {
+    display: none;
+}

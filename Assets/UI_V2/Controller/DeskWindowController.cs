@@ -76,7 +76,6 @@ namespace APP.Pomodoro.Controller
             if (_pomodoroPanelView != null && _pomodoroPanelContainer != null)
             {
                 _pomodoroPanelView.Init(_pomodoroPanelContainer);
-                _pomodoroPanelView.SetVisible(true);
             }
             else if (_pomodoroPanelView != null)
             {
