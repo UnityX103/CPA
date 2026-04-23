@@ -66,6 +66,7 @@ namespace APP.Network.System
             roomModel.SetLocalPlayerName(_playerName);
             roomModel.SetLocalPlayerId(string.Empty);
             roomModel.ClearRemotePlayers();
+            ClearAllPlayerCards();
             EnqueueMainThread(() => this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Connecting)));
 
             _ = RunSessionAsync(_serverUrl, _playerName, _cts, 0);
@@ -431,6 +432,14 @@ namespace APP.Network.System
             IRoomModel room = this.GetModel<IRoomModel>();
             List<RemotePlayerData> players = BuildRemotePlayers(inbound.players, room.LocalPlayerId.Value);
             room.ApplySnapshot(players);
+            IPlayerCardModel cardModel = this.GetModel<IPlayerCardModel>();
+            // 先登记本次 snapshot 里的所有玩家
+            for (int i = 0; i < players.Count; i++)
+            {
+                cardModel.AddOrGet(players[i].PlayerId);
+            }
+            // 删除已不在 snapshot 里的旧在线实例（离线）
+            PruneOfflineCards(cardModel, players);
             this.SendEvent(new E_RoomSnapshot(ClonePlayers(players)));
 
             RequestMissingIcons(players);
@@ -452,6 +461,7 @@ namespace APP.Network.System
 
             RemotePlayerData player = ToRemotePlayerData(entry.playerId, entry.playerName, entry.state);
             room.AddOrUpdateRemotePlayer(player);
+            this.GetModel<IPlayerCardModel>().AddOrGet(player.PlayerId);
 
             this.SendEvent(new E_PlayerJoined(player.Clone()));
         }
@@ -460,6 +470,7 @@ namespace APP.Network.System
         {
             IRoomModel room = this.GetModel<IRoomModel>();
             room.RemoveRemotePlayer(inbound.playerId);
+            this.GetModel<IPlayerCardModel>().Remove(inbound.playerId);
             this.SendEvent(new E_PlayerLeft(inbound.playerId));
         }
 
@@ -611,6 +622,41 @@ namespace APP.Network.System
             return clones;
         }
 
+        private static void PruneOfflineCards(IPlayerCardModel cardModel, List<RemotePlayerData> snapshot)
+        {
+            if (cardModel == null || snapshot == null) return;
+
+            var liveIds = new HashSet<string>();
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                liveIds.Add(snapshot[i].PlayerId);
+            }
+
+            // 先收集要移除的 id（避免遍历时修改集合）
+            var toRemove = new List<string>();
+            var cards = cardModel.Cards;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (!liveIds.Contains(cards[i].PlayerId))
+                {
+                    toRemove.Add(cards[i].PlayerId);
+                }
+            }
+            for (int i = 0; i < toRemove.Count; i++) cardModel.Remove(toRemove[i]);
+        }
+
+        private void ClearAllPlayerCards()
+        {
+            var cardModel = this.GetModel<IPlayerCardModel>();
+            if (cardModel == null) return;
+            var cards = cardModel.Cards;
+            if (cards.Count == 0) return;
+
+            var ids = new List<string>(cards.Count);
+            for (int i = 0; i < cards.Count; i++) ids.Add(cards[i].PlayerId);
+            for (int i = 0; i < ids.Count; i++) cardModel.Remove(ids[i]);
+        }
+
         private void EnqueueMainThread(Action action)
         {
             if (action == null)
@@ -671,6 +717,7 @@ namespace APP.Network.System
                     room.SetConnectionFlags(false, false);
                     room.SetStatus(ConnectionStatus.Disconnected);
                     room.ResetRoomState();
+                    ClearAllPlayerCards();
                     this.SendEvent(new E_RoomSnapshot(new List<RemotePlayerData>()));
                     this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Disconnected));
                 });
