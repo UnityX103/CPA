@@ -27,6 +27,7 @@ namespace APP.Pomodoro.Controller
         private Label         _ppStreakValue;
         private Button        _ppBtnPrimary;
         private Button        _ppBtnSecondary;
+        private VisualElement _ppPinBtn;
 
         // ─── 子视图 ───────────────────────────────────────────────
         private ClockView _clockView;
@@ -148,6 +149,21 @@ namespace APP.Pomodoro.Controller
             // 主/次操作按钮：在 PointerDown 阻断冒泡，避免点击按钮时误触发整卡拖拽
             _ppBtnPrimary?.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
             _ppBtnSecondary?.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+
+            _ppPinBtn = pomodoroTemplateContainer.Q<VisualElement>("pp-pin-btn");
+            BindPinButton();
+        }
+
+        private void BindPinButton()
+        {
+            if (_ppPinBtn == null) return;
+            _ppPinBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+            _ppPinBtn.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                evt.StopPropagation();
+                bool next = !_model.IsPinned.Value;
+                this.SendCommand(new Cmd_SetPomodoroPinned(next));
+            });
         }
 
         // ─── Model 订阅 ──────────────────────────────────────────
@@ -178,6 +194,12 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
 
             _model.AutoStartBreak.RegisterWithInitValue(_ => RefreshClock())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            _model.IsPinned.RegisterWithInitValue(OnPomodoroPinnedChanged)
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            this.GetModel<IGameModel>().IsAppFocused.RegisterWithInitValue(_ => RefreshVisibility())
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
@@ -333,6 +355,22 @@ namespace APP.Pomodoro.Controller
             x = Mathf.Max(0, x);
             y = Mathf.Max(0, y);
             this.SendCommand(new Cmd_SetPomodoroPanelPosition(new Vector2(x, y)));
+        }
+
+        // ─── Pin 状态与可见性 ────────────────────────────────────
+
+        private void OnPomodoroPinnedChanged(bool pinned)
+        {
+            _ppPinBtn?.EnableInClassList("pp-pin-btn--unpinned", !pinned);
+            RefreshVisibility();
+        }
+
+        private void RefreshVisibility()
+        {
+            if (_ppRoot == null || _model == null) return;
+            bool focused = this.GetModel<IGameModel>().IsAppFocused.Value;
+            bool visible = focused || _model.IsPinned.Value;
+            _ppRoot.EnableInClassList("pp-hidden", !visible);
         }
     }
 }
