@@ -1,6 +1,6 @@
 # com.nz.appmonitor — NZ App Monitor
 
-macOS 前台应用监控包。通过系统 **Accessibility API** 实时获取前台应用名称、窗口标题和应用图标。
+macOS 与 Windows 的前台应用监控包。macOS 通过 **Accessibility API**，Windows 通过 **Win32 P/Invoke**（无需特殊权限），实时获取前台应用名称、窗口标题和应用图标。
 
 ---
 
@@ -13,7 +13,7 @@ macOS 前台应用监控包。通过系统 **Accessibility API** 实时获取前
 | `AppMonitor.Instance.IsPermissionGranted` | 检查 Accessibility 权限是否已授予（不弹窗）|
 | `AppMonitor.Instance.RequestPermission()` | 触发系统权限弹窗（仅在未授权时弹出）|
 
-非 macOS 平台（Windows、Linux、编辑器非 macOS 等）自动降级为无操作实现，`GetCurrentApp()` 返回 `IsSuccess = false`，不会崩溃。
+**支持平台:** macOS（Accessibility API）、Windows（Win32 P/Invoke，无原生 DLL 依赖）。其他平台（Linux、非 OSX/WIN 编辑器）自动降级为无操作实现，`GetCurrentApp()` 返回 `IsSuccess = false`，不会崩溃。
 
 ---
 
@@ -85,6 +85,37 @@ macOS 前台应用监控包。通过系统 **Accessibility API** 实时获取前
 
 > **重要：** 若不正确配置 Entitlements，应用在 Hardened Runtime 模式下会被系统拒绝加载原生库。
 > Unity 默认会在构建后处理阶段（`IPostprocessBuildWithReport`）注入这些权限，参考项目中的 `MacOSBuildPostProcessor.cs`。
+
+---
+
+## Windows 支持
+
+Windows 实现采用纯 C# P/Invoke，**无需任何原生 DLL**，直接调用系统 `user32`/`kernel32`/`shell32`/`gdi32`/`version` DLL。克隆即用，不依赖 MSVC 工具链。
+
+### 行为差异（与 macOS 对比）
+
+| 字段/API | macOS | Windows |
+|---|---|---|
+| `IsPermissionGranted` | 取决于 Accessibility 授权 | **恒为 `true`**（Win32 API 不需要特殊权限） |
+| `RequestPermission()` | 触发系统授权弹窗 | **no-op**（无弹窗） |
+| `AppName` | `NSRunningApplication.localizedName` | exe 的 `FileDescription`（版本资源），失败回退到文件名 |
+| `BundleId` | 反向 DNS（如 `com.apple.finder`） | **exe 文件名小写**（如 `notepad`、`chrome`、`explorer`）|
+| `WindowTitle` | `AXFocusedWindow.AXTitle` | `GetWindowTextW(GetForegroundWindow())` |
+| `Icon` | `NSRunningApplication.icon` PNG | `SHGetFileInfoW` + `GetDIBits` 提取 32-bit BGRA |
+
+### 已知限制（Windows）
+
+- **受保护进程**：SYSTEM 级服务、某些 UAC 提升窗口会导致 `OpenProcess` 失败，返回 `NoFrontmostApp`。
+- **图标位深**：仅处理 32-bit BGRA（Vista+ Shell 默认）。1/4/8-bit 老式图标将返回 `Icon = null`。
+- **batchmode**：无前台窗口场景下 `GetForegroundWindow` 返回 0，自然降级为 `NoFrontmostApp`。
+
+### 不需要的配置
+
+与 macOS 不同，Windows **无需**以下任何内容：
+- Entitlements 文件
+- 权限描述字符串
+- 预编译 `.bundle` / `.dll`
+- 代码签名额外条目
 
 ---
 
@@ -246,7 +277,8 @@ com.nz.appmonitor/
 │   ├── IAppMonitor.cs               # 平台无关接口
 │   ├── AppMonitorData.cs            # AppInfo、AppMonitorResultCode、PermissionDeniedException
 │   ├── MacOSAppMonitor.cs           # macOS 实现（#if UNITY_STANDALONE_OSX）
-│   └── UnsupportedAppMonitorImpl.cs # 非 macOS 无操作实现
+│   ├── WindowsAppMonitor.cs         # Windows 实现（#if UNITY_STANDALONE_WIN，纯 C# P/Invoke）
+│   └── UnsupportedAppMonitorImpl.cs # 其他平台无操作实现
 ├── Plugins/
 │   └── macOS/
 │       ├── AppMonitor.bundle        # 预编译 Universal Binary（arm64 + x86_64）
@@ -265,7 +297,9 @@ com.nz.appmonitor/
 
 ## 已知限制
 
-- **仅支持 macOS**：`#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX` 条件编译，其他平台自动降级。
-- **需要 Accessibility 权限**：首次运行时系统会弹窗请求授权，之后记住选择。用户拒绝后 `IsPermissionGranted = false`，`GetCurrentApp()` 返回 Fallback。
+- **支持的平台**：macOS（Standalone/Editor）、Windows（Standalone/Editor）。其他平台自动降级为无操作实现。
+- **macOS — Accessibility 权限**：首次运行时系统会弹窗请求授权。用户拒绝后 `IsPermissionGranted = false`，`GetCurrentApp()` 返回 Fallback AppInfo。
+- **Windows — 受保护进程**：SYSTEM 级服务或 UAC 提升窗口可能导致 `OpenProcess` 失败，返回 `NoFrontmostApp`。
 - **图标内存管理**：`AppInfo.Icon`（Texture2D）由调用方负责 `Object.Destroy()`，否则会造成显存泄漏。
-- **窗口标题限制**：部分应用（如系统守护进程）没有可见窗口，`WindowTitle` 会返回空字符串。
+- **窗口标题限制**：部分应用（如系统守护进程、托盘图标）没有可见窗口，`WindowTitle` 会返回空字符串。
+- **BundleId 跨平台差异**：macOS 是反向 DNS，Windows 是 exe 文件名小写——调用方若需唯一应用标识，应为两个平台分别处理。

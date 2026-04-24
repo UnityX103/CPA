@@ -1,14 +1,16 @@
 {
   "name": "com.nz.appmonitor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "NZ App Monitor",
-  "description": "macOS 前台应用监控：通过系统 Accessibility API 实时获取前台应用名称、窗口标题和应用图标。提供跨平台接口抽象，非 macOS 平台自动降级为无操作实现。",
+  "description": "macOS/Windows 前台应用监控:macOS 通过 Accessibility API,Windows 通过 Win32 P/Invoke,实时获取前台应用名称、窗口标题和应用图标。其他平台自动降级为无操作实现。",
   "unity": "6000.0",
   "author": {
     "name": "NZ"
   },
   "keywords": [
     "macos",
+    "windows",
+    "win32",
     "accessibility",
     "appmonitor",
     "foreground-app",
