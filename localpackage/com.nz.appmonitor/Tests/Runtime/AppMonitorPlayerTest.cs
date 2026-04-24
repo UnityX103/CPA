@@ -56,12 +56,12 @@ namespace NZ.AppMonitor.Tests
                 "RequestPermission() 不应抛出异常");
         }
 
-#if !UNITY_STANDALONE_OSX
+#if !UNITY_STANDALONE_OSX && !UNITY_STANDALONE_WIN
         [Test]
-        public void IsPermissionGranted_NonMacOS_ReturnsFalse()
+        public void IsPermissionGranted_UnsupportedPlatform_ReturnsFalse()
         {
             Assert.IsFalse(CPA.Monitoring.AppMonitor.Instance.IsPermissionGranted,
-                "非 macOS 平台 IsPermissionGranted 应始终返回 false");
+                "非支持平台(macOS/Windows 之外)IsPermissionGranted 应始终返回 false");
         }
 #endif
 
@@ -137,14 +137,16 @@ namespace NZ.AppMonitor.Tests
                     "macOS 上不应出现 UnsupportedAppMonitorImpl 的错误消息");
             }
         }
-#else
+#endif
+
+#if !UNITY_STANDALONE_OSX && !UNITY_STANDALONE_WIN
         [Test]
-        public void GetCurrentApp_NonMacOS_ReturnsPlatformUnsupported()
+        public void GetCurrentApp_UnsupportedPlatform_ReturnsPlatformUnsupported()
         {
             AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
-            Assert.IsFalse(result.IsSuccess, "非 macOS 平台 GetCurrentApp() 应返回失败");
+            Assert.IsFalse(result.IsSuccess, "非支持平台 GetCurrentApp() 应返回失败");
             Assert.AreEqual("当前平台不支持", result.ErrorMessage,
-                "非 macOS 平台错误消息应为 '当前平台不支持'");
+                "非支持平台错误消息应为 '当前平台不支持'");
         }
 #endif
 
@@ -175,12 +177,14 @@ namespace NZ.AppMonitor.Tests
                 UnityEngine.Object.Destroy(icon);
             }
         }
-#else
+#endif
+
+#if !UNITY_STANDALONE_OSX && !UNITY_STANDALONE_WIN
         [Test]
-        public void GetAppIcon_NonMacOS_ReturnsNull()
+        public void GetAppIcon_UnsupportedPlatform_ReturnsNull()
         {
             Texture2D icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon();
-            Assert.IsNull(icon, "非 macOS 平台 GetAppIcon() 应返回 null");
+            Assert.IsNull(icon, "非支持平台 GetAppIcon() 应返回 null");
         }
 #endif
 
