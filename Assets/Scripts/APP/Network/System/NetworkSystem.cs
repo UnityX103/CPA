@@ -484,7 +484,23 @@ namespace APP.Network.System
                 return;
             }
 
-            RemotePlayerData player = ToRemotePlayerData(inbound.playerId, inbound.playerName, inbound.state);
+            // player_state_broadcast 不携带 playerName，从 RoomModel 已有快照取，
+            // 否则会被空串覆盖，远端卡片名字回落到默认"玩家"。
+            string playerName = inbound.playerName;
+            if (string.IsNullOrEmpty(playerName))
+            {
+                IReadOnlyList<RemotePlayerData> existing = room.RemotePlayers;
+                for (int i = 0; i < existing.Count; i++)
+                {
+                    if (existing[i] != null && existing[i].PlayerId == inbound.playerId)
+                    {
+                        playerName = existing[i].PlayerName;
+                        break;
+                    }
+                }
+            }
+
+            RemotePlayerData player = ToRemotePlayerData(inbound.playerId, playerName, inbound.state);
             room.AddOrUpdateRemotePlayer(player);
 
             this.SendEvent(new E_RemoteStateUpdated(inbound.playerId));
@@ -492,8 +508,6 @@ namespace APP.Network.System
 
         private void HandleNetworkError(InboundMessage inbound)
         {
-            IRoomModel room = this.GetModel<IRoomModel>();
-            room.SetStatus(ConnectionStatus.Error);
             string code = string.IsNullOrEmpty(inbound.error) ? "UNKNOWN" : inbound.error;
 
             if (code == "ROOM_NOT_FOUND")
@@ -501,7 +515,13 @@ namespace APP.Network.System
                 this.GetModel<ISessionMemoryModel>().ForgetLastRoom();
             }
 
-            this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Error));
+            // 协议层错误（ROOM_NOT_FOUND / ROOM_FULL / INVALID_* 等）通过仍然存活的
+            // WebSocket 送达，连接本身没断。Status 维持当前值（通常 Connected/InRoom），
+            // 由调用方通过 E_NetworkError 单独决定重试或弹窗。
+            //
+            // 之前在这里强行 Status=Error + 先发 E_ConnectionStateChanged(Error) 再发
+            // E_NetworkError，会导致 OnlineSettingsPanelController 的连接态 handler 抢先
+            // 清掉用户输入的房间号 fallback，使"输入不存在的房间号→自动用该号创建"路径失效。
             this.SendEvent(new E_NetworkError(code, string.Empty));
         }
 

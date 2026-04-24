@@ -74,6 +74,100 @@ namespace APP.NetworkIntegration.Tests
         }
 
         [UnityTest]
+        public IEnumerator CreateRoom_WithDesiredCode_UsesProvidedCode()
+        {
+            Assert.That(_server, Is.Not.Null, "harness 未启动");
+
+            bool roomCreated = false;
+            string createdCode = null;
+            IUnRegister reg = GameApp.Interface.RegisterEvent<E_RoomCreated>(e =>
+            {
+                roomCreated = true;
+                createdCode = e.Code;
+            });
+
+            const string desiredCode = "TESTAB";
+            GameApp.Interface.SendCommand(new Cmd_CreateRoom("Alice", _server.Url, desiredCode));
+
+            float timeout = 5f;
+            while (!roomCreated && timeout > 0f)
+            {
+                yield return null;
+                timeout -= Time.unscaledDeltaTime;
+            }
+
+            reg.UnRegister();
+
+            Assert.That(roomCreated, Is.True, "未在 5 秒内触发 E_RoomCreated");
+            Assert.That(createdCode, Is.EqualTo(desiredCode),
+                $"服务端返回的房间号应等于客户端传入的 {desiredCode}");
+            Assert.That(GameApp.Interface.GetModel<IRoomModel>().RoomCode.Value,
+                Is.EqualTo(desiredCode), "RoomModel.RoomCode 未与服务端返回值同步");
+
+            GameApp.Interface.SendCommand(new Cmd_LeaveRoom());
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        [UnityTest]
+        public IEnumerator JoinMissingRoom_ThenCreateWithSameCode_Succeeds()
+        {
+            Assert.That(_server, Is.Not.Null, "harness 未启动");
+
+            // 步骤 1：用一个肯定不存在的房间号 join，期望收到 ROOM_NOT_FOUND
+            const string desiredCode = "MISSAB";
+            string lastErrorCode = null;
+            IUnRegister errReg = GameApp.Interface.RegisterEvent<E_NetworkError>(e =>
+            {
+                lastErrorCode = e.Code;
+            });
+
+            GameApp.Interface.SendCommand(new Cmd_JoinRoom(desiredCode, "Alice", _server.Url));
+
+            float timeout = 5f;
+            while (lastErrorCode == null && timeout > 0f)
+            {
+                yield return null;
+                timeout -= Time.unscaledDeltaTime;
+            }
+            errReg.UnRegister();
+
+            Assert.That(lastErrorCode, Is.EqualTo("ROOM_NOT_FOUND"),
+                "对一个不存在的房间号执行 join_room 应当收到 ROOM_NOT_FOUND");
+
+            // 协议层错误下，连接 Status 不应被强行改为 Error（Issue 1 的核心）
+            ConnectionStatus statusAfterError = GameApp.Interface
+                .GetModel<IRoomModel>().Status.Value;
+            Assert.That(statusAfterError, Is.Not.EqualTo(ConnectionStatus.Error),
+                "ROOM_NOT_FOUND 是协议层错误，不应触发 Status=Error");
+
+            // 步骤 2：用相同房间号执行 create_room，期望服务端用此房间号创建
+            bool roomCreated = false;
+            string createdCode = null;
+            IUnRegister createReg = GameApp.Interface.RegisterEvent<E_RoomCreated>(e =>
+            {
+                roomCreated = true;
+                createdCode = e.Code;
+            });
+
+            GameApp.Interface.SendCommand(new Cmd_CreateRoom("Alice", _server.Url, desiredCode));
+
+            timeout = 5f;
+            while (!roomCreated && timeout > 0f)
+            {
+                yield return null;
+                timeout -= Time.unscaledDeltaTime;
+            }
+            createReg.UnRegister();
+
+            Assert.That(roomCreated, Is.True, "fallback create 应当成功");
+            Assert.That(createdCode, Is.EqualTo(desiredCode),
+                "fallback 创建的房间号应等于用户输入的房间号");
+
+            GameApp.Interface.SendCommand(new Cmd_LeaveRoom());
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        [UnityTest]
         public IEnumerator TwoClients_JoinAndStateSync()
         {
             Assert.That(_server, Is.Not.Null);
@@ -122,6 +216,22 @@ namespace APP.NetworkIntegration.Tests
             while (!stateReceived && timeout > 0f) { yield return null; timeout -= Time.unscaledDeltaTime; }
             r3.UnRegister();
             Assert.That(stateReceived, Is.True, "A 未收到 B 的 state 广播");
+
+            // 验证：远端玩家名字应被持久保留（state_broadcast 不带 playerName，
+            // RoomModel 应当沿用 player_joined / room_snapshot 时拿到的名字，而不是被空覆盖）
+            var room = GameApp.Interface.GetModel<IRoomModel>();
+            string remoteName = null;
+            for (int i = 0; i < room.RemotePlayers.Count; i++)
+            {
+                if (room.RemotePlayers[i] != null
+                    && !string.IsNullOrEmpty(room.RemotePlayers[i].PlayerName))
+                {
+                    remoteName = room.RemotePlayers[i].PlayerName;
+                    break;
+                }
+            }
+            Assert.That(remoteName, Is.EqualTo("Bob"),
+                "state_broadcast 之后远端玩家名应当仍为 Bob，不能被空字符串覆盖");
 
             // 清理
             var closeTask = Task.Run(async () => await wsB.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None));
