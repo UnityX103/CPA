@@ -17,21 +17,11 @@
       "gap": 16,
       "children": [
         {
-          "id": "PBXgQ",
+          "id": "EkvuW",
           "type": "ref",
-          "ref": "Za5wE",
-          "width": "fill_container",
-          "padding": [
-            10,
-            16
-          ],
+          "ref": "EOrsv",
           "name": "pspApply",
-          "descendants": {
-            "oNDTH": {
-              "content": "应用",
-              "fontSize": 14
-            }
-          }
+          "width": "fill_container"
         },
         {
           "type": "frame",
@@ -1794,6 +1784,29 @@
               "y": 0
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "EOrsv",
+          "name": "SettingsApplyRow",
+          "reusable": true,
+          "width": "fill_container",
+          "justifyContent": "end",
+          "children": [
+            {
+              "id": "gBjcB",
+              "type": "ref",
+              "ref": "Za5wE",
+              "name": "apply-btn",
+              "width": 120,
+              "descendants": {
+                "oNDTH": {
+                  "content": "应用",
+                  "fontSize": 14
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -2195,6 +2208,28 @@
                       "fontWeight": "500"
                     }
                   ]
+                },
+                {
+                  "type": "frame",
+                  "id": "htxKX",
+                  "name": "tab-global",
+                  "width": "fill_container",
+                  "padding": [
+                    10,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "7C2QZ",
+                      "name": "lbl4",
+                      "fill": "#9E8E80",
+                      "content": "全局",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             },
@@ -2205,17 +2240,33 @@
               "width": "fill_container",
               "name": "contentArea",
               "padding": 16
+            },
+            {
+              "id": "jZZYV",
+              "type": "ref",
+              "ref": "Pdj9C",
+              "name": "Global Settings Panel",
+              "width": "fill_container(0)",
+              "enabled": false
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "dIbYY",
+          "name": "scale-dialog-host",
+          "context": "picking-mode:Ignore",
+          "width": "fill_container",
+          "height": 0
         }
       ]
     },
     {
       "type": "frame",
-      "id": "ikREg",
-      "x": 3411,
+      "id": "bfMCZ",
+      "x": 4608,
       "y": 561,
-      "name": "Unsaved Changes Dialog",
+      "name": "ConfirmDialog",
       "reusable": true,
       "width": 420,
       "fill": "#FFFFFF",
@@ -2236,32 +2287,34 @@
       "children": [
         {
           "type": "frame",
-          "id": "MUrck",
-          "name": "dlgHeader",
+          "id": "lFbzX",
+          "name": "dlg-header",
           "width": "fill_container",
           "justifyContent": "space_between",
           "children": [
             {
               "type": "frame",
-              "id": "QF73I",
-              "name": "dlgTitleWrap",
+              "id": "yTKtB",
+              "name": "dlg-title-wrap",
               "layout": "vertical",
               "gap": 4,
               "children": [
                 {
                   "type": "text",
-                  "id": "BPaCU",
+                  "id": "D1pHM",
+                  "name": "dlg-title",
                   "fill": "#1A1A1A",
-                  "content": "有未保存的更改",
+                  "content": "标题",
                   "fontFamily": "MaokenAssortedSans",
                   "fontSize": 16,
                   "fontWeight": "700"
                 },
                 {
                   "type": "text",
-                  "id": "wNvs0",
+                  "id": "rq52v",
+                  "name": "dlg-subtitle",
                   "fill": "#6B7280",
-                  "content": "请先应用或取消后再继续",
+                  "content": "副标题",
                   "fontFamily": "MaokenAssortedSans",
                   "fontSize": 12,
                   "fontWeight": "500"
@@ -2269,20 +2322,43 @@
               ]
             },
             {
-              "id": "se1NP",
+              "id": "2NnEA",
               "type": "ref",
               "ref": "UAbZg",
-              "name": "dlgClose"
+              "name": "dlg-close"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Vyl4X",
+          "x": 0,
+          "y": 0,
+          "name": "dlg-countdown",
+          "enabled": false,
+          "width": "fill_container(0)",
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "gwi14",
+              "name": "dlg-countdown-text",
+              "fill": "#D97706",
+              "content": "剩余 5s 后自动还原",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 13,
+              "fontWeight": "700"
             }
           ]
         },
         {
           "type": "text",
-          "id": "qVnmb",
+          "id": "sus5u",
+          "name": "dlg-body",
           "fill": "#4B5563",
           "textGrowth": "fixed-width",
           "width": "fill_container",
-          "content": "你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？",
+          "content": "正文占位正文占位正文占位",
           "lineHeight": 1.5,
           "fontFamily": "MaokenAssortedSans",
           "fontSize": 14,
@@ -2290,17 +2366,17 @@
         },
         {
           "type": "frame",
-          "id": "NRube",
-          "name": "dlgActions",
+          "id": "06tss",
+          "name": "dlg-actions",
           "width": "fill_container",
           "gap": 12,
           "justifyContent": "end",
           "children": [
             {
-              "id": "ydQod",
+              "id": "kHgaW",
               "type": "ref",
               "ref": "RPLJq",
-              "name": "dlgCancel",
+              "name": "dlg-cancel",
               "descendants": {
                 "zgOkx": {
                   "content": "取消",
@@ -2309,13 +2385,13 @@
               }
             },
             {
-              "id": "AW4FD",
+              "id": "D6waS",
               "type": "ref",
               "ref": "Za5wE",
-              "name": "dlgConfirm",
+              "name": "dlg-confirm",
               "descendants": {
                 "oNDTH": {
-                  "content": "保存并继续",
+                  "content": "确认",
                   "fontSize": 13
                 }
               }
@@ -2323,6 +2399,114 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "Pdj9C",
+      "x": 4608,
+      "y": 1400,
+      "name": "Global Settings Panel",
+      "reusable": true,
+      "width": "fill_container(572)",
+      "fill": "#FFFFFF00",
+      "layout": "vertical",
+      "gap": 16,
+      "children": [
+        {
+          "id": "WA05D",
+          "type": "ref",
+          "ref": "EOrsv",
+          "name": "gspApply"
+        },
+        {
+          "type": "frame",
+          "id": "arfmO",
+          "name": "gspScale",
+          "width": "fill_container",
+          "fill": "#F6F7F8",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "K0ec1",
+              "name": "gsp-scale-label",
+              "fill": "#9CA3AF",
+              "content": "界面缩放",
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 12,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "IZj79",
+              "name": "gsp-scale-row",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "GncV3",
+                  "name": "gsp-scale-slider",
+                  "width": "fill_container",
+                  "height": 24,
+                  "fill": "#FFFFFFCC",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#E5E7EB"
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center"
+                },
+                {
+                  "type": "text",
+                  "id": "A78E8",
+                  "name": "gsp-scale-value",
+                  "fill": "#1A1A1A",
+                  "textGrowth": "fixed-width",
+                  "width": 48,
+                  "content": "1.0×",
+                  "textAlign": "right",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dR7xG",
+      "type": "ref",
+      "ref": "bfMCZ",
+      "name": "Unsaved Changes Dialog",
+      "x": 3411,
+      "y": 561,
+      "descendants": {
+        "D1pHM": {
+          "content": "有未保存的更改"
+        },
+        "rq52v": {
+          "content": "请先应用或取消后再继续"
+        },
+        "Vyl4X": {
+          "enabled": false
+        },
+        "sus5u": {
+          "content": "你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？"
+        },
+        "D6waS/oNDTH": {
+          "content": "保存并继续",
+          "fontSize": 13
+        }
+      }
     }
   ],
   "themes": {
