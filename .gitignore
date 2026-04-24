@@ -113,3 +113,6 @@ wheels/
 node_modules/
 .next/
 .omx/
+
+# Server 子仓库（独立管理于 github.com/UnityX103/CPA-Server）
+Server/
