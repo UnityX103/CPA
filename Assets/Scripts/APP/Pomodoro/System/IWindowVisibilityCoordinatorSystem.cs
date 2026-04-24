@@ -13,6 +13,6 @@ namespace APP.Pomodoro.System
         /// 当前是否存在任何 pinned 的 UI。
         /// 由 PomodoroModel.IsPinned ∥ 任一 PlayerCard.IsPinned 派生。
         /// </summary>
-        IReadOnlyBindableProperty<bool> AnyPinned { get; }
+        IReadonlyBindableProperty<bool> AnyPinned { get; }
     }
 }
