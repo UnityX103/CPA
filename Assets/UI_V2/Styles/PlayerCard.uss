@@ -33,6 +33,17 @@
     cursor: move-arrow;
 }
 
+/* ── D3ZIc: pc-content-stack vertical gap:12 ──────────────
+   设计稿中间层：drqFB > D3ZIc > [head, divider, footer, pin]
+   无 padding：pin 按钮 absolute 坐标 (110,50) 基于此容器计算
+   flex-grow:1 + width:100% 让它完全填满 pc-root 的 content-area
+   ─────────────────────────────────────────────────────── */
+.pc-content-stack {
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+}
+
 /* ── tyyE3: head row align-center fill ─────────────────── */
 /* gap: 10 → pc-time-row margin-left:10px                   */
 .pc-head {

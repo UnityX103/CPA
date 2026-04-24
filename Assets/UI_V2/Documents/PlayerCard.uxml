@@ -8,54 +8,61 @@
     <!-- 整卡拖拽：移除 pc-handle-bar，选中卡片任意位置皆可拖动 -->
     <ui:VisualElement class="pc-root">
 
-        <!-- tyyE3: head  row  align-center  gap:10 -->
-        <ui:VisualElement class="pc-head">
+        <!-- D3ZIc: pc-content-stack (无 padding)，对应设计稿中间层 -->
+        <!-- 必须保留此层：pin 按钮 absolute 坐标 (110,50) 相对此容器成立；     -->
+        <!-- 若直接挂 pc-root 下，Unity absolute 不减父 padding，pin 会偏左上 14px -->
+        <ui:VisualElement class="pc-content-stack">
 
-            <!-- MHhxc: nameCol  vertical  gap:4  flex-grow -->
-            <ui:VisualElement class="pc-name-col">
+            <!-- tyyE3: head  row  align-center  gap:10 -->
+            <ui:VisualElement class="pc-head">
 
-                <!-- 1JKIJ: name  fontSize:14  bold  #5B4636 -->
-                <ui:Label name="pc-name" class="pc-name" text="远端玩家"/>
+                <!-- MHhxc: nameCol  vertical  gap:4  flex-grow -->
+                <ui:VisualElement class="pc-name-col">
 
-                <!-- jtlhD: phaseBadge  row  align-center  padding:[3,8]  cornerRadius:999→8px  #D15F3D -->
-                <ui:VisualElement class="pc-phase-badge">
-                    <!-- bI6eO: dot  6×6  cornerRadius:3  white -->
-                    <ui:VisualElement class="pc-phase-dot"/>
-                    <!-- qfQSq: phase label  fontSize:10  bold  white -->
-                    <ui:Label name="pc-phase" class="pc-phase" text="专注中"/>
+                    <!-- 1JKIJ: name  fontSize:14  bold  #5B4636 -->
+                    <ui:Label name="pc-name" class="pc-name" text="远端玩家"/>
+
+                    <!-- jtlhD: phaseBadge  row  align-center  padding:[3,8]  cornerRadius:999→8px  #D15F3D -->
+                    <ui:VisualElement class="pc-phase-badge">
+                        <!-- bI6eO: dot  6×6  cornerRadius:3  white -->
+                        <ui:VisualElement class="pc-phase-dot"/>
+                        <!-- qfQSq: phase label  fontSize:10  bold  white -->
+                        <ui:Label name="pc-phase" class="pc-phase" text="专注中"/>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- CjhcN: timeRow  row  align-center  margin-left:10 -->
+                <ui:VisualElement class="pc-time-row">
+
+                    <!-- eGfPq: roundsPill  row  align-center  padding:[5,10]  cornerRadius:999→10px  #FFF3EA  border:#EFDCCD -->
+                    <ui:VisualElement class="pc-rounds-pill">
+                        <!-- 7XQkG: rounds  fontSize:11  bold  #A28B79 -->
+                        <ui:Label name="pc-rounds" class="pc-rounds" text="3/4 轮"/>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
             </ui:VisualElement>
 
-            <!-- CjhcN: timeRow  row  align-center  margin-left:10 -->
-            <ui:VisualElement class="pc-time-row">
+            <!-- cnbrI: divider  1px  #F3E3D3  margin-top:12 -->
+            <ui:VisualElement class="pc-divider"/>
 
-                <!-- eGfPq: roundsPill  row  align-center  padding:[5,10]  cornerRadius:999→10px  #FFF3EA  border:#EFDCCD -->
-                <ui:VisualElement class="pc-rounds-pill">
-                    <!-- 7XQkG: rounds  fontSize:11  bold  #A28B79 -->
-                    <ui:Label name="pc-rounds" class="pc-rounds" text="3/4 轮"/>
-                </ui:VisualElement>
-
+            <!-- cwbeK: footer  row  align-center  margin-top:12  gap:6 -->
+            <ui:VisualElement class="pc-footer">
+                <!-- KN0dX: footIcon 13×13  lucide app-window  #B5A49A -->
+                <ui:VisualElement name="pc-active-app-icon" class="pc-foot-icon"/>
+                <!-- rFcKx: footText  fontSize:11  weight:500→normal  #A28B79 -->
+                <ui:Label name="pc-app" class="pc-app" text="VS Code"/>
             </ui:VisualElement>
 
-        </ui:VisualElement>
+            <!-- epxz9: pc-pin-btn 22x22 cornerRadius:11 absolute(110,50) fill #E9D5C3 -->
+            <!-- 默认已置顶(on)；未置顶态加 .pc-pin-btn__unpinned class -->
+            <ui:VisualElement name="pc-pin-btn" class="pc-pin-btn">
+                <!-- 3eDk5: icon 14×14 lucide pin/pin-off #7A5F4D -->
+                <ui:VisualElement name="pc-pin-btn-icon" class="pc-pin-btn-icon"/>
+            </ui:VisualElement>
 
-        <!-- cnbrI: divider  1px  #F3E3D3  margin-top:12 -->
-        <ui:VisualElement class="pc-divider"/>
-
-        <!-- cwbeK: footer  row  align-center  margin-top:12  gap:6 -->
-        <ui:VisualElement class="pc-footer">
-            <!-- KN0dX: footIcon 13×13  lucide app-window  #B5A49A -->
-            <ui:VisualElement name="pc-active-app-icon" class="pc-foot-icon"/>
-            <!-- rFcKx: footText  fontSize:11  weight:500→normal  #A28B79 -->
-            <ui:Label name="pc-app" class="pc-app" text="VS Code"/>
-        </ui:VisualElement>
-
-        <!-- epxz9: pc-pin-btn 22x22 cornerRadius:11 absolute(110,50) fill #E9D5C3 -->
-        <!-- 默认已置顶(on)；未置顶态加 .pc-pin-btn__unpinned class -->
-        <ui:VisualElement name="pc-pin-btn" class="pc-pin-btn">
-            <!-- 3eDk5: icon 14×14 lucide pin/pin-off #7A5F4D -->
-            <ui:VisualElement name="pc-pin-btn-icon" class="pc-pin-btn-icon"/>
         </ui:VisualElement>
 
     </ui:VisualElement>
