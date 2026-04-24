@@ -12,6 +12,8 @@ namespace CPA.Monitoring
         {
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
             _impl = new MacOSAppMonitorImpl();
+#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            _impl = new WindowsAppMonitorImpl();
 #else
             _impl = new UnsupportedAppMonitorImpl();
 #endif
