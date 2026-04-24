@@ -170,6 +170,10 @@ namespace NZ.AppMonitor.Tests
             {
                 Assert.IsNotNull(result.AppName, "Windows 成功状态下 AppName 不应为 null");
                 Debug.Log($"[AppMonitorPlayerTest] Win AppName='{result.AppName}', BundleId='{result.BundleId}', WindowTitle='{result.WindowTitle}'");
+                if (result.Icon != null)
+                {
+                    UnityEngine.Object.Destroy(result.Icon);
+                }
             }
             else
             {
@@ -187,6 +191,10 @@ namespace NZ.AppMonitor.Tests
                 Assert.AreEqual(result.BundleId.ToLowerInvariant(), result.BundleId,
                     "Windows 上 BundleId 应为全小写(exe 文件名)");
             }
+            if (result != null && result.Icon != null)
+            {
+                UnityEngine.Object.Destroy(result.Icon);
+            }
         }
 
         [Test]
@@ -197,6 +205,10 @@ namespace NZ.AppMonitor.Tests
             {
                 StringAssert.DoesNotContain("当前平台不支持", result.ErrorMessage,
                     "Windows 上不应出现 UnsupportedAppMonitorImpl 的错误消息");
+            }
+            if (result != null && result.Icon != null)
+            {
+                UnityEngine.Object.Destroy(result.Icon);
             }
         }
 #endif
