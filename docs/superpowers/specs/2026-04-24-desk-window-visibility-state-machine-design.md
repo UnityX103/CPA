@@ -111,7 +111,7 @@ S2 ──[最后一个 pin 被取消]────→ S0  (详见边界情况 #1)
 
 **新增 `IWindowVisibilityCoordinatorSystem`**（实现 `WindowVisibilityCoordinatorSystem : AbstractSystem`）：
 
-- 对外暴露 `IReadOnlyBindableProperty<bool> AnyPinned`
+- 对外暴露 `IReadonlyBindableProperty<bool> AnyPinned`
 - `OnInit` 中：
   - 订阅 `PomodoroModel.IsPinned` 变化
   - 订阅现有的 `E_PlayerCardAdded` / `E_PlayerCardRemoved` 事件，动态维护每张 PlayerCard 的 `IsPinned` 订阅集合

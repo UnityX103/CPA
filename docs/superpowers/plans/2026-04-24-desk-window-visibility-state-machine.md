@@ -29,7 +29,7 @@
 |---|---|
 | `Assets/Scripts/APP/Pomodoro/Command/Cmd_SetAppFocused.cs` | 写 `IGameModel.IsAppFocused` |
 | `Assets/Scripts/APP/Pomodoro/Queries/Q_IsAnyPinned.cs` | 一次性读取当前 AnyPinned 的快照 |
-| `Assets/Scripts/APP/Pomodoro/System/IWindowVisibilityCoordinatorSystem.cs` | Coordinator 接口（暴露 `AnyPinned: IReadOnlyBindableProperty<bool>`） |
+| `Assets/Scripts/APP/Pomodoro/System/IWindowVisibilityCoordinatorSystem.cs` | Coordinator 接口（暴露 `AnyPinned: IReadonlyBindableProperty<bool>`） |
 | `Assets/Scripts/APP/Pomodoro/System/WindowVisibilityCoordinatorSystem.cs` | 实现：聚合 IsPinned 信号、驱动 WindowPositionSystem.SetTopmost |
 | `Assets/Tests/EditMode/PlayerCardTests/Editor/WindowVisibilityCoordinatorSystemTests.cs` | Coordinator 单测 |
 | `Assets/Tests/EditMode/PlayerCardTests/Editor/QIsAnyPinnedTests.cs` | Query 单测 |
@@ -135,7 +135,7 @@ namespace APP.Pomodoro.System
         /// 当前是否存在任何 pinned 的 UI。
         /// 由 PomodoroModel.IsPinned ∥ 任一 PlayerCard.IsPinned 派生。
         /// </summary>
-        IReadOnlyBindableProperty<bool> AnyPinned { get; }
+        IReadonlyBindableProperty<bool> AnyPinned { get; }
     }
 }
 ```
@@ -181,7 +181,7 @@ namespace APP.Pomodoro.System
         private readonly BindableProperty<bool> _anyPinned = new BindableProperty<bool>(false);
         private readonly Dictionary<string, IUnRegister> _cardSubs = new Dictionary<string, IUnRegister>();
 
-        public IReadOnlyBindableProperty<bool> AnyPinned => _anyPinned;
+        public IReadonlyBindableProperty<bool> AnyPinned => _anyPinned;
 
         protected override void OnInit()
         {
@@ -257,7 +257,7 @@ namespace APP.Pomodoro.System
 
 - [ ] **Step 2：MCP `read_console` filter=Error 检查编译**
 
-Expected: 0 error. 若出现 `IReadOnlyBindableProperty` 找不到，检查 QFramework.cs 内是否存在该接口（Search: `grep -n "IReadOnlyBindableProperty" Assets/Scripts/APP/QFramework.cs`）。
+Expected: 0 error. 若出现 `IReadonlyBindableProperty` 找不到，检查 QFramework.cs 内是否存在该接口（Search: `grep -n "IReadonlyBindableProperty" Assets/Scripts/QFramework.cs`）。注意 QFramework 的命名是 `IReadonlyBindableProperty`（小写 o、单 n），不是 `IReadOnly...`。
 
 - [ ] **Step 3：commit**
 
