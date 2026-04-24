@@ -70,5 +70,43 @@ namespace APP.Tests.PlayerCardTests
 
             Assert.IsTrue(card.IsPinned.Value);
         }
+
+        [Test]
+        public void Cmd_SetAppFocused_WritesFalse()
+        {
+            var arch = GameApp.Interface;
+            var model = arch.GetModel<IGameModel>();
+            Assert.IsTrue(model.IsAppFocused.Value, "IsAppFocused 默认应为 true");
+
+            arch.SendCommand(new Cmd_SetAppFocused(false));
+
+            Assert.IsFalse(model.IsAppFocused.Value);
+        }
+
+        [Test]
+        public void Cmd_SetAppFocused_WritesTrue()
+        {
+            var arch = GameApp.Interface;
+            var model = arch.GetModel<IGameModel>();
+            model.IsAppFocused.Value = false;
+
+            arch.SendCommand(new Cmd_SetAppFocused(true));
+
+            Assert.IsTrue(model.IsAppFocused.Value);
+        }
+
+        [Test]
+        public void Cmd_SetAppFocused_TriggersSubscriber()
+        {
+            var arch = GameApp.Interface;
+            var model = arch.GetModel<IGameModel>();
+            bool? received = null;
+            model.IsAppFocused.Register(v => received = v);
+
+            arch.SendCommand(new Cmd_SetAppFocused(false));
+
+            Assert.IsTrue(received.HasValue);
+            Assert.IsFalse(received.Value);
+        }
     }
 }
