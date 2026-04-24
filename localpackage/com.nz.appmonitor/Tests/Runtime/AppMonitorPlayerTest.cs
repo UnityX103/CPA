@@ -65,6 +65,15 @@ namespace NZ.AppMonitor.Tests
         }
 #endif
 
+#if UNITY_STANDALONE_WIN
+        [Test]
+        public void IsPermissionGranted_Windows_ReturnsTrue()
+        {
+            Assert.IsTrue(CPA.Monitoring.AppMonitor.Instance.IsPermissionGranted,
+                "Windows 上 IsPermissionGranted 应始终返回 true(无权限要求)");
+        }
+#endif
+
         // ──────────────────────────────────────────────
         // 3. GetCurrentApp — 基础契约
         // ──────────────────────────────────────────────
@@ -150,6 +159,48 @@ namespace NZ.AppMonitor.Tests
         }
 #endif
 
+#if UNITY_STANDALONE_WIN
+        [Test]
+        public void GetCurrentApp_Windows_AppName_NotNull()
+        {
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
+            Assert.IsNotNull(result, "Windows 上 GetCurrentApp() 不应返回 null");
+
+            if (result.IsSuccess)
+            {
+                Assert.IsNotNull(result.AppName, "Windows 成功状态下 AppName 不应为 null");
+                Debug.Log($"[AppMonitorPlayerTest] Win AppName='{result.AppName}', BundleId='{result.BundleId}', WindowTitle='{result.WindowTitle}'");
+            }
+            else
+            {
+                Assert.AreEqual(AppMonitorResultCode.NoFrontmostApp, result.ErrorCode,
+                    "Windows 失败时错误码应为 NoFrontmostApp(例如 batchmode 无前台窗口)");
+            }
+        }
+
+        [Test]
+        public void GetCurrentApp_Windows_BundleId_IsLower()
+        {
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
+            if (result.IsSuccess && result.BundleId != null)
+            {
+                Assert.AreEqual(result.BundleId.ToLowerInvariant(), result.BundleId,
+                    "Windows 上 BundleId 应为全小写(exe 文件名)");
+            }
+        }
+
+        [Test]
+        public void GetCurrentApp_Windows_ErrorMessage_NotUnsupportedPlatform()
+        {
+            AppInfo result = CPA.Monitoring.AppMonitor.Instance.GetCurrentApp();
+            if (result.ErrorMessage != null)
+            {
+                StringAssert.DoesNotContain("当前平台不支持", result.ErrorMessage,
+                    "Windows 上不应出现 UnsupportedAppMonitorImpl 的错误消息");
+            }
+        }
+#endif
+
         // ──────────────────────────────────────────────
         // 5. GetAppIcon
         // ──────────────────────────────────────────────
@@ -185,6 +236,22 @@ namespace NZ.AppMonitor.Tests
         {
             Texture2D icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon();
             Assert.IsNull(icon, "非支持平台 GetAppIcon() 应返回 null");
+        }
+#endif
+
+#if UNITY_STANDALONE_WIN
+        [Test]
+        public void GetAppIcon_Windows_ReturnsTextureOrNull()
+        {
+            Texture2D icon = null;
+            Assert.DoesNotThrow(() => icon = CPA.Monitoring.AppMonitor.Instance.GetAppIcon(),
+                "Windows 上 GetAppIcon() 不应抛出异常");
+            if (icon != null)
+            {
+                Assert.Greater(icon.width, 0, "图标宽度应 > 0");
+                Assert.Greater(icon.height, 0, "图标高度应 > 0");
+                UnityEngine.Object.Destroy(icon);
+            }
         }
 #endif
 
