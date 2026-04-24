@@ -3,6 +3,7 @@ using APP.Network.System;
 using APP.Pomodoro.Model;
 using APP.Pomodoro.System;
 using APP.SessionMemory.Model;
+using APP.Settings.Model;
 using APP.Utility;
 using QFramework;
 
@@ -15,6 +16,7 @@ namespace APP.Pomodoro
             // Utility 必须最先注册，Model/System 的 OnInit 可能会用
             RegisterUtility<IStorageUtility>(new PlayerPrefsStorageUtility());
 
+            RegisterModel<ISettingsModel>(new SettingsModel());
             RegisterModel<IPomodoroModel>(new PomodoroModel());
             RegisterModel<IRoomModel>(new RoomModel());
             RegisterModel<ISessionMemoryModel>(new SessionMemoryModel());
