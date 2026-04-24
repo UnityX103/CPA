@@ -132,9 +132,11 @@ namespace APP.Pomodoro.Controller
                 tex = iconCache?.GetTexture(bundleId);
             }
 
+            // tex 为空时用 Null 清掉 inline，回落到 USS 默认 app-window 图标；
+            // 用 None 会显式置空，覆盖 USS 默认导致图标消失
             _appIcon.style.backgroundImage = tex != null
                 ? new StyleBackground(tex)
-                : new StyleBackground(StyleKeyword.None);
+                : new StyleBackground(StyleKeyword.Null);
         }
 
         /// <summary>
