@@ -38,8 +38,10 @@ description: Use when reviewing VisualImageTestBase screenshot runs in this CPA 
 - 按 step 分组判断，不使用“像素一致/不一致”作为结论。
 - 每个 step 至少检查：尺寸范围、位置与留白、颜色、圆角、阴影、文本、控件状态、裁切/遮挡。
 - 如果差异来自测试截图目标范围错误，优先建议修正测试捕获目标，而不是修改 UI。
+  - 项目约定：UI Toolkit 视觉测试一律按"目标所在的完整面板 / overlay 根"（如 `settings-overlay`、`osp-root`）作为 CaptureStep 的 containerElement。actual 图很小（只剩一张卡片或一个按钮 bounding box）通常意味着测试传进去的是待测元素本身，需要改回面板/overlay 根；详见 `.claude/skills/pencil-to-unity-ui-export/SKILL.md` 的「截图区域：截面板，不截待测元素」。
 - 如果差异来自 Unity 导入效果错误，明确指出应修改的文件和样式/结构，例如 `Assets/UI_V2/Styles/*.uss` 或 `Assets/UI_V2/Documents/*.uxml`。
 - 如果差异来自 Pencil baseline 包含阴影外扩或透明区域，而 Unity 截图只截内容盒，明确说明两者截图范围不一致，并建议统一截图范围。
+- 如果差异来自 baseline 只截了局部卡片，而 actual 按新规则抓了整块 `settings-overlay`，应该建议**更新 baseline 去匹配面板级截图范围**，而不是让测试回退到截局部。
 
 ## UnifiedSettingsPanel 速查
 
@@ -49,4 +51,4 @@ description: Use when reviewing VisualImageTestBase screenshot runs in this CPA 
   - `TestArtifacts/PencilReferences/unified-settings-pomodoro.png`
   - `TestArtifacts/PencilReferences/unified-settings-online-not-joined.png`
   - `TestArtifacts/PencilReferences/unified-settings-pet.png`
-- 如果实际图明显比 baseline 大很多，且抓到了整块 `settings-overlay` 而不是紧凑面板，优先归因为“截图目标层级或布局范围不匹配”
+- 该测试的 actual 图就应该是整块 `settings-overlay`（包含 sidebar + 标题 + 当前 tab 内容），这是项目约定的截图区域；如果 baseline 只覆盖到单个紧凑子面板而 actual 是整块 overlay，应建议**重画 baseline** 去匹配面板级范围，而不是把测试截图退回局部。

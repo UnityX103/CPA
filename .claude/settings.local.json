@@ -16,7 +16,8 @@
       "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics",
       "Skill(update-config)",
       "mcp__plugin_oh-my-claudecode_t__notepad_read",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "mcp__context7__resolve-library-id"
     ],
     "deny": [
       "Bash(rm *)",
