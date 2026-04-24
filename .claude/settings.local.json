@@ -15,7 +15,8 @@
       "mcp__pencil__get_editor_state",
       "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics",
       "Skill(update-config)",
-      "mcp__plugin_oh-my-claudecode_t__notepad_read"
+      "mcp__plugin_oh-my-claudecode_t__notepad_read",
+      "Bash(git remote *)"
     ],
     "deny": [
       "Bash(rm *)",
