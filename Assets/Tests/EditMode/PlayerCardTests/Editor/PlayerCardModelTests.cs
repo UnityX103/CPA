@@ -33,8 +33,8 @@ namespace APP.Tests.PlayerCardTests
         public void SetUp()
         {
             // 先清除上一次残留的静态实例（防止 TearDown 未能清理）
-            var existing = typeof(TestArchitecture)
-                .GetField("mArchitecture",
+            var existing = typeof(TestArchitecture).BaseType
+                ?.GetField("mArchitecture",
                     System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
                 ?.GetValue(null) as IArchitecture;
             existing?.Deinit();

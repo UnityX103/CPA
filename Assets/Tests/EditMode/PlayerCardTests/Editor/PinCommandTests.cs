@@ -15,8 +15,8 @@ namespace APP.Tests.PlayerCardTests
         {
             // 重置 Architecture 单例：Deinit 会把 mArchitecture 静态字段置空，
             // 下次访问 Interface 时重新 Init（见 QFramework.cs Architecture<T>.Deinit）
-            var current = typeof(GameApp)
-                .GetField("mArchitecture", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+            var current = typeof(GameApp).BaseType
+                ?.GetField("mArchitecture", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
                 ?.GetValue(null) as IArchitecture;
             current?.Deinit();
 
@@ -27,8 +27,8 @@ namespace APP.Tests.PlayerCardTests
         [TearDown]
         public void TearDown()
         {
-            var current = typeof(GameApp)
-                .GetField("mArchitecture", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
+            var current = typeof(GameApp).BaseType
+                ?.GetField("mArchitecture", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
                 ?.GetValue(null) as IArchitecture;
             current?.Deinit();
 
