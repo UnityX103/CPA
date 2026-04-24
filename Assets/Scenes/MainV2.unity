@@ -674,7 +674,7 @@ MonoBehaviour:
   _pomodoroSettingsTemplate: {fileID: 9197481963319205126, guid: b0135545624a3454cb075f4597f9ce8e, type: 3}
   _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
   _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
-  _unsavedChangesDialogTemplate: {fileID: 9197481963319205126, guid: 7cdeb4982d46b4f91ab58210a1dbf869, type: 3}
+  _confirmDialogTemplate: {fileID: 9197481963319205126, guid: c4de2ebd607034437822380d34c3ef24, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/ConfirmDialog.uss"/>
+
+    <!-- Pencil: ConfirmDialog — 通用确认对话框（backdrop + 白卡片 + 可选倒计时行） -->
+    <ui:VisualElement name="dlg-root" class="dlg-root" style="display: none;">
+        <ui:VisualElement class="dlg-card">
+            <ui:VisualElement class="dlg-header">
+                <ui:VisualElement class="dlg-title-wrap">
+                    <ui:Label name="dlg-title" text="" class="dlg-title" />
+                    <ui:Label name="dlg-subtitle" text="" class="dlg-subtitle" />
+                </ui:VisualElement>
+                <ui:VisualElement name="dlg-close" class="dlg-close">
+                    <ui:Label text="✕" class="dlg-close-icon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 倒计时行（Controller 根据 countdownSeconds 切换显隐） -->
+            <ui:VisualElement name="dlg-countdown" class="dlg-countdown">
+                <ui:Label name="dlg-countdown-text" text="" class="dlg-countdown-text" />
+            </ui:VisualElement>
+
+            <ui:Label name="dlg-body" text="" class="dlg-body" />
+
+            <ui:VisualElement class="dlg-actions">
+                <ui:Button name="dlg-cancel" text="" class="dlg-btn dlg-btn--secondary" />
+                <ui:Button name="dlg-confirm" text="" class="dlg-btn dlg-btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

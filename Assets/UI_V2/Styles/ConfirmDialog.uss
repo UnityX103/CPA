@@ -1,0 +1,95 @@
+/* 外层 backdrop：absolute 全覆盖 overlay，picking 吃输入 */
+.dlg-root {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* 白色卡片 */
+.dlg-card {
+    width: 420px;
+    padding: 24px;
+    background-color: var(--color-bg-white);
+    border-radius: var(--radius-2xl);
+    border-color: var(--color-border-light);
+    border-width: 1px;
+}
+
+.dlg-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.dlg-title-wrap { flex-direction: column; }
+.dlg-title {
+    color: var(--color-text-dark);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+.dlg-subtitle {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.dlg-close {
+    width: 24px; height: 24px;
+    align-items: center; justify-content: center;
+    border-radius: 999px;
+}
+.dlg-close-icon {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+/* 倒计时行（默认隐藏） */
+.dlg-countdown {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 12px;
+    display: none;
+}
+.dlg-countdown-text {
+    color: var(--color-text-amber);
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.dlg-body {
+    color: rgb(75, 85, 99);
+    font-size: 14px;
+    white-space: normal;
+    margin-bottom: 16px;
+}
+
+.dlg-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.dlg-btn {
+    border-radius: 999px;
+    padding: 7px 12px;
+    min-width: 88px;
+    -unity-font-style: bold;
+    font-size: 13px;
+    margin-left: 12px;
+}
+
+.dlg-btn--secondary {
+    background-color: var(--color-bg-white);
+    border-color: var(--color-border-warm);
+    border-width: 1px;
+    color: var(--color-text-secondary);
+}
+
+.dlg-btn--primary {
+    background-color: var(--color-accent-orange);
+    border-width: 0;
+    color: var(--color-text-white);
+}

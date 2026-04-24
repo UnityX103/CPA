@@ -2,7 +2,8 @@
     "name": "APP.Settings.Tests",
     "rootNamespace": "APP.Settings.Tests",
     "references": [
-        "APP.Runtime"
+        "APP.Runtime",
+        "APP.UI_V2"
     ],
     "includePlatforms": [
         "Editor"

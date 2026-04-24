@@ -23,8 +23,9 @@ namespace APP.Pomodoro.Controller
         [SerializeField] private VisualTreeAsset _onlineSettingsTemplate;
         [SerializeField] private VisualTreeAsset _petSettingsTemplate;
 
-        [Header("未保存更改提示对话框模板")]
-        [SerializeField] private VisualTreeAsset _unsavedChangesDialogTemplate;
+        [Header("通用确认对话框模板（用于未保存更改 + 缩放倒计时）")]
+        [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("_unsavedChangesDialogTemplate")]
+        private VisualTreeAsset _confirmDialogTemplate;
 
         private UIDocument _doc;
         private UnifiedSettingsPanelController _controller;
@@ -64,7 +65,7 @@ namespace APP.Pomodoro.Controller
                 _pomodoroSettingsTemplate,
                 _onlineSettingsTemplate,
                 _petSettingsTemplate,
-                _unsavedChangesDialogTemplate,
+                _confirmDialogTemplate,
                 gameObject);
 
             this.RegisterEvent<E_OpenUnifiedSettings>(_ => OpenPanel())
