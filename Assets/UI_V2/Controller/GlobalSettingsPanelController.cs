@@ -20,6 +20,7 @@ namespace APP.Pomodoro.Controller
         public const float CountdownSeconds = 5f;
 
         private Slider _slider;
+        private VisualElement _progressFill;
         private Label _valueLabel;
         private Button _applyBtn;
         private ConfirmDialogController _scaleDialog;
@@ -37,6 +38,7 @@ namespace APP.Pomodoro.Controller
             var model = this.GetModel<ISettingsModel>();
 
             _slider     = root.Q<Slider>("gsp-scale-slider");
+            _progressFill = root.Q<VisualElement>("gsp-scale-slider-fill");
             _valueLabel = root.Q<Label>("gsp-scale-value");
             _applyBtn   = root.Q<Button>("apply-btn");
 
@@ -78,6 +80,7 @@ namespace APP.Pomodoro.Controller
             _pendingScale = SnapToStep(newValue);
             if (_valueLabel != null) _valueLabel.text = FormatScale(_pendingScale);
             _slider?.SetValueWithoutNotify(_pendingScale);
+            RefreshProgressFill(_pendingScale);
         }
 
         // ─── 内部 ────────────────────────────────────────────────
@@ -86,6 +89,7 @@ namespace APP.Pomodoro.Controller
         {
             _pendingScale    = SnapToStep(evt.newValue);
             if (_valueLabel != null) _valueLabel.text = FormatScale(_pendingScale);
+            RefreshProgressFill(_pendingScale);
         }
 
         private void OnApplyClicked()
@@ -115,6 +119,15 @@ namespace APP.Pomodoro.Controller
             _pendingScale = v;
             _slider?.SetValueWithoutNotify(v);
             if (_valueLabel != null) _valueLabel.text = FormatScale(v);
+            RefreshProgressFill(v);
+        }
+
+        private void RefreshProgressFill(float value)
+        {
+            if (_progressFill == null) return;
+
+            float normalized = Mathf.InverseLerp(SettingsModel.MinScale, SettingsModel.MaxScale, value);
+            _progressFill.style.width = Length.Percent(Mathf.Clamp01(normalized) * 100f);
         }
 
         internal static float  SnapToStep(float v) => Mathf.Round(v * 10f) / 10f;

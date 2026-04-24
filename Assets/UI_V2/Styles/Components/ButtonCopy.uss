@@ -1,0 +1,27 @@
+/*
+ * ButtonCopy.uss
+ * Pencil 组件: Button/Copy (j9CVE)
+ * 药丸形小文本按钮，用于"复制 / 已复制"等短标签动作
+ */
+
+.comp-btn-copy {
+    height: 26px;
+    min-height: 26px;
+    max-height: 26px;
+    border-radius: 13px;
+    border-width: 0;
+    background-color: rgb(240, 224, 208); /* #F0E0D0 */
+    color: rgb(162, 139, 121); /* #A28B79 */
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow: hidden;
+}
+
+.comp-btn-copy:hover {
+    background-color: rgb(232, 214, 196);
+}

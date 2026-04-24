@@ -62,24 +62,8 @@
     justify-content: flex-end;
 }
 
+/* 对话框侧只负责布局：宽度与左侧间距；视觉样式来自 ButtonPrimary/Secondary 共享组件 */
 .dlg-btn {
-    border-radius: 14px;
-    padding: 7px 12px;
-    min-width: 88px;
-    -unity-font-style: bold;
-    font-size: 13px;
+    width: 120px;
     margin-left: 12px;
-}
-
-.dlg-btn--secondary {
-    background-color: var(--color-bg-white);
-    border-color: var(--color-border-warm);
-    border-width: 1px;
-    color: var(--color-text-secondary);
-}
-
-.dlg-btn--primary {
-    background-color: var(--color-accent-orange);
-    border-width: 0;
-    color: var(--color-text-white);
 }

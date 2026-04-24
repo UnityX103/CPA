@@ -3,6 +3,8 @@
          noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
+    <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
     <ui:Style src="../Styles/ConfirmDialog.uss"/>
 
     <!-- Pencil: ConfirmDialog — 通用确认对话框（backdrop + 白卡片 + 可选倒计时行） -->
@@ -23,8 +25,8 @@
             <ui:Label name="dlg-body" text="" class="dlg-body" />
 
             <ui:VisualElement class="dlg-actions">
-                <ui:Button name="dlg-cancel" text="" class="dlg-btn dlg-btn--secondary" />
-                <ui:Button name="dlg-confirm" text="" class="dlg-btn dlg-btn--primary" />
+                <ui:Button name="dlg-cancel" text="" class="dlg-btn comp-btn-secondary" />
+                <ui:Button name="dlg-confirm" text="" class="dlg-btn comp-btn-primary" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

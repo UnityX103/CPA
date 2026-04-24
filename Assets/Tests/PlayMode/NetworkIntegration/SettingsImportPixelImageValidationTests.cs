@@ -57,7 +57,7 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(slider, Is.Not.Null, "必须能加载 gsp-scale-slider。");
             slider.lowValue = 0.5f;
             slider.highValue = 2.0f;
-            slider.SetValueWithoutNotify(1.25f);
+            SetSliderVisualState(container, slider, 1.25f);
 
             yield return WaitUntilReady(target, 60);
             yield return CaptureVisualStep(
@@ -108,7 +108,7 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(slider, Is.Not.Null, "必须能加载 gsp-scale-slider。");
             slider.lowValue = 0.5f;
             slider.highValue = 2.0f;
-            slider.SetValueWithoutNotify(1.5f);
+            SetSliderVisualState(container, slider, 1.5f);
 
             Label valueLabel = target.Q<Label>("gsp-scale-value");
             Assert.That(valueLabel, Is.Not.Null, "必须能加载 gsp-scale-value。");
@@ -141,6 +141,17 @@ namespace APP.NetworkIntegration.Tests
         {
             string path = Path.Combine(CurrentRunDirectory, fileName);
             Assert.That(File.Exists(path), Is.True, $"截图产物不存在：{path}");
+        }
+
+        private static void SetSliderVisualState(VisualElement root, Slider slider, float value)
+        {
+            slider.SetValueWithoutNotify(value);
+
+            VisualElement fill = root.Q<VisualElement>("gsp-scale-slider-fill");
+            Assert.That(fill, Is.Not.Null, "必须能加载 gsp-scale-slider-fill。");
+
+            float normalized = Mathf.InverseLerp(slider.lowValue, slider.highValue, value);
+            fill.style.width = Length.Percent(Mathf.Clamp01(normalized) * 100f);
         }
 
         private static VisualElement CreateRuntimePanelRoot()
