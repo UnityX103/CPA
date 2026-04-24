@@ -4,8 +4,8 @@
     {
       "type": "frame",
       "id": "gs1Tv",
-      "x": 2719,
-      "y": 561,
+      "x": 1741,
+      "y": 337,
       "name": "Pomodoro Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
@@ -221,8 +221,8 @@
     {
       "type": "frame",
       "id": "8Le5R",
-      "x": 2719,
-      "y": 1001,
+      "x": 1741,
+      "y": 777,
       "name": "Online Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
@@ -598,8 +598,8 @@
     {
       "type": "frame",
       "id": "v2ZgA",
-      "x": 2719,
-      "y": 1812,
+      "x": 1741,
+      "y": 1588,
       "name": "Pet Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
@@ -2045,8 +2045,8 @@
       "type": "ref",
       "ref": "8Le5R",
       "name": "onlPanel/not-joined",
-      "x": 3332,
-      "y": 1003,
+      "x": 2354,
+      "y": 779,
       "descendants": {
         "EK2CF": {
           "enabled": false
@@ -2058,8 +2058,8 @@
       "type": "ref",
       "ref": "8Le5R",
       "name": "onlPanel/joined",
-      "x": 3956,
-      "y": 1003,
+      "x": 2978,
+      "y": 779,
       "descendants": {
         "ArRDI": {
           "enabled": false
@@ -2072,8 +2072,8 @@
     {
       "type": "frame",
       "id": "vnYnS",
-      "x": 2719,
-      "y": -321,
+      "x": 1741,
+      "y": -371,
       "name": "Unified Settings Panel",
       "reusable": true,
       "width": 460,
@@ -2264,8 +2264,8 @@
     {
       "type": "frame",
       "id": "bfMCZ",
-      "x": 4608,
-      "y": 561,
+      "x": 3630,
+      "y": 337,
       "name": "ConfirmDialog",
       "reusable": true,
       "width": 420,
@@ -2320,12 +2320,6 @@
                   "fontWeight": "500"
                 }
               ]
-            },
-            {
-              "id": "2NnEA",
-              "type": "ref",
-              "ref": "UAbZg",
-              "name": "dlg-close"
             }
           ]
         },
@@ -2403,8 +2397,8 @@
     {
       "type": "frame",
       "id": "Pdj9C",
-      "x": 4608,
-      "y": 1400,
+      "x": 1741,
+      "y": 1752,
       "name": "Global Settings Panel",
       "reusable": true,
       "width": "fill_container(572)",
@@ -2460,8 +2454,35 @@
                     "thickness": 1,
                     "fill": "#E5E7EB"
                   },
-                  "justifyContent": "center",
-                  "alignItems": "center"
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JLifG",
+                      "x": 2,
+                      "y": 2,
+                      "name": "gsp-scale-slider-fill-half-left",
+                      "width": 235,
+                      "height": 20,
+                      "fill": "#66B8FF",
+                      "cornerRadius": 13
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "D8tzX",
+                      "x": 220,
+                      "y": 2,
+                      "name": "gsp-scale-slider-thumb-half",
+                      "fill": "#FFFFFF",
+                      "width": 20,
+                      "height": 20,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 2,
+                        "fill": "#66B8FF"
+                      }
+                    }
+                  ]
                 },
                 {
                   "type": "text",
@@ -2487,8 +2508,8 @@
       "type": "ref",
       "ref": "bfMCZ",
       "name": "Unsaved Changes Dialog",
-      "x": 3411,
-      "y": 561,
+      "x": 2430,
+      "y": 337,
       "descendants": {
         "D1pHM": {
           "content": "有未保存的更改"

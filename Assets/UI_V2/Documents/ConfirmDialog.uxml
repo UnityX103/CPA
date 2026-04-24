@@ -13,9 +13,6 @@
                     <ui:Label name="dlg-title" text="" class="dlg-title" />
                     <ui:Label name="dlg-subtitle" text="" class="dlg-subtitle" />
                 </ui:VisualElement>
-                <ui:VisualElement name="dlg-close" class="dlg-close">
-                    <ui:Label text="✕" class="dlg-close-icon" />
-                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- 倒计时行（Controller 根据 countdownSeconds 切换显隐） -->

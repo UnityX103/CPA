@@ -37,16 +37,6 @@
     margin-top: 4px;
 }
 
-.dlg-close {
-    width: 24px; height: 24px;
-    align-items: center; justify-content: center;
-    border-radius: 999px;
-}
-.dlg-close-icon {
-    color: var(--color-text-secondary);
-    font-size: 14px;
-}
-
 /* 倒计时行（默认隐藏） */
 .dlg-countdown {
     flex-direction: row;
@@ -73,7 +63,7 @@
 }
 
 .dlg-btn {
-    border-radius: 999px;
+    border-radius: 14px;
     padding: 7px 12px;
     min-width: 88px;
     -unity-font-style: bold;

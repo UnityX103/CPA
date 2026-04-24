@@ -9,7 +9,7 @@
 }
 
 .apply-btn {
-    border-radius: 999px;
+    border-radius: 12px;
     padding: 7px 12px;
     width: 120px;
     background-color: var(--color-accent-orange);
@@ -42,6 +42,22 @@
 .gsp-scale-slider {
     flex-grow: 1;
     margin-right: 12px;
+    height: 24px;
+}
+
+.gsp-scale-slider .unity-base-slider__tracker {
+    height: 8px;
+    background-color: var(--color-border-gray);
+    border-radius: 4px;
+}
+
+.gsp-scale-slider .unity-base-slider__dragger {
+    width: 20px;
+    height: 20px;
+    background-color: var(--color-bg-white);
+    border-color: rgb(102, 184, 255);
+    border-width: 2px;
+    border-radius: 10px;
 }
 
 .gsp-scale-value {

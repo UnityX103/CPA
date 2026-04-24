@@ -16,7 +16,7 @@
             <ui:Label text="界面缩放" class="gsp-scale-label" />
             <ui:VisualElement class="gsp-scale-row">
                 <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0"
-                           value="1.0" class="gsp-scale-slider" />
+                           value="1.25" class="gsp-scale-slider" />
                 <ui:Label name="gsp-scale-value" text="1.0×" class="gsp-scale-value" />
             </ui:VisualElement>
         </ui:VisualElement>
