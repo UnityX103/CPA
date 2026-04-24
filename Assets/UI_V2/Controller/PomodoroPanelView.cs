@@ -2,6 +2,7 @@ using APP.Pomodoro.Command;
 using APP.Pomodoro.Config;
 using APP.Pomodoro.Event;
 using APP.Pomodoro.Model;
+using APP.Pomodoro.System;
 using QFramework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -202,6 +203,10 @@ namespace APP.Pomodoro.Controller
 
             this.GetModel<IGameModel>().IsAppFocused.RegisterWithInitValue(_ => RefreshVisibility())
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            this.GetSystem<IWindowVisibilityCoordinatorSystem>().AnyPinned
+                .RegisterWithInitValue(_ => RefreshVisibility())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         // ─── 事件订阅 ────────────────────────────────────────────
@@ -370,8 +375,11 @@ namespace APP.Pomodoro.Controller
         {
             if (_ppRoot == null || _model == null) return;
             bool focused = this.GetModel<IGameModel>().IsAppFocused.Value;
-            bool visible = focused || _model.IsPinned.Value;
-            _ppRoot.EnableInClassList("pp-hidden", !visible);
+            bool anyPinned = this.GetSystem<IWindowVisibilityCoordinatorSystem>().AnyPinned.Value;
+            bool thisPinned = _model.IsPinned.Value;
+            // S2 隐藏条件：整窗口置顶(AnyPinned) 且失焦 且本 UI 非 pinned
+            bool hidden = !thisPinned && !focused && anyPinned;
+            _ppRoot.EnableInClassList("pp-hidden", hidden);
         }
     }
 }
