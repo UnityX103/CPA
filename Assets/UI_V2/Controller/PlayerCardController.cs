@@ -3,6 +3,7 @@ using APP.Network.Model;
 using APP.Network.System;
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Model;
+using APP.Pomodoro.System;
 using QFramework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -192,6 +193,8 @@ namespace APP.Pomodoro.Controller
             _unRegisters.Add(_card.IsPinned.RegisterWithInitValue(OnPinnedChanged));
             _unRegisters.Add(GameApp.Interface.GetModel<IGameModel>()
                 .IsAppFocused.RegisterWithInitValue(_ => RefreshVisibility()));
+            _unRegisters.Add(GameApp.Interface.GetSystem<IWindowVisibilityCoordinatorSystem>()
+                .AnyPinned.RegisterWithInitValue(_ => RefreshVisibility()));
         }
 
         /// <summary>
@@ -214,8 +217,11 @@ namespace APP.Pomodoro.Controller
         {
             if (_root == null || _card == null) return;
             bool focused = GameApp.Interface.GetModel<IGameModel>().IsAppFocused.Value;
-            bool visible = focused || _card.IsPinned.Value;
-            _root.EnableInClassList("pc-hidden", !visible);
+            bool anyPinned = GameApp.Interface.GetSystem<IWindowVisibilityCoordinatorSystem>().AnyPinned.Value;
+            bool thisPinned = _card.IsPinned.Value;
+            // S2 隐藏条件：整窗口置顶(AnyPinned) 且失焦 且本卡非 pinned
+            bool hidden = !thisPinned && !focused && anyPinned;
+            _root.EnableInClassList("pc-hidden", hidden);
         }
     }
 }
