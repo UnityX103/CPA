@@ -51,7 +51,11 @@ namespace CPA.Monitoring
                 }
 
                 string fileNameNoExt = Path.GetFileNameWithoutExtension(exePath) ?? string.Empty;
-                string appName = fileNameNoExt;
+                string appName = TryGetFileDescription(exePath);
+                if (string.IsNullOrEmpty(appName))
+                {
+                    appName = fileNameNoExt;
+                }
                 string bundleId = fileNameNoExt.ToLowerInvariant();
 
                 return new AppInfo
@@ -122,6 +126,56 @@ namespace CPA.Monitoring
             }
         }
 
+        /// <summary>
+        /// 尝试从 exe 的版本资源读取 FileDescription。失败返回 null。
+        /// 流程:GetFileVersionInfoSizeW → GetFileVersionInfoW → VerQueryValueW(\VarFileInfo\Translation) → VerQueryValueW(\StringFileInfo\{lang}\FileDescription)
+        /// </summary>
+        private static string TryGetFileDescription(string exePath)
+        {
+            if (string.IsNullOrEmpty(exePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                int size = GetFileVersionInfoSizeW(exePath, out _);
+                if (size <= 0)
+                {
+                    return null;
+                }
+
+                byte[] data = new byte[size];
+                if (!GetFileVersionInfoW(exePath, 0, size, data))
+                {
+                    return null;
+                }
+
+                if (!VerQueryValueW(data, @"\VarFileInfo\Translation", out IntPtr translationPtr, out uint translationLen) ||
+                    translationPtr == IntPtr.Zero || translationLen < 4)
+                {
+                    return null;
+                }
+
+                ushort langId = (ushort)Marshal.ReadInt16(translationPtr);
+                ushort codePage = (ushort)Marshal.ReadInt16(translationPtr, 2);
+                string subBlock = $@"\StringFileInfo\{langId:X4}{codePage:X4}\FileDescription";
+
+                if (!VerQueryValueW(data, subBlock, out IntPtr descPtr, out uint descLen) ||
+                    descPtr == IntPtr.Zero || descLen == 0)
+                {
+                    return null;
+                }
+
+                string description = Marshal.PtrToStringUni(descPtr);
+                return string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         // ──────────────────────────────────────────────
         // P/Invoke
         // ──────────────────────────────────────────────
@@ -146,6 +200,15 @@ namespace CPA.Monitoring
 
         [DllImport("kernel32.dll")]
         private static extern bool CloseHandle(IntPtr h);
+
+        [DllImport("version.dll", CharSet = CharSet.Unicode, EntryPoint = "GetFileVersionInfoSizeW")]
+        private static extern int GetFileVersionInfoSizeW(string path, out int handleIgnored);
+
+        [DllImport("version.dll", CharSet = CharSet.Unicode, EntryPoint = "GetFileVersionInfoW")]
+        private static extern bool GetFileVersionInfoW(string path, int handleIgnored, int len, byte[] data);
+
+        [DllImport("version.dll", CharSet = CharSet.Unicode, EntryPoint = "VerQueryValueW")]
+        private static extern bool VerQueryValueW(byte[] data, string subBlock, out IntPtr buf, out uint len);
     }
 }
 #endif
