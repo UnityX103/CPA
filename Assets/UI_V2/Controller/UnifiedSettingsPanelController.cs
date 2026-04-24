@@ -24,6 +24,7 @@ namespace APP.Pomodoro.Controller
         private VisualElement _closeBtn;
         private VisualElement _unsavedDialogHost;
         private VisualElement _scaleDialogHost;
+        private VisualElement _onlineErrorDialogHost;
 
         // ─── 状态 ────────────────────────────────────────────────
         private string _activeTab = "pomodoro";
@@ -90,6 +91,7 @@ namespace APP.Pomodoro.Controller
             _closeBtn = root.Q("settings-close");
             _unsavedDialogHost = root.Q("unsaved-dialog-host");
             _scaleDialogHost = root.Q("scale-dialog-host");
+            _onlineErrorDialogHost = root.Q("online-error-dialog-host");
 
             // 初始化未保存提示对话框（复用 ConfirmDialog.uxml 模板）
             _unsavedDialog = new UnsavedChangesDialogController();
@@ -279,7 +281,12 @@ namespace APP.Pomodoro.Controller
                     {
                         _onlineRoot = CloneTemplate(_onlineTemplate);
                         _onlineSettings = new OnlineSettingsPanelController();
-                        _onlineSettings.Init(_onlineRoot, _roomModel, _lifecycleOwner);
+                        _onlineSettings.Init(
+                            _onlineRoot,
+                            _roomModel,
+                            _onlineErrorDialogHost,
+                            _confirmDialogTemplate,
+                            _lifecycleOwner);
                     }
 
                     return _onlineRoot;

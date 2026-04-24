@@ -46,4 +46,9 @@
         <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
         <ui:VisualElement name="scale-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
     </ui:VisualElement>
+
+    <!-- 联机异常弹窗宿主：挂在 UIDocument 根级，不受 settings-overlay 460×394 尺寸限制。
+         position:absolute 铺满整个 usp-root-anchor（=整屏），ConfirmDialog 内部 .dlg-root
+         会继续做 flex 居中，从而把弹窗定位在整个画板中心而不是设置面板中心。 -->
+    <ui:VisualElement name="online-error-dialog-host" class="usp-screen-dialog-host" picking-mode="Ignore" />
 </ui:UXML>

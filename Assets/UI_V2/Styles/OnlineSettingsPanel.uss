@@ -205,21 +205,42 @@
     display: none;
 }
 
-/* ── 错误提示 ────────────────────────────────────────────── */
+/* ── Busy 蒙层 ──────────────────────────────────────────────
+ * 加入/退出/创建房间过程中覆盖整个面板，阻断交互。
+ * 默认由 .osp-hidden (display:none) 隐藏；C# 移除 osp-hidden 即显示。
+ * absolute 相对 osp-root border-box 起点，不受 flex 流影响。
+ * 外层 overlay 吸收点击，内层 card 把 busy 文字托在一个药丸背景里，保证在半透明
+ * 蒙层与任意底层内容上都清晰可见。 */
 
-.osp-error {
-    margin-top: 4px;
-    padding: 6px 10px;
-    font-size: 12px;
-    color: rgb(209, 95, 61); /* #D15F3D */
-    background-color: rgb(255, 241, 238); /* #FFF1EE */
-    border-radius: 8px;
-    white-space: normal;
-    display: none;
+.osp-busy-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    flex-direction: column;
+    /* 不走 justify-content:center——osp-root 长度随 osp-hist-card 动态变化，
+       居中会把 busy card 推到视口外；改为从顶部 60px 处锚定。 */
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 60px;
 }
 
-.osp-error.is-visible {
-    display: flex;
+.osp-busy-card {
+    padding: 14px 24px;
+    border-radius: 14px;
+    background-color: rgb(26, 26, 26); /* #1A1A1A */
+    align-items: center;
+    justify-content: center;
+}
+
+.osp-busy-text {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
 }
 
 .osp-room-name-row {

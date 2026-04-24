@@ -15,6 +15,8 @@ namespace APP.Pomodoro.Controller
     /// 三个卡片根据房间状态互斥显示：
     ///   - osp-join-card + osp-hist-card：未加入房间时
     ///   - osp-room-card：已加入房间时
+    /// 加入/退出/创建房间过程中通过 osp-busy-overlay 蒙层阻断面板交互，
+    /// 异常通过 ConfirmDialog 弹窗呈现（不再使用底部 Label）。
     /// </summary>
     public sealed class OnlineSettingsPanelController : IController
     {
@@ -25,16 +27,18 @@ namespace APP.Pomodoro.Controller
         private IRoomModel _roomModel;
         private ISessionMemoryModel _sessionMemory;
         private Toggle _autoToggle;
-        private Button _createBtn;
         private Button _copyBtn;
         private Label _reconnectBanner;
 
-        // 用户点加入（或从历史快捷加入）后的 pending 态：若服务端回 ROOM_NOT_FOUND，
-        // 自动回退为 create_room（用用户当时输入的房间号作为 key）。
+        // 用户点了加入（或从历史快捷加入）后的 pending 态：若服务端回 ROOM_NOT_FOUND，
+        // 自动回退为 create_room（用用户当时输入的房间号作为 key），保持 busy 态不退出。
         // 自动重连（Cmd_AutoReconnectOnStartup）不走这个分支。
         private bool _userJoinAutoCreateOnMissing;
         private string _userJoinFallbackName;
         private string _userJoinFallbackRoomCode;
+
+        // busy 态：加入/退出/创建三种场景会设置
+        private bool _isBusy;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
         private VisualElement _joinCard;
@@ -42,18 +46,28 @@ namespace APP.Pomodoro.Controller
         private VisualElement _histCard;
         private VisualElement _histList;
         private VisualElement _memberList;
+        private VisualElement _busyOverlay;
+        private Label _busyText;
         private Label _roomName;
         private Label _roomStatus;
-        private Label _ospError;
         private TextField _usernameField;
         private TextField _roomIdField;
+
+        // 异常提示弹窗（复用 ConfirmDialog.uxml）
+        private readonly ConfirmDialogController _errorDialog = new ConfirmDialogController();
+        private bool _errorDialogReady;
 
         // ─── 初始化 ──────────────────────────────────────────────
 
         /// <summary>
         /// 初始化面板。容器内已由 UnifiedSettingsPanelController 克隆好 UXML。
         /// </summary>
-        public void Init(VisualElement container, IRoomModel roomModel, GameObject lifecycleOwner)
+        public void Init(
+            VisualElement container,
+            IRoomModel roomModel,
+            VisualElement errorDialogHost,
+            VisualTreeAsset confirmDialogTemplate,
+            GameObject lifecycleOwner)
         {
             _roomModel = roomModel;
             _sessionMemory = GameApp.Interface.GetModel<ISessionMemoryModel>();
@@ -64,20 +78,19 @@ namespace APP.Pomodoro.Controller
             _histCard      = container.Q<VisualElement>("osp-hist-card");
             _histList      = container.Q<VisualElement>("osp-hist-list");
             _memberList    = container.Q<VisualElement>("osp-member-list");
+            _busyOverlay   = container.Q<VisualElement>("osp-busy-overlay");
+            _busyText      = container.Q<Label>("osp-busy-text");
             _roomName      = container.Q<Label>("osp-room-name");
             _roomStatus    = container.Q<Label>("osp-room-status");
-            _ospError      = container.Q<Label>("osp-error");
             _usernameField = container.Q<TextField>("osp-username");
             _roomIdField   = container.Q<TextField>("osp-room-id");
             _autoToggle      = container.Q<Toggle>("osp-auto-toggle");
-            _createBtn       = container.Q<Button>("osp-create-btn");
             _copyBtn         = container.Q<Button>("osp-copy-btn");
             _reconnectBanner = container.Q<Label>("osp-reconnect-banner");
 
-            // 按钮事件
+            // 按钮事件（房间不存在时服务端走 ROOM_NOT_FOUND → 自动 create_room，不再有独立创建按钮）
             container.Q<Button>("osp-join-btn")?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
             container.Q<Button>("osp-exit-btn")?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
-            _createBtn?.RegisterCallback<PointerUpEvent>(_ => OnCreateClicked());
             _copyBtn?.RegisterCallback<PointerUpEvent>(_ => OnCopyClicked());
 
             if (_autoToggle != null)
@@ -86,11 +99,22 @@ namespace APP.Pomodoro.Controller
                 _autoToggle.RegisterValueChangedCallback(e => _sessionMemory.SetAutoReconnectEnabled(e.newValue));
             }
 
+            // 异常弹窗：挂到外部宿主（settings-overlay 下 online-error-dialog-host）
+            if (errorDialogHost != null && confirmDialogTemplate != null)
+            {
+                _errorDialog.Init(errorDialogHost, confirmDialogTemplate);
+                _errorDialogReady = true;
+            }
+
             // Model/Event 订阅
             if (_roomModel != null)
             {
-                _roomModel.IsInRoom.Register(_ => RefreshCardState())
-                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                _roomModel.IsInRoom.Register(_ =>
+                {
+                    // 房间态翻转（加入成功或退出成功）都解除 busy
+                    ExitBusy();
+                    RefreshCardState();
+                }).UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
 
             this.RegisterEvent<E_NetworkError>(OnNetworkError)
@@ -220,27 +244,48 @@ namespace APP.Pomodoro.Controller
             _memberList.Add(item);
         }
 
+        // ─── Busy 蒙层 ──────────────────────────────────────────
+
+        private void EnterBusy(string actionText)
+        {
+            _isBusy = true;
+            if (_busyText != null) _busyText.text = actionText ?? "处理中…";
+            _busyOverlay?.RemoveFromClassList("osp-hidden");
+        }
+
+        private void ExitBusy()
+        {
+            if (!_isBusy) return;
+            _isBusy = false;
+            _busyOverlay?.AddToClassList("osp-hidden");
+        }
+
         // ─── 按钮回调 ────────────────────────────────────────────
 
         private void OnJoinClicked()
         {
+            if (_isBusy) return;
+
             string username = _usernameField?.value ?? string.Empty;
             string roomId   = _roomIdField?.value ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roomId))
             {
-                ShowError("请输入用户名和房间号");
+                ShowErrorDialog("输入不完整", "请输入用户名和房间号");
                 return;
             }
 
             _userJoinAutoCreateOnMissing = true;
             _userJoinFallbackName = username;
             _userJoinFallbackRoomCode = roomId;
+            EnterBusy("正在加入房间…");
             this.SendCommand(new Cmd_JoinRoom(roomId, username));
         }
 
         private void OnExitClicked()
         {
+            if (_isBusy) return;
+            EnterBusy("正在退出房间…");
             this.SendCommand(new Cmd_LeaveRoom());
         }
 
@@ -248,7 +293,8 @@ namespace APP.Pomodoro.Controller
 
         private void OnNetworkError(E_NetworkError e)
         {
-            // 用户点了加入，但服务端说房间不存在 —— 用输入的房间号作为 key 创建新房间
+            // 用户点了加入，但服务端说房间不存在 —— 用输入的房间号作为 key 创建新房间。
+            // 保持 busy 态，text 切换为"正在创建房间…"。
             if (_userJoinAutoCreateOnMissing
                 && !string.IsNullOrEmpty(e.Code)
                 && e.Code == "ROOM_NOT_FOUND"
@@ -260,9 +306,9 @@ namespace APP.Pomodoro.Controller
                 _userJoinFallbackName = null;
                 _userJoinFallbackRoomCode = null;
 
-                ShowError(string.IsNullOrWhiteSpace(desiredCode)
-                    ? "房间不存在，已为你创建新房间"
-                    : $"房间 {desiredCode} 不存在，已为你创建");
+                EnterBusy(string.IsNullOrWhiteSpace(desiredCode)
+                    ? "房间不存在，正在为你创建…"
+                    : $"房间 {desiredCode} 不存在，正在创建…");
                 this.SendCommand(new Cmd_CreateRoom(name, null, desiredCode));
                 return;
             }
@@ -271,31 +317,27 @@ namespace APP.Pomodoro.Controller
             _userJoinFallbackName = null;
             _userJoinFallbackRoomCode = null;
 
+            ExitBusy();
             string message = string.IsNullOrEmpty(e.Message) ? e.Code : e.Message;
-            ShowError(message);
+            ShowErrorDialog("联机操作失败", message);
         }
 
-        private void ShowError(string message)
+        private void ShowErrorDialog(string title, string message)
         {
-            if (_ospError == null)
+            if (!_errorDialogReady)
             {
+                Debug.LogWarning($"[OnlineSettingsPanel] Error dialog not ready, fallback log: {title} — {message}");
                 return;
             }
 
-            _ospError.text = message ?? string.Empty;
-            _ospError.EnableInClassList("is-visible", !string.IsNullOrEmpty(message));
-        }
-
-        private void OnCreateClicked()
-        {
-            string username = _usernameField?.value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(username))
-            {
-                ShowError("请输入用户名");
-                return;
-            }
-
-            this.SendCommand(new Cmd_CreateRoom(username));
+            _errorDialog.Show(
+                title: title,
+                subtitle: string.Empty,
+                body: message ?? string.Empty,
+                confirmText: "好的",
+                cancelText: "关闭",
+                onConfirm: null,
+                onCancel: null);
         }
 
         private void OnCopyClicked()
@@ -312,25 +354,37 @@ namespace APP.Pomodoro.Controller
 
         private void OnConnectionStateChanged(E_ConnectionStateChanged e)
         {
-            if (_reconnectBanner == null) return;
-
-            switch (e.Status)
+            if (_reconnectBanner != null)
             {
-                case ConnectionStatus.Reconnecting:
-                    _reconnectBanner.text = "正在重新连接...";
-                    _reconnectBanner.RemoveFromClassList("osp-reconnect-banner--error");
-                    _reconnectBanner.RemoveFromClassList("osp-hidden");
-                    break;
-                case ConnectionStatus.Error:
-                    _reconnectBanner.text = "重连失败，请重试";
-                    _reconnectBanner.AddToClassList("osp-reconnect-banner--error");
-                    _reconnectBanner.RemoveFromClassList("osp-hidden");
-                    break;
-                case ConnectionStatus.Connected:
-                case ConnectionStatus.InRoom:
-                case ConnectionStatus.Disconnected:
-                    _reconnectBanner.AddToClassList("osp-hidden");
-                    break;
+                switch (e.Status)
+                {
+                    case ConnectionStatus.Reconnecting:
+                        _reconnectBanner.text = "正在重新连接...";
+                        _reconnectBanner.RemoveFromClassList("osp-reconnect-banner--error");
+                        _reconnectBanner.RemoveFromClassList("osp-hidden");
+                        break;
+                    case ConnectionStatus.Error:
+                        _reconnectBanner.text = "重连失败，请重试";
+                        _reconnectBanner.AddToClassList("osp-reconnect-banner--error");
+                        _reconnectBanner.RemoveFromClassList("osp-hidden");
+                        break;
+                    case ConnectionStatus.Connected:
+                    case ConnectionStatus.InRoom:
+                    case ConnectionStatus.Disconnected:
+                        _reconnectBanner.AddToClassList("osp-hidden");
+                        break;
+                }
+            }
+
+            // 连接进入 Error 终态时，如果面板正在等待加入/退出/创建结果，
+            // 视为操作失败：解除 busy + 弹窗。
+            if (e.Status == ConnectionStatus.Error && _isBusy)
+            {
+                _userJoinAutoCreateOnMissing = false;
+                _userJoinFallbackName = null;
+                _userJoinFallbackRoomCode = null;
+                ExitBusy();
+                ShowErrorDialog("网络异常", "连接已断开，请稍后重试");
             }
         }
 
@@ -387,15 +441,18 @@ namespace APP.Pomodoro.Controller
 
         private void OnHistoryJoinClicked(string roomCode)
         {
+            if (_isBusy) return;
+
             string username = _usernameField?.value ?? string.Empty;
             if (string.IsNullOrWhiteSpace(username))
             {
-                ShowError("请输入用户名");
+                ShowErrorDialog("输入不完整", "请输入用户名");
                 return;
             }
             _userJoinAutoCreateOnMissing = true;
             _userJoinFallbackName = username;
             _userJoinFallbackRoomCode = roomCode;
+            EnterBusy("正在加入房间…");
             this.SendCommand(new Cmd_JoinRoom(roomCode, username));
         }
 

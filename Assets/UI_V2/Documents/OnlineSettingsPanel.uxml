@@ -5,6 +5,7 @@
     <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
     <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
     <ui:Style src="../Styles/Components/ButtonIcon.uss"/>
+    <ui:Style src="../Styles/Components/ButtonCopy.uss"/>
     <ui:Style src="../Styles/Components/InputText.uss"/>
 
     <!--
@@ -35,9 +36,8 @@
                 <ui:Label text="房间号" class="osp-field-label" />
                 <ui:TextField name="osp-room-id" value="ROOM-001" class="comp-input-text" />
             </ui:VisualElement>
-            <!-- 加入按钮 -->
+            <!-- 加入按钮：房间不存在时服务端会自动走 create_room，所以不需要独立的创建按钮 -->
             <ui:Button name="osp-join-btn" text="加入房间" class="comp-btn-primary" />
-            <ui:Button name="osp-create-btn" text="创建新房间" class="comp-btn-secondary" />
         </ui:VisualElement>
 
         <!-- ══ 当前房间卡片（已加入时显示）══ -->
@@ -48,7 +48,7 @@
                 <ui:VisualElement class="osp-room-info">
                     <ui:VisualElement class="osp-room-name-row">
                         <ui:Label name="osp-room-name" text="ROOM-001" class="osp-room-name" />
-                        <ui:Button name="osp-copy-btn" text="复制" class="comp-btn-icon" />
+                        <ui:Button name="osp-copy-btn" text="复制" class="comp-btn-copy" />
                     </ui:VisualElement>
                     <ui:Label name="osp-room-status" text="已连接 · 3 位成员" class="osp-room-status" />
                 </ui:VisualElement>
@@ -67,8 +67,13 @@
             <ui:VisualElement name="osp-hist-list" class="osp-hist-list" />
         </ui:VisualElement>
 
-        <!-- 错误提示 -->
-        <ui:Label name="osp-error" text="" class="osp-error" />
+        <!-- Busy 蒙层：加入/退出/创建房间过程中阻断面板交互；默认隐藏（display:none）
+             外层 overlay 吸收点击；内层 card 是带背景的药丸，保证文字在半透明蒙层上清晰可见。 -->
+        <ui:VisualElement name="osp-busy-overlay" class="osp-busy-overlay osp-hidden">
+            <ui:VisualElement class="osp-busy-card">
+                <ui:Label name="osp-busy-text" text="处理中…" class="osp-busy-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>

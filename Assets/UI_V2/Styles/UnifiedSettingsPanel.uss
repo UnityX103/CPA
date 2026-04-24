@@ -66,7 +66,7 @@
 
 .settings-sidebar {
     width: 71px;
-    background-color: rgb(243, 237, 231);
+    background-color: rgb(246, 247, 248);
     padding-top: 8px;
     padding-bottom: 8px;
     flex-direction: column;
@@ -87,8 +87,8 @@
 .sidebar-tab--active {
     background-color: rgb(255, 255, 255);
     border-top-left-radius: 0;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
 }
 
@@ -121,4 +121,16 @@
     right: 0;
     bottom: 0;
     border-radius: 20px;
+}
+
+/* ── 整屏弹窗宿主（挂在 UIDocument 根级，铺满整个画板）───
+   用于联机异常等需要在整个画板中心而非设置面板中心弹出的对话框。 */
+.usp-screen-dialog-host {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
 }

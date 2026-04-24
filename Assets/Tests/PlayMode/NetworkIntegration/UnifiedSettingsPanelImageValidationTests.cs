@@ -211,7 +211,9 @@ namespace APP.NetworkIntegration.Tests
 
         private static void InvokePrivate(object target, string methodName, string argument)
         {
-            MethodInfo method = target.GetType().GetMethod(methodName, InstancePrivate);
+            MethodInfo method = target.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.That(method, Is.Not.Null, $"方法不存在：{methodName}");
             method.Invoke(target, new object[] { argument });
         }
