@@ -196,6 +196,7 @@ namespace CPA.Monitoring
         [StructLayout(LayoutKind.Sequential)]
         private struct ICONINFO
         {
+            [MarshalAs(UnmanagedType.Bool)]
             public bool fIcon;
             public int xHotspot;
             public int yHotspot;
