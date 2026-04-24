@@ -3,6 +3,7 @@ using APP.Network.System;
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Config;
 using APP.Pomodoro.Model;
+using APP.Pomodoro.System;
 using Kirurobo;
 using QFramework;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace APP.Pomodoro.Controller
     [RequireComponent(typeof(UIDocument))]
     public sealed class DeskWindowController : MonoBehaviour, IController
     {
+        private const int LightweightQualityLevel = 1;
+        private const int TargetFrameRate = 15;
         private const string PlayerCardTemplatePath = "Assets/UI_V2/Documents/PlayerCard.uxml";
 
         // ─── Inspector 引用 ──────────────────────────────────────
@@ -35,6 +38,9 @@ namespace APP.Pomodoro.Controller
         // ─── 私有字段 ────────────────────────────────────────────
         private UIDocument     _uiDocument;
         private IPomodoroModel _model;
+        private IPomodoroTimerSystem _pomodoroTimerSystem;
+        private IActiveAppSystem _activeAppSystem;
+        private IStateSyncSystem _stateSyncSystem;
         private PlayerCardManager _playerCardManager;
 
         // 主容器元素
@@ -47,6 +53,8 @@ namespace APP.Pomodoro.Controller
 
         private void Awake()
         {
+            ConfigureRuntimePerformance();
+
             _uiDocument = GetComponent<UIDocument>();
 
             if (_uwc == null)
@@ -65,6 +73,9 @@ namespace APP.Pomodoro.Controller
 
             // 3. 缓存 Model
             _model = this.GetModel<IPomodoroModel>();
+            _pomodoroTimerSystem = this.GetSystem<IPomodoroTimerSystem>();
+            _activeAppSystem = this.GetSystem<IActiveAppSystem>();
+            _stateSyncSystem = this.GetSystem<IStateSyncSystem>();
 
             // 4. 注册持久化回调
             RegisterPersistenceCallbacks();
@@ -87,9 +98,21 @@ namespace APP.Pomodoro.Controller
 
         private void Update()
         {
-            this.SendCommand(new Cmd_PomodoroTick(Time.deltaTime));
-            this.GetSystem<IActiveAppSystem>().Tick(Time.unscaledDeltaTime);
-            this.GetSystem<IStateSyncSystem>().Tick(Time.unscaledDeltaTime);
+            _pomodoroTimerSystem?.Tick(Time.deltaTime);
+            _activeAppSystem?.Tick(Time.unscaledDeltaTime);
+            _stateSyncSystem?.Tick(Time.unscaledDeltaTime);
+        }
+
+        private static void ConfigureRuntimePerformance()
+        {
+            QualitySettings.vSyncCount = 0;
+
+            if (QualitySettings.GetQualityLevel() > LightweightQualityLevel)
+            {
+                QualitySettings.SetQualityLevel(LightweightQualityLevel, true);
+            }
+
+            Application.targetFrameRate = TargetFrameRate;
         }
 
         private void OnApplicationFocus(bool hasFocus)

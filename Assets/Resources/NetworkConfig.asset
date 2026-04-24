@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e4380a6f08bb4e51a06fddcb9c6fc89, type: 3}
   m_Name: NetworkConfig
   m_EditorClassIdentifier: 
-  CurrentEnvironment: 0
+  CurrentEnvironment: 1
   DevelopmentServerUrl: ws://localhost:8039
   ProductionServerUrl: ws://113.46.152.120:8039

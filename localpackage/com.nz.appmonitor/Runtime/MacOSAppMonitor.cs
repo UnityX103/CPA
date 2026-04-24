@@ -76,7 +76,6 @@ namespace CPA.Monitoring
 
         public AppInfo GetCurrentApp()
         {
-            Debug.Log("[MacOSAppMonitorImpl] GetCurrentApp: 开始调用原生插件");
             var appNameBuilder = new StringBuilder(MaxAppNameLength);
             var windowTitleBuilder = new StringBuilder(MaxWindowTitleLength);
             var bundleIdBuilder = new StringBuilder(MaxBundleIdLength);
@@ -93,13 +92,11 @@ namespace CPA.Monitoring
                     MaxBundleIdLength,
                     out IntPtr iconDataTemp,
                     out int iconLenTemp);
-                Debug.Log($"[MacOSAppMonitorImpl] GetFrontmostAppInfo 返回码: {result} ({(AppMonitorResultCode)result})");
 
                 AppMonitorResultCode resultCode = (AppMonitorResultCode)result;
 
                 if (resultCode == AppMonitorResultCode.AccessibilityDenied)
                 {
-                    Debug.LogWarning("[MacOSAppMonitorImpl] Accessibility 权限被拒绝，使用 Fallback");
                     return CreateFallbackAppInfo(
                         "无法获取应用信息：请在系统偏好设置 > 安全性与隐私 > 辅助功能中授予本应用权限。");
                 }
@@ -118,7 +115,6 @@ namespace CPA.Monitoring
                 string appName = appNameBuilder.ToString();
                 string windowTitle = windowTitleBuilder.ToString();
                 string bundleId = bundleIdBuilder.ToString();
-                Debug.Log($"[MacOSAppMonitorImpl] 获取成功: AppName='{appName}', BundleId='{bundleId}', WindowTitle='{windowTitle}', iconLen={iconLenTemp}");
 
                 var appInfo = new AppInfo
                 {
@@ -135,16 +131,11 @@ namespace CPA.Monitoring
                         byte[] pngBytes = new byte[iconLenTemp];
                         Marshal.Copy(iconDataTemp, pngBytes, 0, iconLenTemp);
                         appInfo.Icon = PngBytesToTexture2D(pngBytes);
-                        Debug.Log($"[MacOSAppMonitorImpl] 图标解析: {(appInfo.Icon != null ? "成功" : "失败")}，原始字节数={iconLenTemp}");
                     }
                     finally
                     {
                         FreeIconData(iconDataTemp);
                     }
-                }
-                else
-                {
-                    Debug.Log("[MacOSAppMonitorImpl] 无图标数据");
                 }
 
                 return appInfo;
@@ -162,9 +153,7 @@ namespace CPA.Monitoring
 
         public Texture2D GetAppIcon()
         {
-            Debug.Log("[MacOSAppMonitorImpl] GetAppIcon 调用");
             AppInfo appInfo = GetCurrentApp();
-            Debug.Log($"[MacOSAppMonitorImpl] GetAppIcon 结果: {(appInfo?.Icon != null ? "有图标" : "无图标")}");
             return appInfo?.Icon;
         }
 

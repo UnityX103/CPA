@@ -7,6 +7,8 @@ namespace APP.Network.System
 {
     public sealed class ActiveAppSystem : AbstractSystem, IActiveAppSystem
     {
+        private const float SampleIntervalSeconds = 3f;
+
         private readonly IAppMonitor _monitor;
         private readonly Func<byte[]> _captureIconPng;
         private float _sampleAccumulator;
@@ -27,32 +29,69 @@ namespace APP.Network.System
         public void Tick(float deltaTime)
         {
             _sampleAccumulator += deltaTime;
-            if (_sampleAccumulator < 1f) return;
+            if (_sampleAccumulator < SampleIntervalSeconds)
+            {
+                return;
+            }
+
             _sampleAccumulator = 0f;
 
             IAppMonitor monitor = _monitor ?? ResolveDefaultMonitor();
             AppInfo info = monitor?.GetCurrentApp();
-            if (info == null || !info.IsSuccess || string.IsNullOrEmpty(info.BundleId))
+
+            try
             {
-                if (!string.IsNullOrEmpty(_current.BundleId))
+                if (info == null || !info.IsSuccess || string.IsNullOrEmpty(info.BundleId))
                 {
-                    _current = ActiveAppSnapshot.Empty;
-                    Changed?.Invoke(_current);
+                    if (!string.IsNullOrEmpty(_current.BundleId))
+                    {
+                        _current = ActiveAppSnapshot.Empty;
+                        Changed?.Invoke(_current);
+                    }
+
+                    return;
                 }
-                return;
+
+                if (info.BundleId == _current.BundleId)
+                {
+                    return;
+                }
+
+                byte[] png = CaptureIconPng(info);
+                _current = new ActiveAppSnapshot(info.AppName, info.BundleId, png);
+                Changed?.Invoke(_current);
             }
-
-            if (info.BundleId == _current.BundleId) return;
-
-            byte[] png = CaptureIconPng(info);
-            _current = new ActiveAppSnapshot(info.AppName, info.BundleId, png);
-            Changed?.Invoke(_current);
+            finally
+            {
+                ReleaseTransientIcon(info?.Icon);
+            }
         }
 
         private byte[] CaptureIconPng(AppInfo info)
         {
-            if (_captureIconPng != null) return _captureIconPng();
+            if (_captureIconPng != null)
+            {
+                return _captureIconPng();
+            }
+
             return info?.Icon != null ? info.Icon.EncodeToPNG() : null;
+        }
+
+        private static void ReleaseTransientIcon(Texture2D icon)
+        {
+            if (icon == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                UnityEngine.Object.Destroy(icon);
+            }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(icon);
+            }
         }
 
         private static IAppMonitor ResolveDefaultMonitor()

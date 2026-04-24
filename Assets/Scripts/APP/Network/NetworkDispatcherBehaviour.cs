@@ -11,16 +11,23 @@ namespace APP.Network
     [DefaultExecutionOrder(-1000)]
     public sealed class NetworkDispatcherBehaviour : MonoBehaviour, IController
     {
+        private INetworkSystem _networkSystem;
+
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
+
+        private void Awake()
+        {
+            _networkSystem = this.GetSystem<INetworkSystem>();
+        }
 
         private void Update()
         {
-            this.GetSystem<INetworkSystem>().DrainMainThreadQueue();
+            _networkSystem?.DrainMainThreadQueue();
         }
 
         private void OnDestroy()
         {
-            this.GetSystem<INetworkSystem>().Disconnect();
+            _networkSystem?.Disconnect();
         }
     }
 }

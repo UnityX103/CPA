@@ -1,9 +1,11 @@
 <linker>
-  <!-- QFramework 核心（反射注册 Model/System/Utility） -->
-  <assembly fullname="Assembly-CSharp">
-    <type fullname="QFramework.*" preserve="all" />
-    <type fullname="APP.Pomodoro.GameApp" preserve="all" />
-    <type fullname="APP.Pomodoro.Model.*" preserve="all" />
-    <type fullname="APP.Pomodoro.System.*" preserve="all" />
-  </assembly>
+  <!-- QFramework 在 APP.Runtime 程序集里（Assets/Scripts/APP.Runtime.asmdef） -->
+  <!-- APP.Pomodoro.* / APP.Network.* 等命名空间均编译进 APP.Runtime -->
+  <assembly fullname="APP.Runtime" preserve="all" />
+
+  <!-- DeskWindowController / PomodoroPanelView 等 UI 控制器在 APP.UI_V2 -->
+  <assembly fullname="APP.UI_V2" preserve="all" />
+
+  <!-- AppMonitor 原生桥接层，避免剥离导致 DllImport 解析失败 -->
+  <assembly fullname="NZ.AppMonitor.Runtime" preserve="all" />
 </linker>

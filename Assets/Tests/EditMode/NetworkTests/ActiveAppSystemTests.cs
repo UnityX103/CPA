@@ -48,8 +48,8 @@ namespace APP.Network.Tests
             int changedCount = 0;
             sys.Changed += _ => changedCount++;
 
-            sys.Tick(0.5f);
-            sys.Tick(0.6f);
+            sys.Tick(1.5f);
+            sys.Tick(1.6f);
 
             Assert.That(changedCount, Is.EqualTo(1));
             Assert.That(sys.Current.BundleId, Is.EqualTo("com.apple.Safari"));
@@ -68,8 +68,8 @@ namespace APP.Network.Tests
             int changedCount = 0;
             sys.Changed += _ => changedCount++;
 
-            sys.Tick(1.1f);
-            sys.Tick(1.1f);
+            sys.Tick(3.1f);
+            sys.Tick(3.1f);
 
             Assert.That(changedCount, Is.EqualTo(1));
         }
@@ -83,7 +83,7 @@ namespace APP.Network.Tests
             };
             var sys = new ActiveAppSystem(fake, () => null);
 
-            sys.Tick(1.1f);
+            sys.Tick(3.1f);
 
             Assert.That(sys.Current.BundleId, Is.Empty);
         }
@@ -100,6 +100,27 @@ namespace APP.Network.Tests
             sys.Tick(0.4f);
 
             Assert.That(getCalls, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Tick_ReleasesTransientIconTexture()
+        {
+            var icon = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var fake = new FakeAppMonitor
+            {
+                NextAppInfo = new AppInfo
+                {
+                    AppName = "Safari",
+                    BundleId = "com.apple.Safari",
+                    Icon = icon,
+                    IsSuccess = true,
+                }
+            };
+            var sys = new ActiveAppSystem(fake);
+
+            sys.Tick(3.1f);
+
+            Assert.That(icon == null, Is.True);
         }
     }
 }

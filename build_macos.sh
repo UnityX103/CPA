@@ -7,7 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${SCRIPT_DIR}"
 UNITY_PATH="/Applications/Unity6/Unity/Unity.app/Contents/MacOS/Unity"
-BUILD_OUTPUT="${PROJECT_ROOT}/Builds/macOS/AppMonitor.app"
+BUILD_OUTPUT="${PROJECT_ROOT}/Builds/macOS/CTClock.app"
 LOG_FILE="${PROJECT_ROOT}/build.log"
 
 echo "========================================="
@@ -37,7 +37,7 @@ echo "开始构建..."
     -batchmode \
     -nographics \
     -projectPath "${PROJECT_ROOT}" \
-    -executeMethod BuildScript.BuildAndPackageMacOS \
+    -executeMethod BuildScript.BuildRunAndVerifyMacOS \
     -logFile "${LOG_FILE}"
 
 BUILD_EXIT_CODE=$?
