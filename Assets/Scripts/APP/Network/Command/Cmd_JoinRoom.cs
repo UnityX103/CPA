@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using APP.Network.Config;
 using APP.Network.DTO;
 using APP.Network.Event;
 using APP.Network.Model;
@@ -9,8 +10,6 @@ namespace APP.Network.Command
 {
     public sealed class Cmd_JoinRoom : AbstractCommand
     {
-        private const string DefaultServerUrl = "ws://localhost:8765";
-
         private readonly string _code;
         private readonly string _playerName;
         private readonly string _serverUrl;
@@ -19,7 +18,9 @@ namespace APP.Network.Command
         {
             _code = code;
             _playerName = playerName;
-            _serverUrl = string.IsNullOrEmpty(serverUrl) ? DefaultServerUrl : serverUrl;
+            _serverUrl = string.IsNullOrEmpty(serverUrl)
+                ? NetworkConfig.Instance.ActiveServerUrl
+                : serverUrl;
         }
 
         protected override void OnExecute()

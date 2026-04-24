@@ -6,6 +6,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using APP.Network.Config;
 using APP.Network.Event;
 using APP.Network.Model;
 using APP.Pomodoro;
@@ -43,8 +44,8 @@ namespace APP.Editor
         private readonly List<RealPlayer> _realPlayers = new List<RealPlayer>();
         private Vector2 _realScrollPos;
         private string _realQuickName = "";
-        // 与 Cmd_CreateRoom / Cmd_JoinRoom 的 DefaultServerUrl 保持一致
-        private string _realServerUrl = "ws://localhost:8765";
+        // 初值取自 NetworkConfig.Instance.ActiveServerUrl；手动覆盖后保留本地态
+        private string _realServerUrl;
         private string _realRoomCodeOverride = "";
 
         private sealed class SimPlayer
@@ -82,6 +83,10 @@ namespace APP.Editor
         private void OnEnable()
         {
             EditorApplication.update += OnEditorUpdate;
+            if (string.IsNullOrEmpty(_realServerUrl))
+            {
+                _realServerUrl = NetworkConfig.Instance.ActiveServerUrl;
+            }
         }
 
         private void OnDisable()

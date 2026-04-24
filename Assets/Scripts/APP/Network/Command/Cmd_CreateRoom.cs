@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using APP.Network.Config;
 using APP.Network.DTO;
 using APP.Network.Event;
 using APP.Network.Model;
@@ -9,8 +10,6 @@ namespace APP.Network.Command
 {
     public sealed class Cmd_CreateRoom : AbstractCommand
     {
-        private const string DefaultServerUrl = "ws://localhost:8765";
-
         private readonly string _playerName;
         private readonly string _serverUrl;
         private readonly string _desiredRoomCode;
@@ -18,7 +17,9 @@ namespace APP.Network.Command
         public Cmd_CreateRoom(string playerName, string serverUrl = null, string desiredRoomCode = null)
         {
             _playerName = playerName;
-            _serverUrl = string.IsNullOrEmpty(serverUrl) ? DefaultServerUrl : serverUrl;
+            _serverUrl = string.IsNullOrEmpty(serverUrl)
+                ? NetworkConfig.Instance.ActiveServerUrl
+                : serverUrl;
             _desiredRoomCode = desiredRoomCode;
         }
 
