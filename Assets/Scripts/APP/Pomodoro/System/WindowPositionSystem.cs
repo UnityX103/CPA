@@ -62,45 +62,11 @@ namespace APP.Pomodoro.System
 
         public void SetTopmost(bool isTopmost)
         {
-            IPomodoroModel model = this.GetModel<IPomodoroModel>();
-            model.IsTopmost.Value = isTopmost;
-
             if (_uwc != null)
             {
                 _uwc.isTopmost = isTopmost;
                 Debug.Log($"[WindowPositionSystem] SetTopmost({isTopmost})");
             }
-        }
-
-        /// <summary>
-        /// 临时置顶窗口（不改变 Model.IsTopmost 偏好）。
-        /// 用于阶段切换时吸引用户注意。
-        /// </summary>
-        public void JumpToScreenTop()
-        {
-            if (_uwc == null)
-            {
-                return;
-            }
-
-            _uwc.isTopmost = true;
-            Debug.Log("[WindowPositionSystem] JumpToScreenTop: 临时置顶窗口");
-        }
-
-        /// <summary>
-        /// 将 isTopmost 恢复为 Model 中用户的偏好值。
-        /// 用于用户聚焦窗口后取消临时置顶。
-        /// </summary>
-        public void RevertTopmost()
-        {
-            if (_uwc == null)
-            {
-                return;
-            }
-
-            bool preferred = this.GetModel<IPomodoroModel>().IsTopmost.Value;
-            _uwc.isTopmost = preferred;
-            Debug.Log($"[WindowPositionSystem] RevertTopmost: 恢复置顶={preferred}");
         }
     }
 }

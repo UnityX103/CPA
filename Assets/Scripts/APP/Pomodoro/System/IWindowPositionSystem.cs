@@ -13,12 +13,5 @@ namespace APP.Pomodoro.System
 
         /// <summary>设置窗口置顶状态</summary>
         void SetTopmost(bool isTopmost);
-
-
-        /// <summary>临时置顶窗口（不改变 Model 偏好），用于阶段切换提醒</summary>
-        void JumpToScreenTop();
-
-        /// <summary>将 isTopmost 恢复为 Model 中用户的偏好值</summary>
-        void RevertTopmost();
     }
 }

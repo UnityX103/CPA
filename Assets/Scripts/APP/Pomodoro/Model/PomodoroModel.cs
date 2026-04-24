@@ -14,7 +14,6 @@ namespace APP.Pomodoro.Model
         public BindableProperty<PomodoroPhase> CurrentPhase { get; } =
             new BindableProperty<PomodoroPhase>(PomodoroPhase.Focus);
         public BindableProperty<bool> IsRunning { get; } = new BindableProperty<bool>(false);
-        public BindableProperty<bool> IsTopmost { get; } = new BindableProperty<bool>(false);
         public BindableProperty<bool> IsPinned { get; } = new BindableProperty<bool>(false);
         public BindableProperty<PomodoroWindowAnchor> WindowAnchor { get; } =
             new BindableProperty<PomodoroWindowAnchor>(PomodoroWindowAnchor.Bottom);
@@ -42,7 +41,6 @@ namespace APP.Pomodoro.Model
         public int RemainingSeconds = 25 * 60;
         public int CurrentPhase;
         public bool IsRunning;
-        public bool IsTopmost;
         public bool IsPinned;
         public int WindowAnchor = (int)PomodoroWindowAnchor.Bottom;
         public bool AutoJumpToTopOnComplete = true;
@@ -120,7 +118,6 @@ namespace APP.Pomodoro.Model
                 RemainingSeconds = Mathf.Max(0, model.RemainingSeconds.Value),
                 CurrentPhase = (int)model.CurrentPhase.Value,
                 IsRunning = model.IsRunning.Value,
-                IsTopmost = model.IsTopmost.Value,
                 IsPinned = model.IsPinned.Value,
                 WindowAnchor = (int)model.WindowAnchor.Value,
                 AutoJumpToTopOnComplete = model.AutoJumpToTopOnComplete.Value,
@@ -164,7 +161,6 @@ namespace APP.Pomodoro.Model
             model.RemainingSeconds.Value = remainingSeconds;
             model.CurrentPhase.Value = phase;
             model.IsRunning.Value = isRunning;
-            model.IsTopmost.Value = state.IsTopmost;
             model.IsPinned.Value = state.IsPinned;
             model.WindowAnchor.Value = anchor;
             model.AutoJumpToTopOnComplete.Value = state.AutoJumpToTopOnComplete;

@@ -177,8 +177,6 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.IsRunning.Register(_ => SaveState(false))
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
-            _model.IsTopmost.Register(_ => SaveState(false))
-                .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.IsPinned.Register(_ => SaveState(false))
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.WindowAnchor.Register(_ => SaveState(false))
