@@ -45,8 +45,10 @@ namespace APP.Pomodoro.Model
         BindableProperty<int> CompletionClipIndex { get; }
 
         /// <summary>
-        /// 番茄钟面板（YRqeB）在全屏主面板坐标系内的左上角位置。
-        /// 值为 Vector2.negativeInfinity 时代表"未初始化"——View 首帧计算默认右下角锚点后回写。
+        /// 番茄钟面板（YRqeB）左上角相对主面板（父容器）的归一化位置，x/y ∈ [0, 1]。
+        /// 0 = 父容器左/上边；1 = 父容器右/下边。View 在 GeometryChanged 时根据当前父容器尺寸换算成像素应用。
+        /// 值为 Vector2.negativeInfinity 时代表"未初始化"——View 首帧计算默认右下角锚点后回写比例。
+        /// 兼容旧版本持久化：若读出的值 > 1 统一 clamp 到 1；&lt; 0 clamp 到 0。
         /// </summary>
         BindableProperty<Vector2> PomodoroPanelPosition { get; }
     }

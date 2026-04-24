@@ -31,4 +31,20 @@ namespace APP.Pomodoro.Event
             CompletedRounds = completedRounds;
         }
     }
+
+    /// <summary>
+    /// 计时自然到期引发阶段切换时广播（不包含用户手动 Reset/Skip）。
+    /// 用于驱动 Flash 之类只在真实"段落结束"时触发的 UI 行为。
+    /// </summary>
+    public readonly struct E_PomodoroPhaseAutoAdvanced
+    {
+        public readonly PomodoroPhase FromPhase;
+        public readonly PomodoroPhase ToPhase;
+
+        public E_PomodoroPhaseAutoAdvanced(PomodoroPhase fromPhase, PomodoroPhase toPhase)
+        {
+            FromPhase = fromPhase;
+            ToPhase = toPhase;
+        }
+    }
 }

@@ -7,7 +7,7 @@
     <Style src="project://database/Assets/UI_V2/Styles/PlayerCard.uss?fileID=7433441132597879392&amp;guid=23b0113cd0f2a41b3bf91059f3d0d0b9&amp;type=3#PlayerCard" />
     <!-- DeskWindow 主面板：透明全屏，只做 pomodoro + card-layer 宿主 -->
     <ui:VisualElement name="dw-canvas" class="dw-canvas">
-        <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-floating" />
+        <ui:Instance name="pomodoro-panel" template="PomodoroPanel" class="dw-floating" picking-mode="Ignore" />
         <ui:VisualElement name="card-layer" class="dw-card-layer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

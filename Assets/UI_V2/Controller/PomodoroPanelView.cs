@@ -81,7 +81,12 @@ namespace APP.Pomodoro.Controller
             _model.PomodoroPanelPosition.RegisterWithInitValue(OnPomodoroPositionChanged)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
 
+            // 自身 GeometryChanged：仅用于首帧 sentinel → 计算默认位置。
+            // 拖拽过程中 style.left/top 会频繁触发这里，务必不要在此覆盖正在拖拽的值。
             _ppRoot?.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChanged);
+
+            // 父容器 GeometryChanged：分辨率/窗口大小变化时按当前 ratio 重算像素位置。
+            _ppRoot?.parent?.RegisterCallback<GeometryChangedEvent>(OnParentGeometryChanged);
 
             _isInitialized = true;
         }
@@ -127,12 +132,16 @@ namespace APP.Pomodoro.Controller
             _ppBtnPrimary?.RegisterCallback<PointerUpEvent>(_ => OnPrimaryButtonClicked());
             _ppBtnSecondary?.RegisterCallback<PointerUpEvent>(_ => OnSecondaryButtonClicked());
 
-            // 整卡拖拽：以 pp-root 本身作为 handle，选中面板任意位置皆可拖动
+            // 整卡拖拽：以 pp-root 本身作为 handle，选中面板任意位置皆可拖动。
+            // DragController 回传像素坐标，此处换算为父容器归一化比例后写入 Model。
             if (_ppRoot != null)
             {
                 var dragController = DraggableElement.MakeDraggable(_ppRoot);
-                dragController.OnDragEnd += pos =>
-                    this.SendCommand(new Cmd_SetPomodoroPanelPosition(pos));
+                dragController.OnDragEnd += pxPos =>
+                {
+                    Vector2 ratio = PixelToRatio(pxPos);
+                    this.SendCommand(new Cmd_SetPomodoroPanelPosition(ratio));
+                };
             }
 
             // 设置齿轮按钮：在 PointerDown 阻断冒泡，避免触发整卡拖拽
@@ -205,6 +214,10 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
 
             this.GetSystem<IWindowVisibilityCoordinatorSystem>().AnyPinned
+                .RegisterWithInitValue(_ => RefreshVisibility())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            this.GetSystem<IPhaseTransitionFlashSystem>().IsFlashing
                 .RegisterWithInitValue(_ => RefreshVisibility())
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
@@ -333,34 +346,89 @@ namespace APP.Pomodoro.Controller
 
         // ─── 位置持久化 ──────────────────────────────────────────
 
-        private void OnPomodoroPositionChanged(Vector2 pos)
+        private const float DefaultMarginPx = 20f;
+
+        private void OnPomodoroPositionChanged(Vector2 ratio)
         {
             if (_ppRoot == null) return;
-            if (float.IsNegativeInfinity(pos.x) || float.IsNegativeInfinity(pos.y))
+            // sentinel / 脏值（NaN、±Infinity）：等 GeometryChanged 算默认位置，不写 style
+            if (!float.IsFinite(ratio.x) || !float.IsFinite(ratio.y))
             {
-                return; // sentinel：等 GeometryChanged 算默认位置
+                return;
             }
-            _ppRoot.style.left = pos.x;
-            _ppRoot.style.top  = pos.y;
+            ApplyRatioToStyle(ratio);
         }
 
         private void OnRootGeometryChanged(GeometryChangedEvent _)
         {
             if (_model == null || _ppRoot == null) return;
+
             var current = _model.PomodoroPanelPosition.Value;
-            if (!float.IsNegativeInfinity(current.x) && !float.IsNegativeInfinity(current.y))
-                return; // 已有持久化值，不覆盖
+            // 已有合法持久化 ratio：不在此处重算像素。
+            // 拖拽期间每次 style.left/top 变化都会触发本回调，若用 Model 的旧 ratio 覆盖 style，
+            // 将把拖拽位置立刻吃掉。分辨率变化由 OnParentGeometryChanged 处理；
+            // Model 自身变化由 OnPomodoroPositionChanged 处理。
+            // NaN/±Infinity 视为 sentinel，需要走默认右下角计算。
+            if (float.IsFinite(current.x) && float.IsFinite(current.y)) return;
 
             var parentLayout = _ppRoot.parent?.layout ?? _ppRoot.layout;
             if (parentLayout.width <= 0 || parentLayout.height <= 0) return;
             if (_ppRoot.layout.width <= 0 || _ppRoot.layout.height <= 0) return;
 
-            // Q6a=B: 屏幕右下角默认（距右/下各 20px）
-            float x = parentLayout.width  - _ppRoot.layout.width  - 20f;
-            float y = parentLayout.height - _ppRoot.layout.height - 20f;
-            x = Mathf.Max(0, x);
-            y = Mathf.Max(0, y);
-            this.SendCommand(new Cmd_SetPomodoroPanelPosition(new Vector2(x, y)));
+            // 首帧 sentinel：屏幕右下角默认（距右/下各 DefaultMarginPx），换算成归一化比例后回写
+            float pxX = Mathf.Max(0f, parentLayout.width  - _ppRoot.layout.width  - DefaultMarginPx);
+            float pxY = Mathf.Max(0f, parentLayout.height - _ppRoot.layout.height - DefaultMarginPx);
+            Vector2 ratio = PixelToRatio(new Vector2(pxX, pxY), parentLayout);
+            this.SendCommand(new Cmd_SetPomodoroPanelPosition(ratio));
+        }
+
+        private void OnParentGeometryChanged(GeometryChangedEvent _)
+        {
+            if (_model == null || _ppRoot == null) return;
+            var current = _model.PomodoroPanelPosition.Value;
+            // sentinel 或脏值（NaN/±Infinity）时不写 style，留给 OnRootGeometryChanged 算默认
+            if (!float.IsFinite(current.x) || !float.IsFinite(current.y)) return;
+            // 父容器尺寸变化（换分辨率/改窗口大小等）时重算像素位置
+            ApplyRatioToStyle(current);
+        }
+
+        /// <summary>
+        /// 将归一化比例换算成像素并写入 style.left/top；
+        /// 对面板自身宽高做 clamp，避免超出父容器右/下边。
+        /// </summary>
+        private void ApplyRatioToStyle(Vector2 ratio)
+        {
+            // 最后一道防线：任何非有限 ratio 一律拒写，防止 NaN 污染 style 并被 DraggableElement 读回。
+            if (!float.IsFinite(ratio.x) || !float.IsFinite(ratio.y)) return;
+            var parentLayout = _ppRoot.parent?.layout ?? _ppRoot.layout;
+            if (parentLayout.width <= 0 || parentLayout.height <= 0) return;
+
+            float rx = Mathf.Clamp01(ratio.x);
+            float ry = Mathf.Clamp01(ratio.y);
+
+            float targetW = _ppRoot.layout.width;
+            float targetH = _ppRoot.layout.height;
+            float maxLeft = Mathf.Max(0f, parentLayout.width  - targetW);
+            float maxTop  = Mathf.Max(0f, parentLayout.height - targetH);
+
+            float px = Mathf.Clamp(rx * parentLayout.width,  0f, maxLeft);
+            float py = Mathf.Clamp(ry * parentLayout.height, 0f, maxTop);
+
+            _ppRoot.style.left = px;
+            _ppRoot.style.top  = py;
+        }
+
+        private Vector2 PixelToRatio(Vector2 pxPos)
+        {
+            var parentLayout = _ppRoot?.parent?.layout ?? default;
+            return PixelToRatio(pxPos, parentLayout);
+        }
+
+        private static Vector2 PixelToRatio(Vector2 pxPos, Rect parentLayout)
+        {
+            float rx = parentLayout.width  > 0 ? Mathf.Clamp01(pxPos.x / parentLayout.width)  : 0f;
+            float ry = parentLayout.height > 0 ? Mathf.Clamp01(pxPos.y / parentLayout.height) : 0f;
+            return new Vector2(rx, ry);
         }
 
         // ─── Pin 状态与可见性 ────────────────────────────────────
@@ -377,8 +445,10 @@ namespace APP.Pomodoro.Controller
             bool focused = this.GetModel<IGameModel>().IsAppFocused.Value;
             bool anyPinned = this.GetSystem<IWindowVisibilityCoordinatorSystem>().AnyPinned.Value;
             bool thisPinned = _model.IsPinned.Value;
-            // S2 隐藏条件：整窗口置顶(AnyPinned) 且失焦 且本 UI 非 pinned
-            bool hidden = !thisPinned && !focused && anyPinned;
+            bool flashing = this.GetSystem<IPhaseTransitionFlashSystem>().IsFlashing.Value;
+            // S2 隐藏条件：整窗口置顶(AnyPinned) 且失焦 且本 UI 非 pinned；
+            // Flash 状态强制显示（覆盖上述隐藏规则）
+            bool hidden = !thisPinned && !focused && anyPinned && !flashing;
             _ppRoot.EnableInClassList("pp-hidden", hidden);
         }
     }

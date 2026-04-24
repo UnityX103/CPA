@@ -34,8 +34,19 @@ namespace APP.Pomodoro.System
             // 4) 写初值
             Recalculate();
 
-            // 5) AnyPinned 变化 → 驱动原生窗口层级
-            _anyPinned.Register(v => this.GetSystem<IWindowPositionSystem>().SetTopmost(v));
+            // 5) AnyPinned 或 IsFlashing 变化 → 驱动原生窗口层级
+            //    topmost = AnyPinned ∥ IsFlashing
+            //    其中 IsFlashing 由 PhaseTransitionFlashSystem 在阶段自然切换时置位
+            _anyPinned.Register(_ => ApplyTopmost());
+            this.GetSystem<IPhaseTransitionFlashSystem>().IsFlashing.Register(_ => ApplyTopmost());
+            ApplyTopmost();
+        }
+
+        private void ApplyTopmost()
+        {
+            bool flashing = this.GetSystem<IPhaseTransitionFlashSystem>().IsFlashing.Value;
+            bool topmost = _anyPinned.Value || flashing;
+            this.GetSystem<IWindowPositionSystem>().SetTopmost(topmost);
         }
 
         private void OnCardAdded(string playerId)

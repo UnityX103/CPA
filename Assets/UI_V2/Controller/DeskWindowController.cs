@@ -142,6 +142,9 @@ namespace APP.Pomodoro.Controller
             VisualElement root = _uiDocument.rootVisualElement;
             root.AddToClassList("dw-root-anchor");
 
+            // Flash 态下，用户在应用内任意位置点击即退出 Flash，恢复原可见性/置顶策略
+            root.RegisterCallback<PointerDownEvent>(OnRootPointerDown, TrickleDown.TrickleDown);
+
             _pomodoroPanelContainer = root.Q<TemplateContainer>("pomodoro-panel");
             var cardLayer = root.Q<VisualElement>("card-layer");
 
@@ -153,6 +156,12 @@ namespace APP.Pomodoro.Controller
 
             _playerCardManager = new PlayerCardManager();
             _playerCardManager.Initialize(_playerCardTemplate, cardLayer, gameObject);
+        }
+
+        private void OnRootPointerDown(PointerDownEvent _)
+        {
+            // 不 StopPropagation：仍让子级按钮/拖拽等功能正常执行
+            this.GetSystem<IPhaseTransitionFlashSystem>().Dismiss();
         }
 
         private static VisualTreeAsset EnsureEditorTemplateLoaded(

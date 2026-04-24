@@ -68,7 +68,11 @@ namespace APP.Pomodoro.System
                 else
                 {
                     model.RemainingSeconds.Value = 0;
+                    PomodoroPhase fromPhase = model.CurrentPhase.Value;
                     AdvancePhase(model);
+                    PomodoroPhase toPhase = model.CurrentPhase.Value;
+                    // 仅在计时自然到期的阶段切换发 AutoAdvanced 事件，Reset/Skip 不发
+                    this.SendEvent(new E_PomodoroPhaseAutoAdvanced(fromPhase, toPhase));
                     // 不清零累加器——剩余时间继续驱动新阶段
                     return;
                 }

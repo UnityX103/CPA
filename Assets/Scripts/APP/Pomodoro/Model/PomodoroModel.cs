@@ -97,8 +97,30 @@ namespace APP.Pomodoro.Model
                 state.AutoStartBreak = true;
             }
 
+            // 旧版本曾以像素写入面板位置；任意维度越界 ([0,1] 之外) 或非有限值（NaN/Infinity）
+            // 视为脏数据，直接丢弃并立即重写 PlayerPrefs，让 View 首帧按默认右下角重新计算 ratio。
+            // 注意：NaN < 0 与 NaN > 1 结果都是 false，必须用 !IsFinite 单独兜底。
+            bool panelPosOutOfRange = state.HasPomodoroPanelPosition &&
+                (!float.IsFinite(state.PomodoroPanelPositionX) ||
+                 !float.IsFinite(state.PomodoroPanelPositionY) ||
+                 state.PomodoroPanelPositionX < 0f || state.PomodoroPanelPositionX > 1f ||
+                 state.PomodoroPanelPositionY < 0f || state.PomodoroPanelPositionY > 1f);
+            if (panelPosOutOfRange)
+            {
+                state.HasPomodoroPanelPosition = false;
+                state.PomodoroPanelPositionX = 0f;
+                state.PomodoroPanelPositionY = 0f;
+            }
+
             ApplyState(model, state);
             _cachedJson = json;
+
+            if (panelPosOutOfRange)
+            {
+                // 强制重写一份清洁版本，避免下次启动再命中
+                _cachedJson = null;
+                Save(model, flushToDisk: true);
+            }
             return true;
         }
 
@@ -167,6 +189,8 @@ namespace APP.Pomodoro.Model
             model.AutoStartBreak.Value = state.AutoStartBreak;
             model.TargetMonitorIndex.Value = Mathf.Max(0, state.TargetMonitorIndex);
             model.CompletionClipIndex.Value = Mathf.Max(0, state.CompletionClipIndex);
+            // 越界数据已在 TryLoad 中被重置为 HasPomodoroPanelPosition=false；
+            // 此处直接按字段取值——合法 ratio 原样读入；否则保持 sentinel，等 View 首帧计算默认。
             model.PomodoroPanelPosition.Value = state.HasPomodoroPanelPosition
                 ? new Vector2(state.PomodoroPanelPositionX, state.PomodoroPanelPositionY)
                 : new Vector2(float.NegativeInfinity, float.NegativeInfinity);

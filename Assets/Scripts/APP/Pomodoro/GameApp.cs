@@ -23,6 +23,8 @@ namespace APP.Pomodoro
 
             RegisterSystem<IPomodoroTimerSystem>(new PomodoroTimerSystem());
             RegisterSystem<IWindowPositionSystem>(new WindowPositionSystem());
+            // Flash 先于 Coordinator：Coordinator 的 topmost 计算需要读取 IsFlashing
+            RegisterSystem<IPhaseTransitionFlashSystem>(new PhaseTransitionFlashSystem());
             RegisterSystem<IWindowVisibilityCoordinatorSystem>(new WindowVisibilityCoordinatorSystem());
             RegisterSystem<IActiveAppSystem>(new ActiveAppSystem());
             RegisterSystem<IIconCacheSystem>(new IconCacheSystem());

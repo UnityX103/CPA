@@ -32,9 +32,16 @@
     bottom: 0;
 }
 
-/* ── 可拖浮动子元素（pomodoro-panel / 玩家卡片）共享 ─────── */
+/* ── 可拖浮动子元素（pomodoro-panel 等）的承载层：铺满全屏 ──
+ * 注意：本身 picking-mode 必须设 Ignore（见 DeskWindow.uxml），
+ * 否则整层会抢走全屏点击。子元素 pp-root 通过 style.left/top 在其中定位。
+ */
 .dw-floating {
     position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 /* ── 卡片层：绝对定位容器，由 PlayerCardManager 动态挂卡 ── */
