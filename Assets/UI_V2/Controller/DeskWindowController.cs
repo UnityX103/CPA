@@ -94,10 +94,9 @@ namespace APP.Pomodoro.Controller
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (hasFocus)
-            {
-                this.SendCommand(new Cmd_PomodoroRevertTopmost());
-            }
+            // 将 Unity 的应用焦点状态统一汇入 IGameModel.IsAppFocused，
+            // 由 WindowVisibilityCoordinatorSystem + View 层公式驱动可见性。
+            this.SendCommand(new Cmd_SetAppFocused(hasFocus));
         }
 
         private void OnApplicationPause(bool pause)
