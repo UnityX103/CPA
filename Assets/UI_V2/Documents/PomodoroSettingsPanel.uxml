@@ -6,7 +6,7 @@
 
     <ui:VisualElement name="psp-root" class="psp-root">
         <!-- Pencil: pspApply — 应用按钮（默认隐藏，草稿与 Model 不一致时浮出） -->
-        <ui:Button name="psp-apply-btn" text="应用" class="psp-apply-btn psp-apply-btn--hidden" />
+        <ui:Button name="apply-btn" text="应用" class="apply-btn apply-btn--hidden" />
 
         <!-- Pencil: pomoGrid — 专注/休息时长卡片 -->
         <ui:VisualElement class="psp-metrics">

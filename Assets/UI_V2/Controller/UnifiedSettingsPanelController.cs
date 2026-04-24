@@ -20,8 +20,10 @@ namespace APP.Pomodoro.Controller
         private VisualElement _tabPomodoro;
         private VisualElement _tabOnline;
         private VisualElement _tabPet;
+        private VisualElement _tabGlobal;
         private VisualElement _closeBtn;
         private VisualElement _unsavedDialogHost;
+        private VisualElement _scaleDialogHost;
 
         // ─── 状态 ────────────────────────────────────────────────
         private string _activeTab = "pomodoro";
@@ -30,18 +32,22 @@ namespace APP.Pomodoro.Controller
         private PomodoroSettingsPanelController _pomodoroSettings;
         private OnlineSettingsPanelController _onlineSettings;
         private PetSettingsPanelController _petSettings;
+        private GlobalSettingsPanelController _globalSettings;
         private UnsavedChangesDialogController _unsavedDialog;
 
         // ─── 模板与缓存实例 ──────────────────────────────────────
         private VisualTreeAsset _pomodoroTemplate;
         private VisualTreeAsset _onlineTemplate;
         private VisualTreeAsset _petTemplate;
+        private VisualTreeAsset _globalTemplate;
+        private VisualTreeAsset _confirmDialogTemplate;
         private IPomodoroModel _model;
         private IRoomModel _roomModel;
         private GameObject _lifecycleOwner;
         private VisualElement _pomodoroRoot;
         private VisualElement _onlineRoot;
         private VisualElement _petRoot;
+        private VisualElement _globalRoot;
 
         // ─── 公开属性 ────────────────────────────────────────────
         public bool IsVisible => _overlay != null && _overlay.resolvedStyle.display == DisplayStyle.Flex;
@@ -61,7 +67,8 @@ namespace APP.Pomodoro.Controller
             VisualTreeAsset pomodoroTemplate,
             VisualTreeAsset onlineTemplate,
             VisualTreeAsset petTemplate,
-            VisualTreeAsset unsavedDialogTemplate,
+            VisualTreeAsset globalTemplate,
+            VisualTreeAsset confirmDialogTemplate,
             GameObject lifecycleOwner)
         {
             _model = model;
@@ -69,6 +76,8 @@ namespace APP.Pomodoro.Controller
             _pomodoroTemplate = pomodoroTemplate;
             _onlineTemplate = onlineTemplate;
             _petTemplate = petTemplate;
+            _globalTemplate = globalTemplate;
+            _confirmDialogTemplate = confirmDialogTemplate;
             _lifecycleOwner = lifecycleOwner;
 
             // 查询 overlay 及子元素
@@ -77,14 +86,16 @@ namespace APP.Pomodoro.Controller
             _tabPomodoro = root.Q("tab-pomodoro");
             _tabOnline = root.Q("tab-online");
             _tabPet = root.Q("tab-pet");
+            _tabGlobal = root.Q("tab-global");
             _closeBtn = root.Q("settings-close");
             _unsavedDialogHost = root.Q("unsaved-dialog-host");
+            _scaleDialogHost = root.Q("scale-dialog-host");
 
-            // 初始化未保存提示对话框
+            // 初始化未保存提示对话框（复用 ConfirmDialog.uxml 模板）
             _unsavedDialog = new UnsavedChangesDialogController();
-            if (_unsavedDialogHost != null && unsavedDialogTemplate != null)
+            if (_unsavedDialogHost != null && confirmDialogTemplate != null)
             {
-                _unsavedDialog.Init(_unsavedDialogHost, unsavedDialogTemplate);
+                _unsavedDialog.Init(_unsavedDialogHost, confirmDialogTemplate);
             }
 
             // 注册关闭与 tab 切换事件
@@ -92,6 +103,7 @@ namespace APP.Pomodoro.Controller
             _tabPomodoro?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pomodoro"));
             _tabOnline?.RegisterCallback<PointerUpEvent>(_ => SelectTab("online"));
             _tabPet?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pet"));
+            _tabGlobal?.RegisterCallback<PointerUpEvent>(_ => SelectTab("global"));
 
             // 整窗拖拽：以 overlay 本身作为 handle；注意 overlay 初始用 flex 居中于全屏锚点，
             // 首次拖拽前需切换为 position:absolute 并把 left/top 锁定在当前布局位置。
@@ -105,6 +117,7 @@ namespace APP.Pomodoro.Controller
                 _tabPomodoro?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
                 _tabOnline?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
                 _tabPet?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+                _tabGlobal?.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
                 // 内容区（含 ScrollView、按钮、输入框等）统一阻断
                 var contentScroll = root.Q<ScrollView>("settings-content");
                 contentScroll?.contentContainer.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
@@ -232,6 +245,7 @@ namespace APP.Pomodoro.Controller
             _tabPomodoro?.EnableInClassList("sidebar-tab--active", tabName == "pomodoro");
             _tabOnline?.EnableInClassList("sidebar-tab--active", tabName == "online");
             _tabPet?.EnableInClassList("sidebar-tab--active", tabName == "pet");
+            _tabGlobal?.EnableInClassList("sidebar-tab--active", tabName == "global");
 
             VisualElement content = EnsureTabContent(tabName);
 
@@ -249,6 +263,9 @@ namespace APP.Pomodoro.Controller
                     break;
                 case "online":
                     _onlineSettings?.RefreshCardState();
+                    break;
+                case "global":
+                    _globalSettings?.RefreshFromModel();
                     break;
             }
         }
@@ -276,6 +293,20 @@ namespace APP.Pomodoro.Controller
                     }
 
                     return _petRoot;
+
+                case "global":
+                    if (_globalRoot == null)
+                    {
+                        _globalRoot = CloneTemplate(_globalTemplate);
+                        _globalSettings = new GlobalSettingsPanelController();
+                        _globalSettings.Init(
+                            _globalRoot,
+                            _scaleDialogHost,
+                            _confirmDialogTemplate,
+                            _lifecycleOwner);
+                    }
+
+                    return _globalRoot;
 
                 case "pomodoro":
                 default:

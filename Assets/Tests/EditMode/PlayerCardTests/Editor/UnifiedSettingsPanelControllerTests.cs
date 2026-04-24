@@ -16,6 +16,7 @@ namespace APP.Pomodoro.Tests
         private const string PomodoroPanelPath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
         private const string OnlinePanelPath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
         private const string PetPanelPath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
+        private const string GlobalPanelPath = "Assets/UI_V2/Documents/GlobalSettingsPanel.uxml";
         private const string UnsavedDialogPath = "Assets/UI_V2/Documents/ConfirmDialog.uxml";
 
         private GameObject _lifecycleOwner;
@@ -46,6 +47,7 @@ namespace APP.Pomodoro.Tests
                 LoadTemplate(PomodoroPanelPath),
                 LoadTemplate(OnlinePanelPath),
                 LoadTemplate(PetPanelPath),
+                LoadTemplate(GlobalPanelPath),
                 LoadTemplate(UnsavedDialogPath),
                 _lifecycleOwner);
 
@@ -71,6 +73,7 @@ namespace APP.Pomodoro.Tests
                 LoadTemplate(PomodoroPanelPath),
                 LoadTemplate(OnlinePanelPath),
                 LoadTemplate(PetPanelPath),
+                LoadTemplate(GlobalPanelPath),
                 LoadTemplate(UnsavedDialogPath),
                 _lifecycleOwner);
 

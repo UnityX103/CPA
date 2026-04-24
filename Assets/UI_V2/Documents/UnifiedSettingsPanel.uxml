@@ -7,6 +7,7 @@
     <Style src="../Styles/PomodoroSettingsPanel.uss"/>
     <Style src="../Styles/OnlineSettingsPanel.uss"/>
     <Style src="../Styles/PetSettingsPanel.uss"/>
+    <Style src="../Styles/GlobalSettingsPanel.uss"/>
     <Style src="../Styles/ConfirmDialog.uss"/>
 
     <!-- 设置面板：独立 UIDocument 根（对应 Pencil vnYnS） -->
@@ -29,6 +30,9 @@
                 <ui:VisualElement name="tab-pet" class="sidebar-tab">
                     <ui:Label text="宠物" class="sidebar-tab-label" />
                 </ui:VisualElement>
+                <ui:VisualElement name="tab-global" class="sidebar-tab">
+                    <ui:Label text="全局" class="sidebar-tab-label" />
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView name="settings-content" vertical-scroller-visibility="Auto"
                            horizontal-scroller-visibility="Hidden" class="settings-content">
@@ -40,5 +44,6 @@
              对话框显示时由内部 .dlg-root（默认 pickingMode=Position）接管交互。
              UnsavedChangesDialogController.Init 时把 ConfirmDialog.uxml 克隆进来。 -->
         <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
+        <ui:VisualElement name="scale-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

@@ -79,8 +79,11 @@
 }
 
 /* ── 应用按钮 ────────────────────────────────────────────── */
+/* 番茄钟 apply-btn 视觉与 GlobalSettingsPanel.uss 的 .apply-btn 不一致
+   （番茄钟要 100% 宽 / 38px 高 / 药丸形 / 橙红底），
+   因此用 .psp-root .apply-btn 作 scope，避免全局规则在后加载时覆盖。 */
 
-.psp-apply-btn {
+.psp-root .apply-btn {
     /* 对齐 Pencil pspApply：padding [10,16], fontSize 14, 无显式 height（≈38px），
        cornerRadius 999 → Unity 写 height/2 = 19px 保证药丸形。 */
     width: 100%;
@@ -97,14 +100,14 @@
     transition: opacity 120ms ease-out;
 }
 
-.psp-apply-btn:hover {
+.psp-root .apply-btn:hover {
     background-color: rgb(232, 130, 74);
 }
 
-.psp-apply-btn:active {
+.psp-root .apply-btn:active {
     background-color: rgb(188, 82, 50);
 }
 
-.psp-apply-btn--hidden {
+.apply-btn--hidden {
     display: none;
 }

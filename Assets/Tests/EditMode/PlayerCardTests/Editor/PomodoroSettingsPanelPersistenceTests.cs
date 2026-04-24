@@ -167,23 +167,23 @@ namespace APP.Pomodoro.Tests
         {
             (PomodoroSettingsPanelController controller, PomodoroSettingsPanelView view, VisualElement root)
                 = BuildPanel();
-            Button applyBtn = root.Q<Button>("psp-apply-btn");
-            Assert.That(applyBtn, Is.Not.Null, "psp-apply-btn 按钮必须存在");
+            Button applyBtn = root.Q<Button>("apply-btn");
+            Assert.That(applyBtn, Is.Not.Null, "apply-btn 按钮必须存在");
 
             // 初始隐藏
-            Assert.That(applyBtn.ClassListContains("psp-apply-btn--hidden"), Is.True,
+            Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.True,
                 "初始 Refresh 后应用按钮应隐藏");
 
             TextField focus = root.Q<TextField>("psp-focus-value");
             focus.value = "40";
             view.CommitFocusValue();
 
-            Assert.That(applyBtn.ClassListContains("psp-apply-btn--hidden"), Is.False,
+            Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.False,
                 "草稿与基线不一致时应用按钮应浮出");
 
             controller.TryApply();
 
-            Assert.That(applyBtn.ClassListContains("psp-apply-btn--hidden"), Is.True,
+            Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.True,
                 "TryApply 后应用按钮应再次隐藏");
         }
 
@@ -193,7 +193,7 @@ namespace APP.Pomodoro.Tests
             (PomodoroSettingsPanelController controller, PomodoroSettingsPanelView view, VisualElement root)
                 = BuildPanel();
             Toggle hint = root.Q<Toggle>("psp-hint-toggle");
-            Button applyBtn = root.Q<Button>("psp-apply-btn");
+            Button applyBtn = root.Q<Button>("apply-btn");
             Assert.That(hint, Is.Not.Null);
 
             bool originalHint = hint.value;
@@ -201,13 +201,13 @@ namespace APP.Pomodoro.Tests
 
             Assert.That(controller.IsDirty, Is.True,
                 "拨动 hint toggle 应让草稿与基线出现差异");
-            Assert.That(applyBtn.ClassListContains("psp-apply-btn--hidden"), Is.False);
+            Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.False);
 
             // 拨回去，dirty 应归零
             view.CommitHintToggle(originalHint);
             Assert.That(controller.IsDirty, Is.False,
                 "toggle 回到基线值后 IsDirty 应归零");
-            Assert.That(applyBtn.ClassListContains("psp-apply-btn--hidden"), Is.True);
+            Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.True);
         }
 
         [Test]

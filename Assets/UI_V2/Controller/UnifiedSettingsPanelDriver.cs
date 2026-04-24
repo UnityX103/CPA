@@ -18,10 +18,11 @@ namespace APP.Pomodoro.Controller
     {
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
-        [Header("子面板 UXML 模板（番茄钟 / 联机 / 宠物）")]
+        [Header("子面板 UXML 模板（番茄钟 / 联机 / 宠物 / 全局）")]
         [SerializeField] private VisualTreeAsset _pomodoroSettingsTemplate;
         [SerializeField] private VisualTreeAsset _onlineSettingsTemplate;
         [SerializeField] private VisualTreeAsset _petSettingsTemplate;
+        [SerializeField] private VisualTreeAsset _globalSettingsTemplate;
 
         [Header("通用确认对话框模板（用于未保存更改 + 缩放倒计时）")]
         [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("_unsavedChangesDialogTemplate")]
@@ -65,6 +66,7 @@ namespace APP.Pomodoro.Controller
                 _pomodoroSettingsTemplate,
                 _onlineSettingsTemplate,
                 _petSettingsTemplate,
+                _globalSettingsTemplate,
                 _confirmDialogTemplate,
                 gameObject);
 

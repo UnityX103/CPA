@@ -21,6 +21,7 @@ namespace APP.Pomodoro.Tests
         private const string PomodoroPanelPath = "Assets/UI_V2/Documents/PomodoroSettingsPanel.uxml";
         private const string OnlinePanelPath = "Assets/UI_V2/Documents/OnlineSettingsPanel.uxml";
         private const string PetPanelPath = "Assets/UI_V2/Documents/PetSettingsPanel.uxml";
+        private const string GlobalPanelPath = "Assets/UI_V2/Documents/GlobalSettingsPanel.uxml";
         private const string UnsavedDialogPath = "Assets/UI_V2/Documents/ConfirmDialog.uxml";
 
         private GameObject _lifecycleOwner;
@@ -187,6 +188,7 @@ namespace APP.Pomodoro.Tests
                 LoadTemplate(PomodoroPanelPath),
                 LoadTemplate(OnlinePanelPath),
                 LoadTemplate(PetPanelPath),
+                LoadTemplate(GlobalPanelPath),
                 LoadTemplate(UnsavedDialogPath),
                 _lifecycleOwner);
 
@@ -224,20 +226,35 @@ namespace APP.Pomodoro.Tests
 
         private static void InvokeDialogConfirm(UnifiedSettingsPanelController unified)
         {
-            UnsavedChangesDialogController dlg = GetDialog(unified);
-            MethodInfo handle = typeof(UnsavedChangesDialogController)
-                .GetMethod("HandleConfirm", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.That(handle, Is.Not.Null, "HandleConfirm 方法应存在");
-            handle.Invoke(dlg, null);
+            ConfirmDialogController inner = GetInnerConfirmDialog(unified);
+            MethodInfo handle = typeof(ConfirmDialogController)
+                .GetMethod("TriggerConfirmForTest", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(handle, Is.Not.Null, "TriggerConfirmForTest 方法应存在");
+            handle.Invoke(inner, null);
         }
 
         private static void InvokeDialogCancel(UnifiedSettingsPanelController unified)
         {
+            ConfirmDialogController inner = GetInnerConfirmDialog(unified);
+            MethodInfo handle = typeof(ConfirmDialogController)
+                .GetMethod("TriggerCancelForTest", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(handle, Is.Not.Null, "TriggerCancelForTest 方法应存在");
+            handle.Invoke(inner, null);
+        }
+
+        /// <summary>
+        /// Stage D 后 UnsavedChangesDialogController 改为薄适配层，真正的 HandleConfirm/Cancel
+        /// 已迁至内部委托字段 _inner（ConfirmDialogController）；测试通过反射走 internal 钩子。
+        /// </summary>
+        private static ConfirmDialogController GetInnerConfirmDialog(UnifiedSettingsPanelController unified)
+        {
             UnsavedChangesDialogController dlg = GetDialog(unified);
-            MethodInfo handle = typeof(UnsavedChangesDialogController)
-                .GetMethod("HandleCancel", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.That(handle, Is.Not.Null, "HandleCancel 方法应存在");
-            handle.Invoke(dlg, null);
+            FieldInfo innerField = typeof(UnsavedChangesDialogController)
+                .GetField("_inner", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(innerField, Is.Not.Null, "UnsavedChangesDialogController._inner 字段应存在");
+            var inner = (ConfirmDialogController)innerField.GetValue(dlg);
+            Assert.That(inner, Is.Not.Null, "内部 ConfirmDialogController 应已初始化");
+            return inner;
         }
 
         private static UnsavedChangesDialogController GetDialog(UnifiedSettingsPanelController unified)

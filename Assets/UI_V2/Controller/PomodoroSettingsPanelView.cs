@@ -30,7 +30,7 @@ namespace APP.Pomodoro.Controller
         private readonly TextField _focusValue;  // name="psp-focus-value"
         private readonly TextField _breakValue;  // name="psp-break-value"
         private readonly Label  _soundLabel;     // name="psp-sound-label"
-        private readonly Button _applyBtn;       // name="psp-apply-btn"
+        private readonly Button _applyBtn;       // name="apply-btn"
 
         // 最近一次 Refresh 时的 Model 值，用于非法输入回滚与去抖
         private int _lastFocusMin = 1;
@@ -54,7 +54,7 @@ namespace APP.Pomodoro.Controller
             _focusValue   = panelRoot.Q<TextField>("psp-focus-value");
             _breakValue   = panelRoot.Q<TextField>("psp-break-value");
             _soundLabel   = panelRoot.Q<Label>("psp-sound-label");
-            _applyBtn     = panelRoot.Q<Button>("psp-apply-btn");
+            _applyBtn     = panelRoot.Q<Button>("apply-btn");
 
             RegisterToggleCallbacks();
             RegisterDurationCallbacks();
@@ -97,7 +97,7 @@ namespace APP.Pomodoro.Controller
                 return;
             }
 
-            _applyBtn.EnableInClassList("psp-apply-btn--hidden", !visible);
+            _applyBtn.EnableInClassList("apply-btn--hidden", !visible);
         }
 
         /// <summary>
