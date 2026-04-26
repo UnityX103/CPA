@@ -170,24 +170,39 @@ namespace APP.NetworkIntegration.Tests
         /// </summary>
         private static void SetDisplayDropdownVisualState(VisualElement root, int index)
         {
-            DropdownField dropdown = root.Q<DropdownField>("gsp-display-dropdown");
-            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
+            Label valueLabel = root.Q<Label>("gsp-display-dropdown-value");
+            VisualElement menu = root.Q<VisualElement>("gsp-display-menu");
+            Assert.That(valueLabel, Is.Not.Null, "必须能加载 gsp-display-dropdown-value。");
+            Assert.That(menu, Is.Not.Null, "必须能加载 gsp-display-menu。");
 
             var choices = new System.Collections.Generic.List<string>
             {
                 "显示器 1（1920×1080）",
                 "显示器 2（2560×1440）",
             };
-            dropdown.choices = choices;
             int safe = Mathf.Clamp(index, 0, choices.Count - 1);
-            dropdown.SetValueWithoutNotify(choices[safe]);
+            valueLabel.text = choices[safe];
+
+            menu.Clear();
+            foreach (string choice in choices)
+            {
+                var item = new VisualElement();
+                item.AddToClassList("gsp-display-menu-item");
+                var label = new Label(choice);
+                label.AddToClassList("gsp-display-menu-item-label");
+                item.Add(label);
+                menu.Add(item);
+            }
+            menu.EnableInClassList("gsp-display-menu--hidden", true);
         }
 
         private static VisualElement CreateRuntimePanelRoot()
         {
             var go = new GameObject("SettingsImportPixelImageValidationRoot");
             UIDocument document = go.AddComponent<UIDocument>();
-            document.panelSettings = LoadAsset<PanelSettings>(PanelSettingsPath);
+            PanelSettings panelSettings = UnityEngine.Object.Instantiate(LoadAsset<PanelSettings>(PanelSettingsPath));
+            panelSettings.scale = 1f;
+            document.panelSettings = panelSettings;
 
             VisualElement root = document.rootVisualElement;
             root.style.position = Position.Absolute;

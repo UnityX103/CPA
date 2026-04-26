@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using NZ.VisualTest;
 using NUnit.Framework;
 using UnityEngine;
@@ -19,10 +18,8 @@ namespace APP.NetworkIntegration.Tests
         private const string PanelSettingsPath = "Assets/UI_V2/PanelSettings_Settings.asset";
         private const string GlobalSettingsPanelPath = "Assets/UI_V2/Documents/GlobalSettingsPanel.uxml";
 
-        private const string DropdownMenuClassName = "unity-base-dropdown";
-        private const string DropdownMenuOuterClassName = "unity-base-dropdown__container-outer";
-        private const string DropdownMenuInnerClassName = "unity-base-dropdown__container-inner";
-        private const string DropdownMenuItemClassName = "unity-base-dropdown__item";
+        private const string DropdownMenuHiddenClassName = "gsp-display-menu--hidden";
+        private const string DropdownMenuItemClassName = "gsp-display-menu-item";
 
         [UnityTest]
         public IEnumerator GlobalSettingsDropdown_ShouldCaptureExpandedAndSelectedStates()
@@ -55,24 +52,24 @@ namespace APP.NetworkIntegration.Tests
         private IEnumerator CaptureDropdownSelectedState(VisualElement panelRoot, int optionCount)
         {
             VisualElement target = BuildPanel(panelRoot, optionCount, optionCount - 1);
-            DropdownField dropdown = target.Q<DropdownField>("gsp-display-dropdown");
-            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
+            Label valueLabel = target.Q<Label>("gsp-display-dropdown-value");
+            Assert.That(valueLabel, Is.Not.Null, "必须能加载 gsp-display-dropdown-value。");
 
             yield return WaitUntilReady(target, 60);
             yield return CaptureScreenStep(
                 $"global-settings-dropdown-{optionCount}-selected",
                 null,
-                $"full-screen; options={optionCount}; selected={dropdown.value}");
+                $"full-screen; options={optionCount}; selected={valueLabel.text}");
         }
 
         private IEnumerator CaptureDropdownExpandedState(VisualElement panelRoot, int optionCount)
         {
             VisualElement target = BuildPanel(panelRoot, optionCount, selectedIndex: 0);
-            DropdownField dropdown = target.Q<DropdownField>("gsp-display-dropdown");
-            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
+            VisualElement menu = target.Q<VisualElement>("gsp-display-menu");
+            Assert.That(menu, Is.Not.Null, "必须能加载 gsp-display-menu。");
 
             yield return WaitUntilReady(target, 60);
-            yield return OpenDropdown(dropdown, panelRoot, optionCount);
+            yield return OpenDropdown(menu, panelRoot, optionCount);
             yield return CaptureScreenStep(
                 $"global-settings-dropdown-{optionCount}-expanded",
                 null,
@@ -81,8 +78,6 @@ namespace APP.NetworkIntegration.Tests
 
         private static VisualElement BuildPanel(VisualElement panelRoot, int optionCount, int selectedIndex)
         {
-            RemoveDropdownMenus(panelRoot);
-
             VisualTreeAsset template = LoadAsset<VisualTreeAsset>(GlobalSettingsPanelPath);
             TemplateContainer container = template.CloneTree();
             panelRoot.Clear();
@@ -92,13 +87,25 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(target, Is.Not.Null, "必须能加载 GlobalSettingsPanel.uxml 的 gsp-root。");
             target.style.width = 572;
 
-            DropdownField dropdown = target.Q<DropdownField>("gsp-display-dropdown");
-            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
+            Label valueLabel = target.Q<Label>("gsp-display-dropdown-value");
+            VisualElement menu = target.Q<VisualElement>("gsp-display-menu");
+            Assert.That(valueLabel, Is.Not.Null, "必须能加载 gsp-display-dropdown-value。");
+            Assert.That(menu, Is.Not.Null, "必须能加载 gsp-display-menu。");
 
             List<string> choices = BuildDisplayChoices(optionCount);
-            dropdown.choices = choices;
             int safeIndex = Mathf.Clamp(selectedIndex, 0, choices.Count - 1);
-            dropdown.SetValueWithoutNotify(choices[safeIndex]);
+            valueLabel.text = choices[safeIndex];
+            menu.Clear();
+            foreach (string choice in choices)
+            {
+                var item = new VisualElement();
+                item.AddToClassList(DropdownMenuItemClassName);
+                var label = new Label(choice);
+                label.AddToClassList("gsp-display-menu-item-label");
+                item.Add(label);
+                menu.Add(item);
+            }
+            menu.EnableInClassList(DropdownMenuHiddenClassName, true);
 
             return target;
         }
@@ -116,14 +123,9 @@ namespace APP.NetworkIntegration.Tests
             return choices;
         }
 
-        private static IEnumerator OpenDropdown(DropdownField dropdown, VisualElement panelRoot, int expectedItemCount)
+        private static IEnumerator OpenDropdown(VisualElement menu, VisualElement panelRoot, int expectedItemCount)
         {
-            MethodInfo showMenu = typeof(DropdownField).GetMethod(
-                "ShowMenu",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.That(showMenu, Is.Not.Null, "Unity DropdownField 必须能通过 ShowMenu 展开菜单。");
-
-            showMenu.Invoke(dropdown, null);
+            menu.EnableInClassList(DropdownMenuHiddenClassName, false);
             yield return WaitUntilMenuReady(panelRoot, expectedItemCount, 30);
         }
 
@@ -134,9 +136,9 @@ namespace APP.NetworkIntegration.Tests
         {
             for (int frame = 0; frame < frameLimit; frame++)
             {
-                VisualElement menu = panelRoot.Query<VisualElement>(className: DropdownMenuClassName).First();
                 int itemCount = panelRoot.Query<VisualElement>(className: DropdownMenuItemClassName).ToList().Count;
-                if (menu != null && menu.worldBound.width > 0f && itemCount == expectedItemCount)
+                VisualElement firstItem = panelRoot.Query<VisualElement>(className: DropdownMenuItemClassName).First();
+                if (firstItem != null && firstItem.worldBound.width > 0f && itemCount == expectedItemCount)
                 {
                     yield break;
                 }
@@ -146,40 +148,6 @@ namespace APP.NetworkIntegration.Tests
 
             int actualCount = panelRoot.Query<VisualElement>(className: DropdownMenuItemClassName).ToList().Count;
             Assert.Fail($"等待下拉菜单展开超时：expected={expectedItemCount}, actual={actualCount}");
-        }
-
-        private static void RemoveDropdownMenus(VisualElement panelRoot)
-        {
-            VisualElement searchRoot = GetPanelVisualTree(panelRoot) ?? panelRoot;
-            RemoveDropdownElements(searchRoot, DropdownMenuItemClassName);
-            RemoveDropdownElements(searchRoot, DropdownMenuInnerClassName);
-            RemoveDropdownElements(searchRoot, DropdownMenuOuterClassName);
-            RemoveDropdownElements(searchRoot, DropdownMenuClassName);
-        }
-
-        private static VisualElement GetPanelVisualTree(VisualElement element)
-        {
-            if (element.panel == null)
-            {
-                return null;
-            }
-
-            PropertyInfo visualTree = element.panel.GetType().GetProperty(
-                "visualTree",
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return visualTree?.GetValue(element.panel) as VisualElement;
-        }
-
-        private static void RemoveDropdownElements(VisualElement searchRoot, string className)
-        {
-            List<VisualElement> elements = searchRoot.Query<VisualElement>(className: className).ToList();
-            foreach (VisualElement element in elements)
-            {
-                if (element.hierarchy.parent != null)
-                {
-                    element.RemoveFromHierarchy();
-                }
-            }
         }
 
         private void AssertCaptureArtifact(string fileName)
@@ -192,7 +160,9 @@ namespace APP.NetworkIntegration.Tests
         {
             var go = new GameObject("GlobalSettingsDropdownImageValidationRoot");
             UIDocument document = go.AddComponent<UIDocument>();
-            document.panelSettings = LoadAsset<PanelSettings>(PanelSettingsPath);
+            PanelSettings panelSettings = UnityEngine.Object.Instantiate(LoadAsset<PanelSettings>(PanelSettingsPath));
+            panelSettings.scale = 1f;
+            document.panelSettings = panelSettings;
 
             VisualElement root = document.rootVisualElement;
             root.style.position = Position.Absolute;

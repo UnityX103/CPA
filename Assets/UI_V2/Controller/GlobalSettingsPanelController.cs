@@ -36,9 +36,12 @@ namespace APP.Pomodoro.Controller
         private float _pendingScale;
 
         // ─── 目标显示器 ───────────────────────────────────────────
-        private DropdownField _displayDropdown;
+        private VisualElement _displayDropdown;
+        private Label _displayValueLabel;
+        private VisualElement _displayMenu;
         private IReadOnlyList<DisplayChoice> _availableDisplays;
         private int _pendingDisplayIndex;
+        private bool _isDisplayMenuOpen;
 
         public bool IsScaleDialogVisible => _scaleDialog?.IsVisible == true;
 
@@ -77,20 +80,20 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
 
             // 目标显示器
-            _displayDropdown = root.Q<DropdownField>("gsp-display-dropdown");
+            _displayDropdown = root.Q<VisualElement>("gsp-display-dropdown");
+            _displayValueLabel = root.Q<Label>("gsp-display-dropdown-value");
+            _displayMenu = root.Q<VisualElement>("gsp-display-menu");
             if (_displayDropdown != null)
             {
                 _availableDisplays = this.SendQuery(new Q_GetAvailableDisplays());
-                var choices = new List<string>(_availableDisplays.Count);
-                foreach (var d in _availableDisplays) choices.Add(d.Label);
-                _displayDropdown.choices = choices;
+                RebuildDisplayMenu();
 
                 int initialIndex = Mathf.Clamp(pomo.TargetMonitorIndex.Value, 0, _availableDisplays.Count - 1);
                 _pendingDisplayIndex = initialIndex;
                 settings.PreviewTargetDisplay.SetValueWithoutEvent(initialIndex);
                 SyncDropdownFromIndex(initialIndex);
 
-                _displayDropdown.RegisterValueChangedCallback(OnDropdownChanged);
+                _displayDropdown.RegisterCallback<PointerUpEvent>(OnDisplayDropdownPointerUp);
             }
 
             settings.PreviewTargetDisplay.Register(SyncDropdownFromIndex)
@@ -137,12 +140,7 @@ namespace APP.Pomodoro.Controller
         internal void OverrideAvailableDisplaysForTest(IReadOnlyList<DisplayChoice> displays)
         {
             _availableDisplays = displays;
-            if (_displayDropdown != null)
-            {
-                var choices = new List<string>(displays.Count);
-                foreach (var d in displays) choices.Add(d.Label);
-                _displayDropdown.choices = choices;
-            }
+            RebuildDisplayMenu();
             int committed = this.GetModel<IPomodoroModel>().TargetMonitorIndex.Value;
             int safe = displays.Count == 0 ? 0 : Mathf.Clamp(committed, 0, displays.Count - 1);
             _pendingDisplayIndex = safe;
@@ -150,7 +148,7 @@ namespace APP.Pomodoro.Controller
         }
 
         /// <summary>测试钩子（internal）：当前 dropdown 显示的字符串。</summary>
-        internal string CurrentDropdownValueForTest => _displayDropdown?.value;
+        internal string CurrentDropdownValueForTest => _displayValueLabel?.text;
 
         /// <summary>测试钩子（internal）：直接触发 ConfirmDialog 的"保留"。</summary>
         internal void TriggerScaleDialogConfirmForTest() => _scaleDialog?.TriggerConfirmForTest();
@@ -189,20 +187,15 @@ namespace APP.Pomodoro.Controller
                 countdownSeconds: CountdownSeconds);
         }
 
-        private void OnDropdownChanged(ChangeEvent<string> evt)
+        private void OnDisplayDropdownPointerUp(PointerUpEvent evt)
         {
-            if (_availableDisplays == null) return;
-            int newIndex = -1;
-            for (int i = 0; i < _availableDisplays.Count; i++)
+            evt.StopPropagation();
+            if (_availableDisplays == null || _availableDisplays.Count == 0)
             {
-                if (_availableDisplays[i].Label == evt.newValue)
-                {
-                    newIndex = i;
-                    break;
-                }
+                return;
             }
-            if (newIndex < 0) return;
-            HandleDropdownIndex(newIndex);
+
+            SetDisplayMenuVisible(!_isDisplayMenuOpen);
         }
 
         private void HandleDropdownIndex(int newIndex)
@@ -250,7 +243,44 @@ namespace APP.Pomodoro.Controller
         {
             if (_displayDropdown == null || _availableDisplays == null || _availableDisplays.Count == 0) return;
             int safe = Mathf.Clamp(index, 0, _availableDisplays.Count - 1);
-            _displayDropdown.SetValueWithoutNotify(_availableDisplays[safe].Label);
+            if (_displayValueLabel != null) _displayValueLabel.text = _availableDisplays[safe].Label;
+        }
+
+        private void RebuildDisplayMenu()
+        {
+            if (_displayMenu == null || _availableDisplays == null)
+            {
+                return;
+            }
+
+            _displayMenu.Clear();
+            for (int i = 0; i < _availableDisplays.Count; i++)
+            {
+                int index = i;
+                var item = new VisualElement();
+                item.AddToClassList("gsp-display-menu-item");
+
+                var label = new Label(_availableDisplays[i].Label);
+                label.AddToClassList("gsp-display-menu-item-label");
+                item.Add(label);
+
+                item.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SetDisplayMenuVisible(false);
+                    HandleDropdownIndex(index);
+                });
+
+                _displayMenu.Add(item);
+            }
+
+            SetDisplayMenuVisible(false);
+        }
+
+        private void SetDisplayMenuVisible(bool visible)
+        {
+            _isDisplayMenuOpen = visible;
+            _displayMenu?.EnableInClassList("gsp-display-menu--hidden", !visible);
         }
 
         private void RefreshProgressFill(float value)

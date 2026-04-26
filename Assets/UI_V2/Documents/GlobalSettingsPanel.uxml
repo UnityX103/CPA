@@ -29,9 +29,11 @@
         <ui:VisualElement class="gsp-display-card">
             <ui:Label text="目标显示器" class="gsp-display-label" />
             <ui:VisualElement class="gsp-display-dropdown-wrap">
-                <ui:DropdownField name="gsp-display-dropdown" class="gsp-display-dropdown" />
-                <!-- 显式覆盖一个 chevron Label，保证 PlayMode 下也有"可下拉"提示 -->
-                <ui:Label text="▾" class="gsp-display-chevron" picking-mode="Ignore" />
+                <ui:VisualElement name="gsp-display-dropdown" class="gsp-display-dropdown">
+                    <ui:Label name="gsp-display-dropdown-value" class="gsp-display-dropdown-value" />
+                    <ui:Label text="▾" class="gsp-display-chevron" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="gsp-display-menu" class="gsp-display-menu gsp-display-menu--hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
