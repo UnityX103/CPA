@@ -5,8 +5,8 @@ namespace APP.Pomodoro.System
 {
     public interface IWindowPositionSystem : ISystem
     {
-        /// <summary>初始化：传入 UniWindowController 实例和窗口高度/边距</summary>
-        void Initialize(Kirurobo.UniWindowController uwc, float windowHeight, float verticalMargin);
+        /// <summary>初始化：传入 UniWindowController 实例。窗口几何固定为铺满目标显示器。</summary>
+        void Initialize(Kirurobo.UniWindowController uwc);
 
         /// <summary>将窗口移动到指定显示器并铺满该显示器（同时写入 IPomodoroModel.TargetMonitorIndex）</summary>
         void MoveToMonitor(int monitorIndex);

@@ -25,16 +25,8 @@ namespace APP.Pomodoro.Config
         public int DefaultRounds = 4;
 
         [Header("窗口位置")]
-        [Tooltip("初始屏幕锚点（顶端/底端）")]
+        [Tooltip("初始屏幕锚点（顶端/底端，目前仅用于持久化兼容，窗口已改为铺满目标显示器）")]
         public PomodoroWindowAnchor DefaultWindowAnchor = PomodoroWindowAnchor.Bottom;
-
-        [Tooltip("窗口高度（像素），用于计算底端 Y 坐标")]
-        [Min(1f)]
-        public float FixedWindowHeight = 120f;
-
-        [Tooltip("屏幕边缘留白（像素）")]
-        [Min(0f)]
-        public float VerticalMargin = 0f;
 
         [Header("完成提示")]
         [Tooltip("在底端计时完成后，是否默认自动跳到顶端提示")]

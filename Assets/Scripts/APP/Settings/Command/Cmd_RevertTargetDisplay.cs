@@ -2,6 +2,7 @@ using APP.Pomodoro.Model;
 using APP.Pomodoro.System;
 using APP.Settings.Model;
 using QFramework;
+using UnityEngine;
 
 namespace APP.Settings.Command
 {
@@ -17,6 +18,9 @@ namespace APP.Settings.Command
             var pomo     = this.GetModel<IPomodoroModel>();
 
             int committed = pomo.TargetMonitorIndex.Value;
+            int prevPreview = settings.PreviewTargetDisplay.Value;
+            Debug.Log($"[Cmd_RevertTargetDisplay] 还原: PreviewTargetDisplay({prevPreview}→{committed}), " +
+                      $"committed TargetMonitorIndex={committed}");
             settings.PreviewTargetDisplay.Value = committed;
             this.GetSystem<IWindowPositionSystem>().PreviewMoveToMonitor(committed);
         }

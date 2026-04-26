@@ -167,7 +167,8 @@ namespace APP.Pomodoro.Controller
         {
             _pendingScale    = SnapToStep(evt.newValue);
             if (_valueLabel != null) _valueLabel.text = FormatScale(_pendingScale);
-            RefreshProgressFill(_pendingScale);
+            // 用原始（未 snap）值刷新填充，避免拖动时 dragger 连续移动而 fill 按 0.1 跳变带来的"慢一帧"错觉
+            RefreshProgressFill(evt.newValue);
         }
 
         private void OnApplyClicked()
@@ -205,21 +206,32 @@ namespace APP.Pomodoro.Controller
 
         private void HandleDropdownIndex(int newIndex)
         {
+            Debug.Log($"[GlobalSettingsPanelController][HandleDropdownIndex] 用户选择 newIndex={newIndex}, " +
+                      $"availableDisplays.Count={_availableDisplays?.Count ?? -1}, " +
+                      $"committed={this.GetModel<IPomodoroModel>().TargetMonitorIndex.Value}, " +
+                      $"preview={this.GetModel<ISettingsModel>().PreviewTargetDisplay.Value}, " +
+                      $"_scaleDialog.IsVisible={_scaleDialog?.IsVisible}");
             if (_availableDisplays == null || _availableDisplays.Count == 0) return;
             int clamped = Mathf.Clamp(newIndex, 0, _availableDisplays.Count - 1);
             int committed = this.GetModel<IPomodoroModel>().TargetMonitorIndex.Value;
 
-            if (clamped == committed) return;
+            if (clamped == committed)
+            {
+                Debug.Log($"[GlobalSettingsPanelController][HandleDropdownIndex] clamped({clamped})==committed, 不切屏");
+                return;
+            }
 
             // 弹窗已存在 —— 拒绝新的预览，并把 dropdown 同步回当前预览值（保持视觉一致）
             if (_scaleDialog.IsVisible)
             {
                 int currentPreview = this.GetModel<ISettingsModel>().PreviewTargetDisplay.Value;
+                Debug.Log($"[GlobalSettingsPanelController][HandleDropdownIndex] 弹窗已显示，拒绝新预览，回滚 dropdown→{currentPreview}");
                 SyncDropdownFromIndex(currentPreview);
                 return;
             }
 
             _pendingDisplayIndex = clamped;
+            Debug.Log($"[GlobalSettingsPanelController][HandleDropdownIndex] 派发 Cmd_SetPreviewTargetDisplay({clamped})");
             this.SendCommand(new Cmd_SetPreviewTargetDisplay(clamped));
 
             string targetLabel  = _availableDisplays[clamped].Label;

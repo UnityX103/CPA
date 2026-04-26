@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <ui:Style src="../../Styles/Variables.uss"/>
+    <ui:Style src="../../Styles/Components/InputSlider.uss"/>
+
+    <!--
+      InputSlider — 统一滑动条组件
+      对应 Pencil 组件: Input/Slider (id = YwCv6)
+
+      C# 绑定名称：
+        gsp-scale-slider-wrap
+        gsp-scale-slider-fill
+        gsp-scale-slider
+        gsp-scale-value
+    -->
+    <ui:VisualElement class="comp-input-slider">
+        <ui:VisualElement name="gsp-scale-slider-wrap" class="comp-input-slider__wrap">
+            <ui:VisualElement class="comp-input-slider__track" />
+            <ui:VisualElement name="gsp-scale-slider-fill" class="comp-input-slider__fill" />
+            <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0"
+                       value="1.25" class="comp-input-slider__control" />
+        </ui:VisualElement>
+        <ui:Label name="gsp-scale-value" text="1.0×" class="comp-input-slider__value" />
+    </ui:VisualElement>
+</ui:UXML>

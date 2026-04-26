@@ -7,7 +7,7 @@ namespace APP.Settings.Model
     public sealed class SettingsModel : AbstractModel, ISettingsModel
     {
         public const float MinScale     = 0.5f;
-        public const float MaxScale     = 2.0f;
+        public const float MaxScale     = 3.0f;
         public const float DefaultScale = 1.0f;
 
         private const string UiScaleKey = "Settings.UiScale";

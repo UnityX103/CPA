@@ -5,7 +5,8 @@
         "APP.Runtime",
         "APP.UI_V2",
         "NZ.VisualTest",
-        "UnityEngine.TestRunner"
+        "UnityEngine.TestRunner",
+        "Kirurobo.UniWindowController"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -17,6 +17,9 @@ namespace APP.Settings.Command
         protected override void OnExecute()
         {
             int safe = Mathf.Max(0, _index);
+            int prevPreview = this.GetModel<ISettingsModel>().PreviewTargetDisplay.Value;
+            Debug.Log($"[Cmd_SetPreviewTargetDisplay] _index={_index}, safe={safe}, " +
+                      $"PreviewTargetDisplay({prevPreview}→{safe})");
             this.GetModel<ISettingsModel>().PreviewTargetDisplay.Value = safe;
             this.GetSystem<IWindowPositionSystem>().PreviewMoveToMonitor(safe);
         }

@@ -4,6 +4,8 @@
          editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/GlobalSettingsPanel.uss"/>
+    <ui:Style src="../Styles/Components/InputSlider.uss"/>
+    <ui:Template name="InputSlider" src="Components/InputSlider.uxml"/>
 
     <ui:VisualElement name="gsp-root" class="gsp-root">
         <!-- Pencil: gspApply — 复用 SettingsApplyRow；按钮 name="apply-btn" -->
@@ -14,15 +16,7 @@
         <!-- Pencil: gspScale — 界面缩放卡片 -->
         <ui:VisualElement class="gsp-scale-card">
             <ui:Label text="界面缩放" class="gsp-scale-label" />
-            <ui:VisualElement class="gsp-scale-row">
-                <ui:VisualElement name="gsp-scale-slider-wrap" class="gsp-scale-slider-wrap">
-                    <ui:VisualElement class="gsp-scale-track" />
-                    <ui:VisualElement name="gsp-scale-slider-fill" class="gsp-scale-slider-fill" />
-                    <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0"
-                               value="1.25" class="gsp-scale-slider" />
-                </ui:VisualElement>
-                <ui:Label name="gsp-scale-value" text="1.0×" class="gsp-scale-value" />
-            </ui:VisualElement>
+            <ui:Instance name="gsp-scale-row" template="InputSlider" class="gsp-scale-row" />
         </ui:VisualElement>
 
         <!-- Pencil: gspDisplay — 目标显示器卡片 -->

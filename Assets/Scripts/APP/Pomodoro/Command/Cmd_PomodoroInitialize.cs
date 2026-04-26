@@ -24,11 +24,9 @@ namespace APP.Pomodoro.Command
 
         protected override void OnExecute()
         {
-            // 初始化窗口定位系统（不依赖 config）
+            // 初始化窗口定位系统（窗口几何固定为铺满目标显示器，不再依赖 config 高度/边距）
             IWindowPositionSystem wps = this.GetSystem<IWindowPositionSystem>();
-            float windowHeight = _config?.FixedWindowHeight ?? 120f;
-            float verticalMargin = _config?.VerticalMargin ?? 4f;
-            wps.Initialize(_uwc, windowHeight, verticalMargin);
+            wps.Initialize(_uwc);
 
             IPomodoroModel model = this.GetModel<IPomodoroModel>();
 

@@ -39,88 +39,8 @@
 }
 
 .gsp-scale-row {
-    flex-direction: row;
-    align-items: center;
-}
-
-.gsp-scale-slider-wrap {
-    flex-grow: 1;
-    margin-right: 12px;
     height: 24px;
-    border-radius: 12px;
-    background-color: rgba(0, 0, 0, 0);
-    overflow: visible;
-}
-
-.gsp-scale-track {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 24px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-width: 1px;
-    border-color: var(--color-border-gray);
-    border-radius: 12px;
-}
-
-.gsp-scale-slider-fill {
-    position: absolute;
-    left: 2px;
-    top: 2px;
-    height: 20px;
-    width: 50%;
-    background-color: rgb(102, 184, 255);
-    border-radius: 10px;
-}
-
-.gsp-scale-slider {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    height: 24px;
-    margin-left: 0;
-    margin-right: 0;
-    background-color: rgba(0, 0, 0, 0);
-}
-
-.gsp-scale-slider .unity-base-slider__tracker {
-    height: 24px;
-    top: 0;
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
-    border-radius: 12px;
-}
-
-.gsp-scale-slider .unity-base-slider__drag-container {
-    height: 24px;
-}
-
-.gsp-scale-slider .unity-base-slider__dragger,
-.gsp-scale-slider.unity-base-slider--horizontal .unity-base-slider__dragger,
-.gsp-scale-slider #unity-dragger {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    max-width: 24px;
-    min-height: 24px;
-    max-height: 24px;
-    margin-top: 0;
-    top: 0;
-    background-color: var(--color-bg-white);
-    border-color: rgb(102, 184, 255);
-    border-width: 2px;
-    border-radius: 12px;
-}
-
-.gsp-scale-value {
-    color: var(--color-text-dark);
-    font-size: 14px;
-    -unity-font-style: bold;
-    min-width: 48px;
-    -unity-text-align: middle-right;
+    width: 100%;
 }
 
 /* ─── 目标显示器卡片 ─────────────────────────────────────── */

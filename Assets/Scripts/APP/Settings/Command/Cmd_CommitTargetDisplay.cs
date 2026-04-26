@@ -1,6 +1,7 @@
 using APP.Pomodoro.Model;
 using APP.Settings.Model;
 using QFramework;
+using UnityEngine;
 
 namespace APP.Settings.Command
 {
@@ -14,7 +15,10 @@ namespace APP.Settings.Command
         {
             var settings = this.GetModel<ISettingsModel>();
             var pomo     = this.GetModel<IPomodoroModel>();
-            pomo.TargetMonitorIndex.Value = settings.PreviewTargetDisplay.Value;
+            int from = pomo.TargetMonitorIndex.Value;
+            int to   = settings.PreviewTargetDisplay.Value;
+            Debug.Log($"[Cmd_CommitTargetDisplay] TargetMonitorIndex({from}→{to})");
+            pomo.TargetMonitorIndex.Value = to;
         }
     }
 }
