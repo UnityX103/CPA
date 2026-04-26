@@ -65,11 +65,14 @@ namespace APP.NetworkIntegration.Tests
         private IEnumerator CaptureDropdownExpandedState(VisualElement panelRoot, int optionCount)
         {
             VisualElement target = BuildPanel(panelRoot, optionCount, selectedIndex: 0);
+            VisualElement dropdown = target.Q<VisualElement>("gsp-display-dropdown");
             VisualElement menu = target.Q<VisualElement>("gsp-display-menu");
+            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
             Assert.That(menu, Is.Not.Null, "必须能加载 gsp-display-menu。");
 
             yield return WaitUntilReady(target, 60);
             yield return OpenDropdown(menu, panelRoot, optionCount);
+            AssertDropdownMenuMatchesFieldWidth(dropdown, menu);
             yield return CaptureScreenStep(
                 $"global-settings-dropdown-{optionCount}-expanded",
                 null,
@@ -127,6 +130,16 @@ namespace APP.NetworkIntegration.Tests
         {
             menu.EnableInClassList(DropdownMenuHiddenClassName, false);
             yield return WaitUntilMenuReady(panelRoot, expectedItemCount, 30);
+        }
+
+        private static void AssertDropdownMenuMatchesFieldWidth(VisualElement dropdown, VisualElement menu)
+        {
+            const float Tolerance = 1f;
+            Rect dropdownBounds = dropdown.worldBound;
+            Rect menuBounds = menu.worldBound;
+
+            Assert.That(menuBounds.xMin, Is.EqualTo(dropdownBounds.xMin).Within(Tolerance), "下拉选项左边缘必须对齐下拉条。");
+            Assert.That(menuBounds.width, Is.EqualTo(dropdownBounds.width).Within(Tolerance), "下拉选项宽度必须等于下拉条宽度。");
         }
 
         private static IEnumerator WaitUntilMenuReady(

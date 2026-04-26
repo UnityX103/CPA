@@ -142,6 +142,7 @@
 
 .gsp-display-dropdown-wrap {
     position: relative;
+    width: 100%;
     height: 36px;
     overflow: visible;
 }
@@ -183,10 +184,11 @@
 .gsp-display-menu {
     position: absolute;
     left: 0;
-    right: 0;
     top: 40px;
+    width: 100%;
     min-height: 0;
-    min-width: 360px;
+    min-width: 0;
+    max-width: 100%;
     background-color: var(--color-bg-white);
     border-width: 1px;
     border-color: var(--color-border-gray);
