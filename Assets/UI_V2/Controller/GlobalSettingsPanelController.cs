@@ -29,11 +29,14 @@ namespace APP.Pomodoro.Controller
 
         // ─── 缩放 ─────────────────────────────────────────────────
         private Slider _slider;
+        private VisualElement _sliderWrap;
         private VisualElement _progressFill;
         private Label _valueLabel;
         private Button _applyBtn;
         private ConfirmDialogController _scaleDialog;
         private float _pendingScale;
+        private const float ScaleSliderDraggerSize = 24f;
+        private const float ScaleSliderFillLeftInset = 2f;
 
         // ─── 目标显示器 ───────────────────────────────────────────
         private VisualElement _displayDropdown;
@@ -55,6 +58,7 @@ namespace APP.Pomodoro.Controller
             var pomo     = this.GetModel<IPomodoroModel>();
 
             _slider     = root.Q<Slider>("gsp-scale-slider");
+            _sliderWrap = root.Q<VisualElement>("gsp-scale-slider-wrap");
             _progressFill = root.Q<VisualElement>("gsp-scale-slider-fill");
             _valueLabel = root.Q<Label>("gsp-scale-value");
             _applyBtn   = root.Q<Button>("apply-btn");
@@ -74,6 +78,7 @@ namespace APP.Pomodoro.Controller
             SyncSliderFromModel(settings.UiScale.Value);
 
             _slider?.RegisterValueChangedCallback(OnSliderChanged);
+            _sliderWrap?.RegisterCallback<GeometryChangedEvent>(_ => RefreshProgressFill(_pendingScale));
             if (_applyBtn != null) _applyBtn.clicked += OnApplyClicked;
 
             settings.UiScale.Register(SyncSliderFromModel)
@@ -287,8 +292,27 @@ namespace APP.Pomodoro.Controller
         {
             if (_progressFill == null) return;
 
-            float normalized = Mathf.InverseLerp(SettingsModel.MinScale, SettingsModel.MaxScale, value);
-            _progressFill.style.width = Length.Percent(Mathf.Clamp01(normalized) * 100f);
+            float trackWidth = _sliderWrap?.resolvedStyle.width ?? 0f;
+            if (trackWidth <= 0f)
+            {
+                trackWidth = _progressFill.parent?.resolvedStyle.width ?? 0f;
+            }
+
+            if (trackWidth <= 0f)
+            {
+                _progressFill.style.width = 0f;
+                return;
+            }
+
+            _progressFill.style.width = CalculateProgressFillWidth(value, trackWidth);
+        }
+
+        internal static float CalculateProgressFillWidth(float value, float trackWidth)
+        {
+            float normalized = Mathf.Clamp01(Mathf.InverseLerp(SettingsModel.MinScale, SettingsModel.MaxScale, value));
+            float dragRange = Mathf.Max(0f, trackWidth - ScaleSliderDraggerSize);
+            float thumbCenterX = (ScaleSliderDraggerSize * 0.5f) + (dragRange * normalized);
+            return Mathf.Max(0f, thumbCenterX - ScaleSliderFillLeftInset);
         }
 
         internal static float  SnapToStep(float v) => Mathf.Round(v * 10f) / 10f;

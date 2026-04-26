@@ -57,11 +57,13 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(slider, Is.Not.Null, "必须能加载 gsp-scale-slider。");
             slider.lowValue = 0.5f;
             slider.highValue = 2.0f;
-            SetSliderVisualState(container, slider, 1.25f);
+            slider.SetValueWithoutNotify(1.25f);
 
             SetDisplayDropdownVisualState(target, 0);
 
             yield return WaitUntilReady(target, 60);
+            SetSliderVisualState(container, slider, 1.25f);
+            yield return null;
             yield return CaptureVisualStep(
                 "global-settings-half",
                 target,
@@ -110,7 +112,7 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(slider, Is.Not.Null, "必须能加载 gsp-scale-slider。");
             slider.lowValue = 0.5f;
             slider.highValue = 2.0f;
-            SetSliderVisualState(container, slider, 1.5f);
+            slider.SetValueWithoutNotify(1.5f);
 
             Label valueLabel = target.Q<Label>("gsp-scale-value");
             Assert.That(valueLabel, Is.Not.Null, "必须能加载 gsp-scale-value。");
@@ -122,6 +124,8 @@ namespace APP.NetworkIntegration.Tests
             SetDisplayDropdownVisualState(target, 1);
 
             yield return WaitUntilReady(target, 60);
+            SetSliderVisualState(container, slider, 1.5f);
+            yield return null;
             yield return CaptureVisualStep(
                 "global-settings-changed-value",
                 target,
@@ -158,10 +162,23 @@ namespace APP.NetworkIntegration.Tests
             slider.SetValueWithoutNotify(value);
 
             VisualElement fill = root.Q<VisualElement>("gsp-scale-slider-fill");
+            VisualElement wrap = root.Q<VisualElement>("gsp-scale-slider-wrap");
             Assert.That(fill, Is.Not.Null, "必须能加载 gsp-scale-slider-fill。");
+            Assert.That(wrap, Is.Not.Null, "必须能加载 gsp-scale-slider-wrap。");
+            Assert.That(wrap.resolvedStyle.width, Is.GreaterThan(0f), "滑条容器必须已完成布局。");
 
-            float normalized = Mathf.InverseLerp(slider.lowValue, slider.highValue, value);
-            fill.style.width = Length.Percent(Mathf.Clamp01(normalized) * 100f);
+            fill.style.width = CalculateScaleFillWidth(slider, value, wrap.resolvedStyle.width);
+        }
+
+        private static float CalculateScaleFillWidth(Slider slider, float value, float trackWidth)
+        {
+            const float DraggerSize = 24f;
+            const float FillLeftInset = 2f;
+
+            float normalized = Mathf.Clamp01(Mathf.InverseLerp(slider.lowValue, slider.highValue, value));
+            float dragRange = Mathf.Max(0f, trackWidth - DraggerSize);
+            float thumbCenterX = (DraggerSize * 0.5f) + (dragRange * normalized);
+            return Mathf.Max(0f, thumbCenterX - FillLeftInset);
         }
 
         /// <summary>

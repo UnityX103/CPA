@@ -142,6 +142,22 @@ namespace APP.Settings.Tests
             Assert.That(_panelRoot.Q<Label>("gsp-scale-value").text, Is.EqualTo("1.3×"));
         }
 
+        [Test]
+        public void CalculateProgressFillWidth_AlignsToSliderThumbCenter()
+        {
+            const float TrackWidth = 320f;
+
+            Assert.That(
+                GlobalSettingsPanelController.CalculateProgressFillWidth(SettingsModel.MinScale, TrackWidth),
+                Is.EqualTo(10f).Within(0.001f));
+            Assert.That(
+                GlobalSettingsPanelController.CalculateProgressFillWidth(SettingsModel.DefaultScale, TrackWidth),
+                Is.EqualTo(108.666672f).Within(0.001f));
+            Assert.That(
+                GlobalSettingsPanelController.CalculateProgressFillWidth(SettingsModel.MaxScale, TrackWidth),
+                Is.EqualTo(306f).Within(0.001f));
+        }
+
         // ─── 目标显示器 ────────────────────────────────────────────
 
         [Test]
