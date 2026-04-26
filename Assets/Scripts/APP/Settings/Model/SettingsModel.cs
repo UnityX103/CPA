@@ -12,8 +12,9 @@ namespace APP.Settings.Model
 
         private const string UiScaleKey = "Settings.UiScale";
 
-        public BindableProperty<float> PreviewUiScale { get; } = new BindableProperty<float>(DefaultScale);
-        public BindableProperty<float> UiScale        { get; } = new BindableProperty<float>(DefaultScale);
+        public BindableProperty<float> PreviewUiScale       { get; } = new BindableProperty<float>(DefaultScale);
+        public BindableProperty<float> UiScale              { get; } = new BindableProperty<float>(DefaultScale);
+        public BindableProperty<int>   PreviewTargetDisplay { get; } = new BindableProperty<int>(0);
 
         protected override void OnInit()
         {

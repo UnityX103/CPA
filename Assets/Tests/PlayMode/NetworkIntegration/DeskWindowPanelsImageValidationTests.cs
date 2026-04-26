@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
@@ -64,11 +63,13 @@ namespace APP.NetworkIntegration.Tests
             // 等 TextMeshPro/SDF 字体完成加载 + 多帧渲染 pass 完成
             yield return WaitForFrames(30);
 
-            yield return CaptureScaled(
+            // 项目约定：所有视觉测试都用 full-screen 截图。
+            Assert.That(pomodoroRoot.worldBound.width,  Is.GreaterThan(0f));
+            Assert.That(pomodoroRoot.worldBound.height, Is.GreaterThan(0f));
+            yield return CaptureScreenStep(
                 "pomodoro-panel",
-                pomodoroRoot,
                 $"{BaselineDirectory}/pomodoro-panel-baseline.png",
-                "YRqeB pomodoroPanel");
+                "YRqeB pomodoroPanel / full-screen");
 
             // 2) 玩家卡片 —— 注入一个测试玩家，等 PlayerCardManager 落出 pc-root
             PlayerCardManager manager = GetPlayerCardManager(desk);
@@ -94,11 +95,12 @@ namespace APP.NetworkIntegration.Tests
             // 等 SDF 字体/图标异步加载 + 多帧渲染 pass 完成
             yield return WaitForFrames(30);
 
-            yield return CaptureScaled(
+            Assert.That(cardRoot.worldBound.width,  Is.GreaterThan(0f));
+            Assert.That(cardRoot.worldBound.height, Is.GreaterThan(0f));
+            yield return CaptureScreenStep(
                 "player-card",
-                cardRoot,
                 $"{BaselineDirectory}/player-card-baseline.png",
-                "drqFB PlayerCard");
+                "drqFB PlayerCard / full-screen");
 
             // 清理：移除测试玩家，避免污染后续测试状态
             manager.Remove(player.PlayerId);
@@ -127,60 +129,6 @@ namespace APP.NetworkIntegration.Tests
                 "02-player-card-actual.png",
                 $"{BaselineDirectory}/player-card-baseline.png");
 #endif
-        }
-
-        /// <summary>
-        /// worldBound 是面板内部坐标系（ReferenceResolution），而 ScreenCapture 按真实屏幕像素取图。
-        /// 需要先按 panel→screen 比例缩放，再调 <see cref="VisualTestImageUtility.CaptureScreenRegionToFile"/>，
-        /// 产出的尺寸才能跟 baseline（Pencil 导出，已是 2x panel 像素）对齐。
-        /// </summary>
-        private IEnumerator CaptureScaled(
-            string stepName,
-            VisualElement target,
-            string baselinePath,
-            string notes)
-        {
-            Assert.That(target, Is.Not.Null, "CaptureScaled: target 为空。");
-            Assert.That(target.panel, Is.Not.Null, "CaptureScaled: target.panel 为空，元素未挂到 UI。");
-
-            Rect panelRoot = target.panel.visualTree.worldBound;
-            float scaleX = panelRoot.width > 0 ? Screen.width / panelRoot.width : 1f;
-            float scaleY = panelRoot.height > 0 ? Screen.height / panelRoot.height : 1f;
-            Rect wb = target.worldBound;
-            Rect screenRect = new Rect(wb.x * scaleX, wb.y * scaleY, wb.width * scaleX, wb.height * scaleY);
-
-            yield return new WaitForEndOfFrame();
-
-            RectInt region = VisualTestImageUtility.CreateScreenRegionFromTopLeftRect(
-                screenRect, Screen.width, Screen.height, 0);
-            Assert.That(region.width, Is.GreaterThan(0), "截图区域宽度必须大于 0。");
-            Assert.That(region.height, Is.GreaterThan(0), "截图区域高度必须大于 0。");
-
-            // 借用 VisualImageTestBase 的私有 _stepIndex / _currentManifest 完成步骤登记
-            FieldInfo stepIndexField = typeof(VisualImageTestBase).GetField(
-                "_stepIndex", BindingFlags.Instance | BindingFlags.NonPublic);
-            FieldInfo manifestField = typeof(VisualImageTestBase).GetField(
-                "_currentManifest", BindingFlags.Instance | BindingFlags.NonPublic);
-            MethodInfo saveManifestMethod = typeof(VisualImageTestBase).GetMethod(
-                "SaveManifest", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            int next = (int)stepIndexField.GetValue(this) + 1;
-            stepIndexField.SetValue(this, next);
-
-            string fileName = VisualTestImageUtility.BuildStepArtifactFileName(next, stepName, "actual");
-            string outputPath = Path.Combine(CurrentRunDirectory, fileName);
-            VisualTestImageUtility.CaptureScreenRegionToFile(outputPath, region);
-
-            var manifest = manifestField.GetValue(this) as VisualImageTestRunManifest;
-            manifest.steps.Add(new VisualImageTestStepManifest
-            {
-                index = next,
-                name = stepName,
-                actualImagePath = fileName,
-                baselineImagePath = baselinePath,
-                notes = notes,
-            });
-            saveManifestMethod.Invoke(this, Array.Empty<object>());
         }
 
         private static PlayerCardManager GetPlayerCardManager(DeskWindowController desk)

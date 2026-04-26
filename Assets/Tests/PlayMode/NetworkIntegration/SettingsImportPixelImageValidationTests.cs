@@ -59,6 +59,8 @@ namespace APP.NetworkIntegration.Tests
             slider.highValue = 2.0f;
             SetSliderVisualState(container, slider, 1.25f);
 
+            SetDisplayDropdownVisualState(target, 0);
+
             yield return WaitUntilReady(target, 60);
             yield return CaptureVisualStep(
                 "global-settings-half",
@@ -117,6 +119,8 @@ namespace APP.NetworkIntegration.Tests
             Button applyButton = target.Q<Button>("apply-btn");
             Assert.That(applyButton, Is.Not.Null, "必须能加载 apply-btn，用于检查修改值后应用按钮表现。");
 
+            SetDisplayDropdownVisualState(target, 1);
+
             yield return WaitUntilReady(target, 60);
             yield return CaptureVisualStep(
                 "global-settings-changed-value",
@@ -134,7 +138,13 @@ namespace APP.NetworkIntegration.Tests
                 Assert.That(File.Exists(baselinePath), Is.True, $"Pencil 参考图不存在：{baselinePath}");
             }
 
-            yield return CaptureStep(stepName, target, baselinePath, stepName);
+            // 等待目标元素布局就绪后截整屏；项目约定：所有视觉测试都用 full-screen 截图，
+            // 让审图人能看到 game view 内的完整上下文（侧栏 / 标题 / 同级控件等）。
+            Assert.That(target, Is.Not.Null, "待截图的 VisualElement 不能为空。");
+            Assert.That(target.worldBound.width, Is.GreaterThan(0f), "目标元素宽度必须大于 0。");
+            Assert.That(target.worldBound.height, Is.GreaterThan(0f), "目标元素高度必须大于 0。");
+
+            yield return CaptureScreenStep(stepName, baselinePath, "full-screen");
         }
 
         private void AssertCaptureArtifact(string fileName)
@@ -152,6 +162,25 @@ namespace APP.NetworkIntegration.Tests
 
             float normalized = Mathf.InverseLerp(slider.lowValue, slider.highValue, value);
             fill.style.width = Length.Percent(Mathf.Clamp01(normalized) * 100f);
+        }
+
+        /// <summary>
+        /// 视觉测试在 PlayMode 创建的面板没有走 Controller，
+        /// 所以下拉框默认空，得手动注入 choices 和当前值才能截到目标显示器卡片。
+        /// </summary>
+        private static void SetDisplayDropdownVisualState(VisualElement root, int index)
+        {
+            DropdownField dropdown = root.Q<DropdownField>("gsp-display-dropdown");
+            Assert.That(dropdown, Is.Not.Null, "必须能加载 gsp-display-dropdown。");
+
+            var choices = new System.Collections.Generic.List<string>
+            {
+                "显示器 1（1920×1080）",
+                "显示器 2（2560×1440）",
+            };
+            dropdown.choices = choices;
+            int safe = Mathf.Clamp(index, 0, choices.Count - 1);
+            dropdown.SetValueWithoutNotify(choices[safe]);
         }
 
         private static VisualElement CreateRuntimePanelRoot()

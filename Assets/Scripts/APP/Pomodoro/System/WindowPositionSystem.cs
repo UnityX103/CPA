@@ -36,10 +36,26 @@ namespace APP.Pomodoro.System
             int previousIndex = model.TargetMonitorIndex.Value;
             model.TargetMonitorIndex.Value = safeIndex;
 
-            if (safeIndex == previousIndex || _uwc == null)
+            if (safeIndex == previousIndex)
             {
                 return;
             }
+
+            ApplyMonitorRect(safeIndex, $"MoveToMonitor({previousIndex} → {safeIndex})");
+        }
+
+        public void PreviewMoveToMonitor(int monitorIndex)
+        {
+            int monitorCount = UniWindowController.GetMonitorCount();
+            if (monitorCount <= 0) return;
+
+            int safeIndex = Mathf.Clamp(monitorIndex, 0, monitorCount - 1);
+            ApplyMonitorRect(safeIndex, $"PreviewMoveToMonitor({safeIndex})");
+        }
+
+        private void ApplyMonitorRect(int safeIndex, string logTag)
+        {
+            if (_uwc == null) return;
 
             Rect monitorRect = UniWindowController.GetMonitorRect(safeIndex);
             if (monitorRect.width <= 0f || monitorRect.height <= 0f)
@@ -48,15 +64,16 @@ namespace APP.Pomodoro.System
                 return;
             }
 
+            var anchor = this.GetModel<IPomodoroModel>().WindowAnchor.Value;
             float x = monitorRect.x;
-            float y = model.WindowAnchor.Value == PomodoroWindowAnchor.Top
+            float y = anchor == PomodoroWindowAnchor.Top
                 ? monitorRect.y + _verticalMargin
                 : monitorRect.y + monitorRect.height - _windowHeight - _verticalMargin;
 
             _uwc.windowPosition = new Vector2(x, y);
             _uwc.windowSize = new Vector2(monitorRect.width, _windowHeight);
             Debug.Log(
-                $"[WindowPositionSystem] MoveToMonitor({previousIndex} → {safeIndex}): " +
+                $"[WindowPositionSystem] {logTag}: " +
                 $"position=({x}, {y}), size=({monitorRect.width}, {_windowHeight})");
         }
 

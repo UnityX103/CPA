@@ -125,8 +125,11 @@ namespace APP.NetworkIntegration.Tests
         {
             VisualElement overlay = root.Q<VisualElement>("settings-overlay");
             Assert.That(overlay, Is.Not.Null, "settings-overlay 必须存在。");
+            Assert.That(overlay.worldBound.width, Is.GreaterThan(0f));
+            Assert.That(overlay.worldBound.height, Is.GreaterThan(0f));
 
-            yield return CaptureStep(stepName, overlay, baselinePath, "settings-overlay");
+            // 项目约定：所有视觉测试都用 full-screen 截图。
+            yield return CaptureScreenStep(stepName, baselinePath, "full-screen");
         }
 
         private static void AssertManifestStep(

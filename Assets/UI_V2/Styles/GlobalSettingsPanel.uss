@@ -122,3 +122,81 @@
     min-width: 48px;
     -unity-text-align: middle-right;
 }
+
+/* ─── 目标显示器卡片 ─────────────────────────────────────── */
+
+.gsp-display-card {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: var(--color-bg-surface);
+    border-radius: var(--radius-xl);
+    flex-direction: column;
+}
+
+.gsp-display-label {
+    color: rgb(156, 163, 175);
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+/* DropdownField 容器 —— 隐掉默认空 Label 区；整体 36px，更紧凑 */
+.gsp-display-dropdown-wrap {
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    height: 36px;
+}
+
+.gsp-display-dropdown {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    height: 36px;
+    min-height: 36px;
+}
+
+.gsp-display-dropdown > .unity-base-field__label {
+    display: none;
+}
+
+.gsp-display-dropdown > .unity-base-field__input {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    height: 36px;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 32px 0 12px;        /* 右侧给 chevron 留出空间 */
+    background-color: rgba(255, 255, 255, 0.8);
+    border-width: 1px;
+    border-color: var(--color-border-gray);
+    border-radius: 10px;
+}
+
+/* 文本垂直居中 */
+.gsp-display-dropdown .unity-base-popup-field__text {
+    flex-grow: 1;
+    color: var(--color-text-dark);
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* 隐藏 Unity 自带 arrow 元素（PlayMode 下贴图缺省时只剩占位） */
+.gsp-display-dropdown .unity-base-popup-field__arrow {
+    display: none;
+}
+
+/* 我们自己画一个 chevron Label，绝对定位在右侧，垂直居中 */
+.gsp-display-chevron {
+    position: absolute;
+    right: 12px;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    color: rgb(107, 114, 128);
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}

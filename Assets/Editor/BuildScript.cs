@@ -12,6 +12,7 @@ public static class BuildScript
 {
     private const string BuildPath = "Builds/macOS/CTClock.app";
     private const string ProfilerBuildPath = "Builds/macOS/CTClock_Profiler.app";
+    private const string WindowsBuildPath = "Builds/Win/CTClock.exe";
     /// <summary>运行验证等待秒数（等应用写出日志再读取）</summary>
     private const int VerifyRunSeconds = 8;
 
@@ -31,9 +32,24 @@ public static class BuildScript
         DoDevelopmentProfilerBuild();
     }
 
+    /// <summary>构建 Windows 64 位应用</summary>
+    [MenuItem("Build/Build Windows 64")]
+    public static void BuildWindows64()
+    {
+        DoWindowsBuild();
+    }
+
+    /// <summary>同时构建 macOS 与 Windows 两个平台（仅打包，不运行验证）</summary>
+    [MenuItem("Build/Build macOS + Windows")]
+    public static void BuildMacOSAndWindows()
+    {
+        DoBuild(runAfter: false);
+        DoWindowsBuild();
+    }
+
     // ─── 核心构建逻辑 ────────────────────────────────────────────
 
-    private static void DoBuild()
+    private static void DoBuild(bool runAfter = true)
     {
         string[] scenes = GetBuildScenes();
         if (scenes.Length == 0)
@@ -72,7 +88,67 @@ public static class BuildScript
 
         SignApplication(BuildPath);
         VerifyBuild(BuildPath);
-        RunAndCaptureLogs(BuildPath);
+        if (runAfter)
+        {
+            RunAndCaptureLogs(BuildPath);
+        }
+    }
+
+    /// <summary>构建 Windows 64 位 Standalone 应用</summary>
+    private static void DoWindowsBuild()
+    {
+        string[] scenes = GetBuildScenes();
+        if (scenes.Length == 0)
+        {
+            Debug.LogError("[BuildScript] ✗ 没有可用的场景，请在 Build Settings 中至少启用一个场景。");
+            return;
+        }
+
+        // 输出目录：Builds/Win/，先清理旧产物以避免缓存残留
+        string outputDir = Path.GetDirectoryName(Path.GetFullPath(WindowsBuildPath));
+        if (!string.IsNullOrEmpty(outputDir) && Directory.Exists(outputDir))
+        {
+            try
+            {
+                Directory.Delete(outputDir, recursive: true);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[BuildScript] ⚠ 清理旧 Windows 构建失败：{ex.Message}");
+            }
+        }
+        if (!string.IsNullOrEmpty(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
+        Debug.Log("[BuildScript] 开始构建 Windows 64 应用...");
+        foreach (string s in scenes)
+        {
+            Debug.Log($"[BuildScript]   场景: {s}");
+        }
+
+        BuildPlayerOptions options = new BuildPlayerOptions
+        {
+            scenes = scenes,
+            locationPathName = WindowsBuildPath,
+            target = BuildTarget.StandaloneWindows64,
+            targetGroup = BuildTargetGroup.Standalone,
+            options = BuildOptions.None,
+        };
+
+        BuildReport report = BuildPipeline.BuildPlayer(options);
+        BuildSummary summary = report.summary;
+
+        if (summary.result != BuildResult.Succeeded)
+        {
+            Debug.LogError($"[BuildScript] ✗ Windows 构建失败: {summary.result}");
+            Debug.LogError($"[BuildScript]   错误数: {summary.totalErrors}，警告数: {summary.totalWarnings}");
+            return;
+        }
+
+        Debug.Log($"[BuildScript] ✓ Windows 构建成功: {summary.totalSize / 1024 / 1024} MB");
+        Debug.Log($"[BuildScript] ✓ 输出路径: {Path.GetFullPath(WindowsBuildPath)}");
     }
 
     /// <summary>

@@ -33,6 +33,13 @@ namespace APP.Pomodoro.Controller
         private const int PhaseMinFontSize = 7;
         private const int PhaseMaxCharsAtBaseSize = 3;
 
+        // 玩家名自适应字号范围：基础=设计稿 14，最小=7。
+        // 9px 实测对 6 字以内长名仍 ellipsis；下探到 7 让 6~7 个汉字也能完整显示，超出再交给 USS overflow:ellipsis 兜底
+        private const float NameBaseFontSize = 14f;
+        private const float NameMinFontSize = 7f;
+        // 安全系数：避免测量值与实际渲染舍入带来的溢出
+        private const float NameSafetyFactor = 0.95f;
+
         private readonly VisualElement _root;
         private Label _nameLabel;
         private Label _phaseLabel;
@@ -43,6 +50,9 @@ namespace APP.Pomodoro.Controller
         private IPlayerCard _card;
         private VisualElement _pinBtn;
         private readonly List<IUnRegister> _unRegisters = new List<IUnRegister>();
+
+        // 防止 AutoFit 内部修改 fontSize 触发 GeometryChangedEvent 再次进入导致递归
+        private bool _isAutoFittingName;
 
         /// <summary>该卡片对应的远端玩家 ID。</summary>
         public string PlayerId { get; private set; }
@@ -84,6 +94,13 @@ namespace APP.Pomodoro.Controller
             _appLabel = _root.Q<Label>("pc-app");
             _appIcon = _root.Q<VisualElement>("pc-active-app-icon");
             _pinBtn = _root.Q<VisualElement>("pc-pin-btn");
+
+            // 玩家名容器布局变化时重新自适应字号（卡片改宽 / 时间区文本变更挤压 nameCol 等）
+            if (_nameLabel != null)
+            {
+                var nameCol = _nameLabel.parent;
+                nameCol?.RegisterCallback<GeometryChangedEvent>(_ => AutoFitNameFontSize());
+            }
             if (_pinBtn != null)
             {
                 _pinBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
@@ -99,7 +116,11 @@ namespace APP.Pomodoro.Controller
         private void ApplyData(RemotePlayerData data)
         {
             if (_nameLabel != null)
+            {
                 _nameLabel.text = string.IsNullOrEmpty(data.PlayerName) ? "玩家" : data.PlayerName;
+                // 文本变化后触发自适应；schedule 下一帧让布局先完成一次 pass
+                _nameLabel.schedule.Execute(AutoFitNameFontSize).StartingIn(0);
+            }
 
             if (_phaseLabel != null)
             {
@@ -138,6 +159,44 @@ namespace APP.Pomodoro.Controller
             _appIcon.style.backgroundImage = tex != null
                 ? new StyleBackground(tex)
                 : new StyleBackground(StyleKeyword.Null);
+        }
+
+        /// <summary>
+        /// 根据玩家名容器宽度逐步缩小字体，直到完整文本可在一行内显示为止。
+        /// 若缩到最小字号仍溢出，USS 的 overflow:hidden + text-overflow 作为兜底。
+        /// </summary>
+        private void AutoFitNameFontSize()
+        {
+            if (_isAutoFittingName) return;
+            if (_nameLabel == null) return;
+            if (string.IsNullOrEmpty(_nameLabel.text)) return;
+
+            var parent = _nameLabel.parent;
+            if (parent == null) return;
+
+            float available = parent.resolvedStyle.width;
+            if (available <= 0f) return; // 尚未完成布局
+
+            _isAutoFittingName = true;
+            try
+            {
+                _nameLabel.style.fontSize = NameBaseFontSize;
+                Vector2 measured = _nameLabel.MeasureTextSize(
+                    _nameLabel.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
+
+                if (measured.x <= available)
+                {
+                    return;
+                }
+
+                float ratio = available / measured.x;
+                float newSize = Mathf.Max(NameMinFontSize, NameBaseFontSize * ratio * NameSafetyFactor);
+                _nameLabel.style.fontSize = newSize;
+            }
+            finally
+            {
+                _isAutoFittingName = false;
+            }
         }
 
         /// <summary>

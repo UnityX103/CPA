@@ -239,9 +239,8 @@ Unity 6（UI Toolkit）的 USS 在语法上贴近 CSS，但只实现了一个受
    - 打开/切换到目标界面状态；
    - 覆盖本次导入涉及的所有面板；如果导入影响统一设置窗口、弹窗、子面板或组件库，必须分别截图；
    - 覆盖关键交互状态，例如初始值、修改值后、应用按钮可见/不可见、弹窗显示/隐藏、tab active、slider 进度等；
-   - 等待截图容器有 panel、宽高大于 0；
-   - 调用 `CaptureStep(stepName, containerElement, baselinePath, notes)`；
-     **注意 `containerElement` 选"目标所在的完整面板 / overlay 根"，不是待测元素本身**，详见下文「截图区域：截面板，不截待测元素」。
+   - 在截图前先 Assert 待测面板已 attach 到 panel、`worldBound.width/height > 0`；
+   - 调用 `CaptureScreenStep(stepName, baselinePath, notes)`（**不要再用 `CaptureStep(target,...)` / 自定义 `CaptureScaled`**），详见下文「截图区域：一律截整屏」。
    - 断言截图文件和 manifest 存在。
 4. 测试禁止职责：
    - 不做像素一致断言；
@@ -258,22 +257,22 @@ Unity 6（UI Toolkit）的 USS 在语法上贴近 CSS，但只实现了一个受
 - 对于“修改值后才出现差异”的控件，例如应用按钮、slider、输入框校验状态，必须新增单独 step 保存输出。
 - 每个 step 的 `name` 必须能看出面板和状态，例如 `global-settings-changed-value`、`confirm-dialog-no-close`。
 
-### 截图区域：截面板，不截待测元素
+### 截图区域：一律截整屏
 
-UI Toolkit 的视觉测试**一律按"目标所在的完整面板 / overlay 根"作为 CaptureStep 的 containerElement**，不要为了聚焦"待测控件"而直接把该控件元素传进去——那样截出来的画面只有画面一角，审图人看不到面板布局、tab 状态、同级控件、标题栏等上下文，差异不好判断。
+**项目硬性规则**：所有 PlayMode 视觉测试都必须用 `VisualImageTestBase.CaptureScreenStep(stepName, baselinePath, notes)`，截整张 game view（`Screen.width × Screen.height`）。**禁止**调 `CaptureStep(stepName, target, ...)` 局部截图，**禁止**自定义按面板缩放的 `CaptureScaled` 之类只截目标元素 worldBound 的私货——那种局部图会把下拉框、长卡片、弹窗剪出画面，审图人看不到完整上下文（标题栏、应用按钮、tab、侧栏、同级控件、空白布局区），diff 时无法判断真实视觉。
 
 规则：
 
-1. **"待测元素" ≠ "截图容器"**。测试断言的是控件状态（如 `_copyBtn.text = "已复制"`），但 CaptureStep 的 target 要换成它所在的**容器面板**。
-2. 按以下优先级选容器：
-   1. 当前打开的统一窗口根（如 `settings-overlay`、`dialog-overlay`、`pomodoro-overlay`）——包含 tab/sidebar/标题栏，上下文最全；
-   2. 该 tab / 子面板根（如 `osp-root`、`psp-root`、`gsp-root`）——当测试的是"子面板 + 弹窗组合"这种不需要窗口外壳的局部场景；
-   3. 组件自身根（仅当组件有独立 Preview 文档、不是嵌在面板里时，例如 `Components/ButtonCopy.uxml` 单测）。
-3. **禁止**把正好包裹待测元素的最小卡片/行/按钮作为 containerElement（例如 `osp-room-card`、`osp-room-name-row`、`osp-copy-btn`）——截图会退化成一角，视觉验证失效。
-4. 已加入房间的复制按钮这种"子状态在面板深处"的用例，仍然截 `settings-overlay`；通过 driver/controller 把面板切到对应 tab / Model 状态，让待测控件自然显示在面板里。
-5. 等宽高合法的判定也要放在"截图容器"上：`overlay.worldBound.width > 0 && overlay.worldBound.height > 0`，不是在待测控件上。
-
-例外：如果目标是"一个纯粹的独立组件单测"（比如为某个新 Component 写一个 only-component 的 PlayMode 测试，UIDocument 只挂了该 Component 的 uxml），此时 root 就是该 Component——这是规则 2.3，不是特例。
+1. **"待测元素" ≠ "截图区域"**。测试断言的是控件状态（如 `_copyBtn.text = "已复制"` 或 `dropdown.value == "显示器 2"`），但截图永远是整屏，由 game view 真实分辨率决定；不要再去算 worldBound、不要按面板做 scale。
+2. 截图前的存活/就绪断言仍然落在"目标面板/overlay/控件"上：
+   - `overlay.worldBound.width > 0 && overlay.worldBound.height > 0` 作为"已渲染"前置；
+   - 但调用 `CaptureScreenStep` 时不再传它进去。
+3. 把面板放在 game view 内"自然位置"摆好，让整屏拍下来就能交差：
+   - 创建临时 UIDocument 时，根容器用 `Position.Absolute + left=0 + top=0 + width/height` 钉在 game view 左上；
+   - 加载真实 Scene 的视觉测试（如 `MainV2`），保持场景里 UIDocument 自身的位置不变。
+4. baseline 也按"整屏"重制：Pencil 端按 `Screen.width × Screen.height` 画一张同分辨率的参考图，对应的 `TestArtifacts/PencilReferences/*.png` 必须是整屏视图，不要再拿"只截目标"的小图当 baseline。旧的局部 baseline 一律视为过期，需要逐个刷新。
+5. `CaptureScreenStep` 已自带 `WaitForEndOfFrame + 写 manifest`，不要再用 reflection 自己塞 step。
+6. 唯一例外：纯独立组件单测（UIDocument 只挂一个 component uxml，没有面板外壳）——此时整屏=组件本身，不属于例外，仍走 `CaptureScreenStep`。
 
 ## 视觉判断流程
 
@@ -431,6 +430,7 @@ export WEIXIN_ACCOUNT=<bot-account-id>
 - [ ] 已刷新 Unity 资源并检查相关控制台错误。
 - [ ] 已新增或更新 PlayMode 视觉测试，仅产出截图和 manifest。
 - [ ] 视觉测试已覆盖本次导入影响到的所有面板和关键状态，包括修改值后/按钮状态等动态表现。
-- [ ] CaptureStep 的 containerElement 选择的是目标所在的完整面板 / overlay 根（如 `settings-overlay`、`osp-root`），不是把待测元素（如具体 Button、Card、Row）本身塞进去导致截图只剩一角。
+- [ ] 所有 step 都通过 `CaptureScreenStep(stepName, baselinePath, notes)` 截整屏；没有 `CaptureStep(target,...)` / `CaptureScaled` 这类只截局部的调用残留。
+- [ ] baseline 已是整屏 Pencil 参考图（与 `Screen.width × Screen.height` 同分辨率）；旧的局部 baseline 已刷新或在 manifest 备注"待补整屏目标图"。
 - [ ] 已运行测试并用 `unity-visual-image-validation` 人工判断差异。
 - [ ] 已使用 `weixin` 技能把所有 actual 截图和对应 baseline/目标截图发送给用户；如 openclaw gateway 或 openclaw-weixin 未就绪，已明确说明缺失配置。

@@ -15,5 +15,12 @@ namespace APP.Settings.Model
 
         /// <summary>已保留/持久化的缩放倍率。自动写入 PlayerPrefs。</summary>
         BindableProperty<float> UiScale { get; }
+
+        /// <summary>
+        /// 当前正在生效/预览中的目标显示器索引。不持久化；
+        /// 委托物理移动通过 IWindowPositionSystem.PreviewMoveToMonitor。
+        /// 已提交/持久化的索引复用 IPomodoroModel.TargetMonitorIndex。
+        /// </summary>
+        BindableProperty<int> PreviewTargetDisplay { get; }
     }
 }

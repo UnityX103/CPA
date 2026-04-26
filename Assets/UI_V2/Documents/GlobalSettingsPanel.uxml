@@ -24,5 +24,15 @@
                 <ui:Label name="gsp-scale-value" text="1.0×" class="gsp-scale-value" />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!-- Pencil: gspDisplay — 目标显示器卡片 -->
+        <ui:VisualElement class="gsp-display-card">
+            <ui:Label text="目标显示器" class="gsp-display-label" />
+            <ui:VisualElement class="gsp-display-dropdown-wrap">
+                <ui:DropdownField name="gsp-display-dropdown" class="gsp-display-dropdown" />
+                <!-- 显式覆盖一个 chevron Label，保证 PlayMode 下也有"可下拉"提示 -->
+                <ui:Label text="▾" class="gsp-display-chevron" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
