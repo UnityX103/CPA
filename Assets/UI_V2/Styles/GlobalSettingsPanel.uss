@@ -200,3 +200,57 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
+
+/* Runtime PanelSettings 不会自动带 Editor 默认 Dropdown 菜单皮肤；
+   明确给弹出层补齐背景、边框和固定行高，避免展开后透明或被内容挤窄。 */
+.unity-base-dropdown {
+    height: auto;
+    background-color: rgba(0, 0, 0, 0);
+    overflow: visible;
+}
+
+.unity-base-dropdown__container-outer {
+    height: auto;
+    min-width: 360px;
+    background-color: var(--color-bg-white);
+    border-width: 1px;
+    border-color: var(--color-border-gray);
+    border-radius: 10px;
+    padding: 4px 0;
+    overflow: visible;
+}
+
+.unity-base-dropdown__container-inner {
+    height: auto;
+    background-color: var(--color-bg-white);
+    border-width: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+.unity-base-dropdown__item {
+    height: 32px;
+    min-height: 32px;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 12px;
+    background-color: var(--color-bg-white);
+}
+
+.unity-base-dropdown__item:hover {
+    background-color: var(--color-bg-surface);
+}
+
+.unity-base-dropdown__label {
+    flex-grow: 1;
+    color: var(--color-text-dark);
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.unity-base-dropdown__checkmark {
+    width: 0;
+    min-width: 0;
+    display: none;
+}
