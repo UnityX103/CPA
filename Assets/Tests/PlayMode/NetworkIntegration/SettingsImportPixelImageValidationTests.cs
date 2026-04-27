@@ -20,6 +20,29 @@ namespace APP.NetworkIntegration.Tests
         private const string GlobalSettingsPanelPath = "Assets/UI_V2/Documents/GlobalSettingsPanel.uxml";
         private const string ConfirmDialogPath = "Assets/UI_V2/Documents/ConfirmDialog.uxml";
 
+        private GameObject _host;
+        private GameObject _cameraHost;
+
+        [TearDown]
+        public void TearDownComponentHost()
+        {
+            if (_host != null)
+            {
+                UIDocument doc = _host.GetComponent<UIDocument>();
+                if (doc != null && doc.panelSettings != null)
+                {
+                    Object.DestroyImmediate(doc.panelSettings);
+                }
+                Object.DestroyImmediate(_host);
+                _host = null;
+            }
+            if (_cameraHost != null)
+            {
+                Object.DestroyImmediate(_cameraHost);
+                _cameraHost = null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator SettingsImport_ShouldCaptureExpectedStates()
         {
@@ -27,6 +50,15 @@ namespace APP.NetworkIntegration.Tests
             Assert.Ignore("图片视觉测试仅支持 Unity Editor PlayMode。");
             yield break;
 #else
+            // 创建纯黑背景摄像机，避免上一帧残留 UI 形成残影
+            _cameraHost = new GameObject("VisualTestCamera_SettingsImport");
+            Camera testCamera = _cameraHost.AddComponent<Camera>();
+            testCamera.clearFlags = CameraClearFlags.SolidColor;
+            testCamera.backgroundColor = Color.black;
+            testCamera.depth = 100f;
+            testCamera.orthographic = true;
+            testCamera.cullingMask = 0;
+
             VisualElement panelRoot = CreateRuntimePanelRoot();
             yield return null;
 
@@ -173,12 +205,12 @@ namespace APP.NetworkIntegration.Tests
         private static float CalculateScaleFillWidth(Slider slider, float value, float trackWidth)
         {
             const float DraggerSize = 24f;
-            const float FillLeftInset = 2f;
+            const float FillLeftInset = 0f;
 
             float normalized = Mathf.Clamp01(Mathf.InverseLerp(slider.lowValue, slider.highValue, value));
             float dragRange = Mathf.Max(0f, trackWidth - DraggerSize);
             float thumbCenterX = (DraggerSize * 0.5f) + (dragRange * normalized);
-            return Mathf.Max(0f, thumbCenterX - FillLeftInset);
+            return Mathf.Max(0f, thumbCenterX);
         }
 
         /// <summary>
@@ -213,10 +245,10 @@ namespace APP.NetworkIntegration.Tests
             menu.EnableInClassList("gsp-display-menu--hidden", true);
         }
 
-        private static VisualElement CreateRuntimePanelRoot()
+        private VisualElement CreateRuntimePanelRoot()
         {
-            var go = new GameObject("SettingsImportPixelImageValidationRoot");
-            UIDocument document = go.AddComponent<UIDocument>();
+            _host = new GameObject("SettingsImportPixelImageValidationRoot");
+            UIDocument document = _host.AddComponent<UIDocument>();
             PanelSettings panelSettings = UnityEngine.Object.Instantiate(LoadAsset<PanelSettings>(PanelSettingsPath));
             panelSettings.scale = 1f;
             document.panelSettings = panelSettings;

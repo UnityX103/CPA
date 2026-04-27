@@ -9,15 +9,16 @@
     <Style src="../Styles/PetSettingsPanel.uss"/>
     <Style src="../Styles/GlobalSettingsPanel.uss"/>
     <Style src="../Styles/ConfirmDialog.uss"/>
+    <Style src="../Styles/Components/ButtonClose.uss"/>
 
     <!-- 设置面板：独立 UIDocument 根（对应 Pencil vnYnS） -->
     <ui:VisualElement name="settings-overlay" class="settings-overlay" style="display: none;">
         <ui:VisualElement class="settings-header">
             <ui:Label text="设置" class="settings-title" />
             <ui:VisualElement class="settings-spacer" />
-            <ui:VisualElement name="settings-close" class="settings-close">
-                <ui:Label text="✕" class="settings-close-icon" />
-            </ui:VisualElement>
+            <!-- Pencil: mNjRm (UAbZg ref) — 关闭按钮，直接用 ui:Button + comp-btn-close 样式
+                 不走模板实例：避免内层 Button 的 Clickable 吞 PointerUp 导致父 wrapper 收不到事件 -->
+            <ui:Button name="settings-close" class="comp-btn-close settings-close" text="✕" />
         </ui:VisualElement>
         <ui:VisualElement class="settings-body">
             <ui:VisualElement class="settings-sidebar">
@@ -39,16 +40,11 @@
                 <ui:VisualElement name="settings-content-host" class="settings-content-host" />
             </ui:ScrollView>
         </ui:VisualElement>
-        <!-- 未保存更改对话框宿主：绝对定位覆盖整个 overlay。
-             宿主自身 picking-mode=Ignore，避免空闲时遮挡下方设置面板的点击；
-             对话框显示时由内部 .dlg-root（默认 pickingMode=Position）接管交互。
-             UnsavedChangesDialogController.Init 时把 ConfirmDialog.uxml 克隆进来。 -->
+        <!-- 弹窗宿主 -->
         <ui:VisualElement name="unsaved-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
         <ui:VisualElement name="scale-dialog-host" class="unsaved-dialog-host" picking-mode="Ignore" />
     </ui:VisualElement>
 
-    <!-- 联机异常弹窗宿主：挂在 UIDocument 根级，不受 settings-overlay 460×394 尺寸限制。
-         position:absolute 铺满整个 usp-root-anchor（=整屏），ConfirmDialog 内部 .dlg-root
-         会继续做 flex 居中，从而把弹窗定位在整个画板中心而不是设置面板中心。 -->
+    <!-- 联机异常弹窗宿主（独立全屏定位） -->
     <ui:VisualElement name="online-error-dialog-host" class="usp-screen-dialog-host" picking-mode="Ignore" />
 </ui:UXML>

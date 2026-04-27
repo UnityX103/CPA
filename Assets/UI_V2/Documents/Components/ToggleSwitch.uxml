@@ -4,5 +4,5 @@
          editor-extension-mode="False">
   <ui:Style src="../../Styles/Variables.uss"/>
   <ui:Style src="../../Styles/Components/ToggleSwitch.uss"/>
-  <ui:Toggle class="comp-toggle-switch"/>
+  <ui:Toggle name="root" class="comp-toggle-switch"/>
 </ui:UXML>

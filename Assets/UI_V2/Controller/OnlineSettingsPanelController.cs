@@ -73,6 +73,8 @@ namespace APP.Pomodoro.Controller
             _sessionMemory = GameApp.Interface.GetModel<ISessionMemoryModel>();
 
             // 查询 UI 元素
+            // 注意: 通过 ui:Instance 引入的模板，AttributeOverrides 无法重命名内部 root 元素的 name，
+            //       所以这里走"先按 name 拿 TemplateContainer，再钻进去取内部控件"的写法。
             _joinCard      = container.Q<VisualElement>("osp-join-card");
             _roomCard      = container.Q<VisualElement>("osp-room-card");
             _histCard      = container.Q<VisualElement>("osp-hist-card");
@@ -82,15 +84,15 @@ namespace APP.Pomodoro.Controller
             _busyText      = container.Q<Label>("osp-busy-text");
             _roomName      = container.Q<Label>("osp-room-name");
             _roomStatus    = container.Q<Label>("osp-room-status");
-            _usernameField = container.Q<TextField>("osp-username");
-            _roomIdField   = container.Q<TextField>("osp-room-id");
-            _autoToggle      = container.Q<Toggle>("osp-auto-toggle");
-            _copyBtn         = container.Q<Button>("osp-copy-btn");
+            _usernameField = container.Q<TemplateContainer>("osp-username")?.Q<TextField>();
+            _roomIdField   = container.Q<TemplateContainer>("osp-room-id")?.Q<TextField>();
+            _autoToggle      = container.Q<TemplateContainer>("osp-auto-toggle")?.Q<Toggle>();
+            _copyBtn         = container.Q<TemplateContainer>("osp-copy-btn")?.Q<Button>();
             _reconnectBanner = container.Q<Label>("osp-reconnect-banner");
 
             // 按钮事件（房间不存在时服务端走 ROOM_NOT_FOUND → 自动 create_room，不再有独立创建按钮）
-            container.Q<Button>("osp-join-btn")?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
-            container.Q<Button>("osp-exit-btn")?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
+            container.Q<TemplateContainer>("osp-join-btn")?.Q<Button>()?.RegisterCallback<PointerUpEvent>(_ => OnJoinClicked());
+            container.Q<TemplateContainer>("osp-exit-btn")?.Q<Button>()?.RegisterCallback<PointerUpEvent>(_ => OnExitClicked());
             _copyBtn?.RegisterCallback<PointerUpEvent>(_ => OnCopyClicked());
 
             if (_autoToggle != null)
@@ -266,12 +268,18 @@ namespace APP.Pomodoro.Controller
         {
             if (_isBusy) return;
 
-            string username = _usernameField?.value ?? string.Empty;
-            string roomId   = _roomIdField?.value ?? string.Empty;
+            string username = (_usernameField?.value ?? string.Empty).Trim();
+            string roomId   = (_roomIdField?.value ?? string.Empty).Trim();
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roomId))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(roomId))
             {
                 ShowErrorDialog("输入不完整", "请输入用户名和房间号");
+                return;
+            }
+
+            if (!IsValidRoomCode(roomId))
+            {
+                ShowErrorDialog("房间号格式不正确", "房间号必须是 6 位数字");
                 return;
             }
 
@@ -280,6 +288,18 @@ namespace APP.Pomodoro.Controller
             _userJoinFallbackRoomCode = roomId;
             EnterBusy("正在加入房间…");
             this.SendCommand(new Cmd_JoinRoom(roomId, username));
+        }
+
+        // 房间号格式校验：必须正好 6 位数字。
+        // 同时拦住手动输入和历史项快捷加入两条路径。
+        private static bool IsValidRoomCode(string code)
+        {
+            if (code == null || code.Length != 6) return false;
+            for (int i = 0; i < code.Length; i++)
+            {
+                if (code[i] < '0' || code[i] > '9') return false;
+            }
+            return true;
         }
 
         private void OnExitClicked()
@@ -426,12 +446,12 @@ namespace APP.Pomodoro.Controller
 
                 string capturedCode = entry.RoomCode;
                 Button joinBtn = new Button(() => OnHistoryJoinClicked(capturedCode)) { text = "加入" };
-                joinBtn.AddToClassList("comp-btn-icon");
+                joinBtn.AddToClassList("comp-btn-primary");
                 joinBtn.AddToClassList("osp-hist-join-btn");
                 item.Add(joinBtn);
 
                 Button delBtn = new Button(() => OnHistoryDeleteClicked(capturedCode)) { text = "删除" };
-                delBtn.AddToClassList("comp-btn-icon");
+                delBtn.AddToClassList("comp-btn-secondary");
                 delBtn.AddToClassList("osp-hist-del-btn");
                 item.Add(delBtn);
 
@@ -443,12 +463,19 @@ namespace APP.Pomodoro.Controller
         {
             if (_isBusy) return;
 
-            string username = _usernameField?.value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(username))
+            string username = (_usernameField?.value ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(username))
             {
                 ShowErrorDialog("输入不完整", "请输入用户名");
                 return;
             }
+
+            if (!IsValidRoomCode(roomCode))
+            {
+                ShowErrorDialog("房间号格式不正确", "房间号必须是 6 位数字");
+                return;
+            }
+
             _userJoinAutoCreateOnMissing = true;
             _userJoinFallbackName = username;
             _userJoinFallbackRoomCode = roomCode;

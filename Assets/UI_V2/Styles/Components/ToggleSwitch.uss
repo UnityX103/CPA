@@ -53,3 +53,19 @@
     background-image: none;
     -unity-background-image-tint-color: rgba(0, 0, 0, 0);
 }
+
+/* ── 状态变体：LZn9z (toggle-disabled) ── */
+.comp-toggle-switch--disabled,
+.comp-toggle-switch:disabled {
+    opacity: 0.6;
+}
+
+.comp-toggle-switch--disabled .unity-toggle__input,
+.comp-toggle-switch:disabled .unity-toggle__input {
+    background-color: rgb(229, 231, 235); /* #E5E7EB */
+}
+
+.comp-toggle-switch--disabled .unity-toggle__checkmark,
+.comp-toggle-switch:disabled .unity-toggle__checkmark {
+    background-color: rgb(243, 244, 246); /* #F3F4F6 */
+}

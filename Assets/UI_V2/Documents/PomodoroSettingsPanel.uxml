@@ -1,28 +1,32 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/PomodoroSettingsPanel.uss"/>
-    <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
-    <ui:Style src="../Styles/Components/InputTextSuffix.uss"/>
+    <ui:Template name="ToggleSwitch" src="Components/ToggleSwitch.uxml"/>
+    <ui:Template name="InputTextSuffix" src="Components/InputTextSuffix.uxml"/>
+    <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
 
     <ui:VisualElement name="psp-root" class="psp-root">
-        <!-- Pencil: pspApply — 应用按钮（默认隐藏，草稿与 Model 不一致时浮出） -->
-        <ui:Button name="apply-btn" text="应用" class="apply-btn apply-btn--hidden" />
+        <!-- Pencil: pspApply (EOrsv) — SettingsApplyRow 模板，按钮 name=apply-btn -->
+        <ui:Instance name="psp-apply-row" template="SettingsApplyRow" class="psp-apply-row">
+            <AttributeOverrides element-name="apply-btn" class="comp-btn-primary comp-settings-apply-row__btn apply-btn apply-btn--hidden" />
+        </ui:Instance>
 
         <!-- Pencil: pomoGrid — 专注/休息时长卡片 -->
         <ui:VisualElement class="psp-metrics">
             <ui:VisualElement class="psp-metric psp-metric--neutral">
                 <ui:Label text="专注时长" class="psp-metric-label psp-metric-label--neutral" />
-                <ui:VisualElement class="comp-input-suffix">
-                    <ui:TextField name="psp-focus-value" value="25" class="comp-input-suffix__field" />
-                    <ui:Label text="分钟" class="comp-input-suffix__hint" />
-                </ui:VisualElement>
+                <ui:Instance name="psp-focus-suffix" template="InputTextSuffix" class="psp-focus-suffix">
+                    <AttributeOverrides element-name="value" value="25" />
+                    <AttributeOverrides element-name="hint" text="分钟" />
+                </ui:Instance>
             </ui:VisualElement>
             <ui:VisualElement class="psp-metric psp-metric--warm">
                 <ui:Label text="休息时长" class="psp-metric-label psp-metric-label--warm" />
-                <ui:VisualElement class="comp-input-suffix comp-input-suffix--warm">
-                    <ui:TextField name="psp-break-value" value="5" class="comp-input-suffix__field" />
-                    <ui:Label text="分钟" class="comp-input-suffix__hint" />
-                </ui:VisualElement>
+                <ui:Instance name="psp-break-suffix" template="InputTextSuffix" class="psp-break-suffix">
+                    <AttributeOverrides element-name="root" class="comp-input-suffix comp-input-suffix--warm" />
+                    <AttributeOverrides element-name="value" value="5" />
+                    <AttributeOverrides element-name="hint" text="分钟" />
+                </ui:Instance>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -30,7 +34,9 @@
         <ui:VisualElement class="psp-settings">
             <ui:VisualElement class="psp-row">
                 <ui:Label text="阶段切换时自动指定窗口提示" class="psp-row-label" />
-                <ui:Toggle name="psp-hint-toggle" value="true" class="comp-toggle-switch" />
+                <ui:Instance name="psp-hint-toggle" template="ToggleSwitch">
+                    <AttributeOverrides element-name="root" class="comp-toggle-switch" />
+                </ui:Instance>
             </ui:VisualElement>
             <ui:VisualElement class="psp-row" style="margin-bottom: 0;">
                 <ui:Label text="结束提示音" class="psp-row-label" />

@@ -5,16 +5,14 @@
 
   <!-- 子组件模板引用 -->
   <ui:Template name="Clock" src="Clock.uxml"/>
+  <ui:Template name="ButtonPrimary" src="Components/ButtonPrimary.uxml"/>
+  <ui:Template name="ButtonSecondary" src="Components/ButtonSecondary.uxml"/>
 
   <ui:Style src="../Styles/Variables.uss"/>
   <ui:Style src="../Styles/PomodoroPanel.uss"/>
-  <!-- 组件 USS -->
-  <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
-  <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
-  <ui:Style src="../Styles/Components/ButtonIcon.uss"/>
 
   <!--
-    PomodoroPanel — 番茄钟主面板
+    PomodoroPanel — 番茄钟主面板 (Pencil YRqeB)
     C# 绑定名称（Q<>() 查询用）:
       #pp-root          — 根容器
       #pp-title         — 标题 Label
@@ -22,37 +20,42 @@
       #pp-clock         — Clock TemplateContainer
       #pp-btn-primary   — 主操作按钮（开始/暂停）
       #pp-btn-secondary — 次操作按钮（跳过）
+      #pp-settings-btn  — 设置齿轮按钮（自定义 ui:Button + 齿轮 PNG）
+      #pp-pin-btn       — 置顶按钮（自定义 VisualElement + pin/pin-off 子图标）
   -->
-  <!-- 整卡拖拽：移除 pp-handle-bar，选中面板任意位置皆可拖动 -->
   <ui:VisualElement name="pp-root" class="pp-root">
 
-    <!-- 顶部：标题 + 连续专注 + 设置齿轮（Pencil head/S3Nbk: space-between + 绝对定位 4qNnO） -->
+    <!-- 顶部：标题 + 连续专注 + 设置齿轮 -->
     <ui:VisualElement class="pp-header">
       <ui:Label name="pp-title" class="pp-title" text="番茄钟"/>
       <ui:VisualElement class="pp-streak">
         <ui:Label class="pp-streak-label" text="连续专注"/>
         <ui:Label name="pp-streak-value" class="pp-streak-value" text="3 次"/>
       </ui:VisualElement>
-      <!-- 4qNnO: pp-settings-btn 绝对定位 (x:66, y:3) 37×18 -->
-      <ui:VisualElement name="pp-settings-btn" class="pp-settings-btn">
-        <ui:Label class="pp-settings-btn-icon"/>
-      </ui:VisualElement>
+      <!-- 4qNnO: 设计稿是 37×18 含齿轮的自定义 pill，不是 Button/Icon (22×22 圆) 实例
+           齿轮 PNG 由内部子节点承载（保持 14×14 与设计 cHy9C 一致） -->
+      <ui:Button name="pp-settings-btn" class="pp-settings-btn" text="">
+        <ui:VisualElement name="pp-settings-btn-icon" class="pp-settings-btn-icon" picking-mode="Ignore"/>
+      </ui:Button>
     </ui:VisualElement>
 
     <!-- 主体：时钟 + 操作按钮 -->
     <ui:VisualElement class="pp-body">
       <ui:Instance name="pp-clock" template="Clock" class="pp-clock"/>
 
-      <!-- 操作按钮（Pencil: chipsRow/p4kgU） -->
+      <!-- Pencil: chipsRow/p4kgU — Primary + Secondary 按钮 -->
       <ui:VisualElement class="pp-actions">
-        <ui:Button name="pp-btn-primary"   class="comp-btn-primary"   text="开始"/>
-        <ui:Button name="pp-btn-secondary" class="comp-btn-secondary" text="跳过"/>
+        <ui:Instance name="pp-btn-primary" template="ButtonPrimary">
+          <AttributeOverrides element-name="root" class="comp-btn-primary" text="开始" />
+        </ui:Instance>
+        <ui:Instance name="pp-btn-secondary" template="ButtonSecondary">
+          <AttributeOverrides element-name="root" class="comp-btn-secondary" text="跳过" />
+        </ui:Instance>
       </ui:VisualElement>
 
-      <!-- HApJ0: pp-pin-btn 22×22 cornerRadius:11 absolute(193,69) 默认已置顶(on) -->
+      <!-- HApJ0: pp-pin-btn 22×22 absolute(193,69) 自定义 pin/pin-off 双态 -->
       <ui:VisualElement name="pp-pin-btn" class="pp-pin-btn">
-        <!-- 3eDk5: icon 14×14 lucide pin/pin-off #D15F3D -->
-        <ui:VisualElement name="pp-pin-btn-icon" class="pp-pin-btn-icon"/>
+        <ui:VisualElement name="pp-pin-btn-icon" class="pp-pin-btn-icon" picking-mode="Ignore"/>
       </ui:VisualElement>
     </ui:VisualElement>
 

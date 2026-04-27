@@ -4,5 +4,5 @@
          editor-extension-mode="False">
   <ui:Style src="../../Styles/Variables.uss"/>
   <ui:Style src="../../Styles/Components/ButtonCopy.uss"/>
-  <ui:Button class="comp-btn-copy" text="复制"/>
+  <ui:Button name="root" class="comp-btn-copy" text="复制"/>
 </ui:UXML>

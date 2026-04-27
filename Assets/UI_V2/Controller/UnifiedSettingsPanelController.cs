@@ -21,7 +21,7 @@ namespace APP.Pomodoro.Controller
         private VisualElement _tabOnline;
         private VisualElement _tabPet;
         private VisualElement _tabGlobal;
-        private VisualElement _closeBtn;
+        private Button _closeBtn;
         private VisualElement _unsavedDialogHost;
         private VisualElement _scaleDialogHost;
         private VisualElement _onlineErrorDialogHost;
@@ -88,7 +88,7 @@ namespace APP.Pomodoro.Controller
             _tabOnline = root.Q("tab-online");
             _tabPet = root.Q("tab-pet");
             _tabGlobal = root.Q("tab-global");
-            _closeBtn = root.Q("settings-close");
+            _closeBtn = root.Q<Button>("settings-close");
             _unsavedDialogHost = root.Q("unsaved-dialog-host");
             _scaleDialogHost = root.Q("scale-dialog-host");
             _onlineErrorDialogHost = root.Q("online-error-dialog-host");
@@ -101,7 +101,7 @@ namespace APP.Pomodoro.Controller
             }
 
             // 注册关闭与 tab 切换事件
-            _closeBtn?.RegisterCallback<PointerUpEvent>(_ => RequestClose(null));
+            if (_closeBtn != null) _closeBtn.clicked += () => RequestClose(null);
             _tabPomodoro?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pomodoro"));
             _tabOnline?.RegisterCallback<PointerUpEvent>(_ => SelectTab("online"));
             _tabPet?.RegisterCallback<PointerUpEvent>(_ => SelectTab("pet"));

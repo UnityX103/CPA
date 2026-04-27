@@ -25,3 +25,12 @@
 .comp-btn-copy:hover {
     background-color: rgb(232, 214, 196);
 }
+
+/* ── 状态变体：0i8b0 (copy-pressed)，"已复制"瞬态 ── */
+.comp-btn-copy--pressed {
+    background-color: rgb(232, 210, 188); /* #E8D2BC */
+}
+
+.comp-btn-copy--pressed:hover {
+    background-color: rgb(232, 210, 188);
+}

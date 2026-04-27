@@ -21,6 +21,29 @@ namespace APP.NetworkIntegration.Tests
         private const string DropdownMenuHiddenClassName = "gsp-display-menu--hidden";
         private const string DropdownMenuItemClassName = "gsp-display-menu-item";
 
+        private GameObject _host;
+        private GameObject _cameraHost;
+
+        [TearDown]
+        public void TearDownComponentHost()
+        {
+            if (_host != null)
+            {
+                UIDocument doc = _host.GetComponent<UIDocument>();
+                if (doc != null && doc.panelSettings != null)
+                {
+                    Object.DestroyImmediate(doc.panelSettings);
+                }
+                Object.DestroyImmediate(_host);
+                _host = null;
+            }
+            if (_cameraHost != null)
+            {
+                Object.DestroyImmediate(_cameraHost);
+                _cameraHost = null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator GlobalSettingsDropdown_ShouldCaptureExpandedAndSelectedStates()
         {
@@ -28,6 +51,15 @@ namespace APP.NetworkIntegration.Tests
             Assert.Ignore("图片视觉测试仅支持 Unity Editor PlayMode。");
             yield break;
 #else
+            // 创建纯黑背景摄像机，避免上一帧残留 UI 形成残影
+            _cameraHost = new GameObject("VisualTestCamera_Dropdown");
+            Camera testCamera = _cameraHost.AddComponent<Camera>();
+            testCamera.clearFlags = CameraClearFlags.SolidColor;
+            testCamera.backgroundColor = Color.black;
+            testCamera.depth = 100f;
+            testCamera.orthographic = true;
+            testCamera.cullingMask = 0;
+
             VisualElement panelRoot = CreateRuntimePanelRoot();
             yield return null;
 
@@ -169,10 +201,10 @@ namespace APP.NetworkIntegration.Tests
             Assert.That(File.Exists(path), Is.True, $"截图产物不存在：{path}");
         }
 
-        private static VisualElement CreateRuntimePanelRoot()
+        private VisualElement CreateRuntimePanelRoot()
         {
-            var go = new GameObject("GlobalSettingsDropdownImageValidationRoot");
-            UIDocument document = go.AddComponent<UIDocument>();
+            _host = new GameObject("GlobalSettingsDropdownImageValidationRoot");
+            UIDocument document = _host.AddComponent<UIDocument>();
             PanelSettings panelSettings = UnityEngine.Object.Instantiate(LoadAsset<PanelSettings>(PanelSettingsPath));
             panelSettings.scale = 1f;
             document.panelSettings = panelSettings;

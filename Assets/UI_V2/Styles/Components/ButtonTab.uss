@@ -42,3 +42,23 @@
 .comp-btn-tab--pet:hover {
     background-color: rgb(255, 238, 190);
 }
+
+/* ── 状态变体：hcuNm (tab-inactive) ── */
+.comp-btn-tab--inactive {
+    background-color: rgb(243, 244, 246); /* #F3F4F6 */
+    color: rgb(156, 163, 175); /* #9CA3AF */
+}
+
+.comp-btn-tab--inactive:hover {
+    background-color: rgb(229, 231, 235);
+}
+
+/* ── 内联使用：去掉 pill 视觉，仅保留文字（PlayerCard phase badge 等场景） ── */
+.comp-btn-tab--ghost {
+    background-color: rgba(0, 0, 0, 0);
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-width: 0;
+}

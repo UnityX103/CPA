@@ -22,3 +22,14 @@
 .comp-btn-primary:hover {
     background-color: rgb(195, 82, 48);
 }
+
+/* ── 状态变体：ZLesZ (primary-disabled) ── */
+.comp-btn-primary--disabled,
+.comp-btn-primary:disabled {
+    background-color: rgb(224, 217, 211); /* #E0D9D3 */
+    color: rgb(255, 255, 255);
+}
+
+.comp-btn-primary--disabled:hover {
+    background-color: rgb(224, 217, 211);
+}

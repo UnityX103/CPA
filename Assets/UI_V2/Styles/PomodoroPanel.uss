@@ -24,7 +24,6 @@
     padding-left: 12px;
     overflow: hidden;
     position: absolute;
-    cursor: move-arrow;
     /* box-shadow: 0_16px_24px_rgba(199,133,84,0.19) → border 模拟 */
 }
 
@@ -100,18 +99,23 @@
     flex-grow: 1;
 }
 
-/* 重置 Unity Button 默认 1px margin，确保精确控制 p4kgU gap:8 */
-.pp-actions > Button {
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+/* .pp-actions 直接子是 ButtonPrimary/Secondary 的 TemplateContainer，
+   先把 wrapper 自身的 margin/min-width 清零并撑满列宽 */
+.pp-actions > TemplateContainer {
+    margin: 0;
     width: auto;
+    min-width: 0;
 }
 
-/* Pencil p4kgU gap:8 → 主按钮下间距 8px（次按钮是 last child 无下间距） */
-.pp-actions > .comp-btn-primary {
+/* Pencil p4kgU gap:8 → 主按钮 wrapper 下间距 8px（次按钮 last child 无） */
+.pp-actions > #pp-btn-primary {
     margin-bottom: 8px;
+}
+
+/* 重置 Unity Button 默认 1px margin，避免破坏 p4kgU 的精确间距 */
+.pp-actions Button {
+    margin: 0;
+    width: auto;
 }
 
 /* ── 通用隐藏（由 C# class 切换，不写 inline style）─────── */
@@ -119,8 +123,9 @@
     display: none;
 }
 
-/* ── 4qNnO: pp-settings-btn 绝对定位于 head 内 (x:66, y:3) 37×18 ─── */
-/* cornerRadius:17 与 h=18 下，四角实际不超过 h/2=9px                 */
+/* ── 4qNnO: pp-settings-btn 37×18 pill，absolute(66, 3) on .pp-header ───
+   cornerRadius:17 与 h=18 下，四角实际不超过 h/2=9px。
+   原 ButtonIcon 模板（22×22 圆）不匹配此设计，已直接使用 ui:Button。 */
 .pp-settings-btn {
     position: absolute;
     left: 66px;
@@ -128,16 +133,23 @@
     width: 37px;
     height: 18px;
     border-radius: 9px;
+    border-width: 0;
     background-color: rgb(240, 224, 208);
+    padding-top: 2px;
+    padding-right: 0;
+    padding-bottom: 2px;
+    padding-left: 0;
+    margin: 0;
     align-items: center;
     justify-content: center;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    cursor: link;
 }
 
-/* cHy9C: lucide settings  #8c5830  白色 PNG + tint
-   PNG 源文件非正方形（213×235），需 scale-to-fit 保持比例 */
+.pp-settings-btn:hover {
+    background-color: rgb(232, 214, 196);
+}
+
+/* cHy9C: lucide settings 图标，14×14 居中，#8c5830 tint
+   PNG 源 213×235 非正方形，scale-to-fit 保持比例 */
 .pp-settings-btn-icon {
     width: 14px;
     height: 14px;
@@ -146,9 +158,10 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* ── HApJ0: pp-pin-btn 22×22 cornerRadius:11 absolute(193,69) ──
-   fill:#F5D7C3  stroke:#E7C6AF 1px  icon 14×14 lucide pin #D15F3D
-   默认已置顶(on)，切 .pp-pin-btn--unpinned 进 off 态              */
+/* ── HApJ0: pp-pin-btn 22×22 cornerRadius:11 absolute(193, 69) on .pp-body ──
+   fill:#F5D7C3 stroke:#E7C6AF 1px。原 ButtonPin 模板默认背景/tint 与本处覆写
+   不一致（设计稿 HApJ0 显式改 fill/stroke），改用自定义 VisualElement+icon 子节点。
+   默认已置顶(on)，Controller 切 .pp-pin-btn--unpinned 进 off 态 */
 .pp-pin-btn {
     position: absolute;
     left: 193px;
@@ -161,7 +174,6 @@
     border-color: rgb(231, 198, 175);
     align-items: center;
     justify-content: center;
-    cursor: link;
 }
 
 /* PNG 源 pin.png 171×235、pin-off.png 235×235 非正方形，需 scale-to-fit */
@@ -169,7 +181,7 @@
     width: 14px;
     height: 14px;
     background-image: url("project://database/Assets/UI_V2/Icons/pin.png");
-    -unity-background-image-tint-color: rgb(209, 95, 61);
+    -unity-background-image-tint-color: rgb(209, 95, 61); /* #D15F3D */
     -unity-background-scale-mode: scale-to-fit;
 }
 

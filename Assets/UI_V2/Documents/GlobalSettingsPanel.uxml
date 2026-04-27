@@ -4,14 +4,15 @@
          editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/GlobalSettingsPanel.uss"/>
-    <ui:Style src="../Styles/Components/InputSlider.uss"/>
+    <ui:Style src="../Styles/Components/InputDropdown.uss"/>
     <ui:Template name="InputSlider" src="Components/InputSlider.uxml"/>
+    <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
 
     <ui:VisualElement name="gsp-root" class="gsp-root">
-        <!-- Pencil: gspApply — 复用 SettingsApplyRow；按钮 name="apply-btn" -->
-        <ui:VisualElement class="gsp-apply-row">
-            <ui:Button name="apply-btn" text="应用" class="apply-btn" />
-        </ui:VisualElement>
+        <!-- Pencil: gspApply — SettingsApplyRow 模板，按钮 name=apply-btn -->
+        <ui:Instance template="SettingsApplyRow" class="gsp-apply-row">
+            <AttributeOverrides element-name="apply-btn" name="apply-btn" class="comp-btn-primary apply-btn" />
+        </ui:Instance>
 
         <!-- Pencil: gspScale — 界面缩放卡片 -->
         <ui:VisualElement class="gsp-scale-card">
@@ -23,9 +24,10 @@
         <ui:VisualElement class="gsp-display-card">
             <ui:Label text="目标显示器" class="gsp-display-label" />
             <ui:VisualElement class="gsp-display-dropdown-wrap">
-                <ui:VisualElement name="gsp-display-dropdown" class="gsp-display-dropdown">
-                    <ui:Label name="gsp-display-dropdown-value" class="gsp-display-dropdown-value" />
-                    <ui:Label text="▾" class="gsp-display-chevron" picking-mode="Ignore" />
+                <!-- 直接展开 InputDropdown 模板（Frjkw）：避免 AttributeOverrides 不传 name 导致 Q<>(name) 拿不到元素 -->
+                <ui:VisualElement name="gsp-display-dropdown" class="comp-input-dropdown gsp-display-dropdown">
+                    <ui:Label name="gsp-display-dropdown-value" class="comp-input-dropdown__value" text="" />
+                    <ui:Label class="comp-input-dropdown__chevron gsp-display-chevron" text="▾" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:VisualElement name="gsp-display-menu" class="gsp-display-menu gsp-display-menu--hidden" />
             </ui:VisualElement>

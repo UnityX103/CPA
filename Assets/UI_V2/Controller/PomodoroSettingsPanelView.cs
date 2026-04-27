@@ -26,9 +26,9 @@ namespace APP.Pomodoro.Controller
         public event Action OnApplyClicked;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
-        private readonly Toggle _hintToggle;     // name="psp-hint-toggle"
-        private readonly TextField _focusValue;  // name="psp-focus-value"
-        private readonly TextField _breakValue;  // name="psp-break-value"
+        private readonly Toggle _hintToggle;     // Instance name="psp-hint-toggle" 内 Toggle
+        private readonly TextField _focusValue;  // Instance name="psp-focus-suffix" 内 TextField
+        private readonly TextField _breakValue;  // Instance name="psp-break-suffix" 内 TextField
         private readonly Label  _soundLabel;     // name="psp-sound-label"
         private readonly Button _applyBtn;       // name="apply-btn"
 
@@ -50,9 +50,10 @@ namespace APP.Pomodoro.Controller
                 throw new ArgumentNullException(nameof(panelRoot));
             }
 
-            _hintToggle   = panelRoot.Q<Toggle>("psp-hint-toggle");
-            _focusValue   = panelRoot.Q<TextField>("psp-focus-value");
-            _breakValue   = panelRoot.Q<TextField>("psp-break-value");
+            // 元素通过 Instance 容器向内查找（AttributeOverrides 不覆盖 name）
+            _hintToggle   = panelRoot.Q<TemplateContainer>("psp-hint-toggle")?.Q<Toggle>();
+            _focusValue   = panelRoot.Q<TemplateContainer>("psp-focus-suffix")?.Q<TextField>("value");
+            _breakValue   = panelRoot.Q<TemplateContainer>("psp-break-suffix")?.Q<TextField>("value");
             _soundLabel   = panelRoot.Q<Label>("psp-sound-label");
             _applyBtn     = panelRoot.Q<Button>("apply-btn");
 

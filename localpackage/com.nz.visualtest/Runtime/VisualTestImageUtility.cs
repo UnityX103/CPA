@@ -60,6 +60,13 @@ namespace NZ.VisualTest
     /// </summary>
     public static class VisualTestImageUtility
     {
+        /// <summary>
+        /// 项目临时目录：工程根目录下的 temp 文件夹。
+        /// 用于替代 Application.temporaryCachePath，避免系统临时目录被清理导致测试产物丢失。
+        /// </summary>
+        private static string ProjectTempPath => Path.GetFullPath(
+            Path.Combine(Application.dataPath, "..", "temp"));
+
         public static string BuildImageOutputDirectory(string testName)
         {
             if (string.IsNullOrWhiteSpace(testName))
@@ -68,7 +75,7 @@ namespace NZ.VisualTest
             }
 
             string outputDirectory = Path.Combine(
-                Application.temporaryCachePath,
+                ProjectTempPath,
                 "TestOutput",
                 SanitizeFileName(testName),
                 "Images");
@@ -90,7 +97,7 @@ namespace NZ.VisualTest
             }
 
             string outputDirectory = Path.Combine(
-                Application.temporaryCachePath,
+                ProjectTempPath,
                 "TestOutput",
                 SanitizeFileName(testName),
                 SanitizeFileName(runId));

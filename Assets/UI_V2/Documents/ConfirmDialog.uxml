@@ -3,11 +3,11 @@
          noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/ConfirmDialog.uss"/>
     <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
     <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
-    <ui:Style src="../Styles/ConfirmDialog.uss"/>
 
-    <!-- Pencil: ConfirmDialog — 通用确认对话框（backdrop + 白卡片 + 可选倒计时行） -->
+    <!-- Pencil: ConfirmDialog (bfMCZ) — 通用确认对话框（backdrop + 白卡片 + 可选倒计时行） -->
     <ui:VisualElement name="dlg-root" class="dlg-root" style="display: none;">
         <ui:VisualElement class="dlg-card">
             <ui:VisualElement class="dlg-header">
@@ -24,9 +24,11 @@
 
             <ui:Label name="dlg-body" text="" class="dlg-body" />
 
+            <!-- Pencil: dlg-actions / kHgaW + D6waS — 直接使用 ui:Button + comp-btn-* 样式
+                 不走模板实例，避免 AttributeOverrides 不传递 name 导致 Q<Button>(name) 找不到目标 -->
             <ui:VisualElement class="dlg-actions">
-                <ui:Button name="dlg-cancel" text="" class="dlg-btn comp-btn-secondary" />
-                <ui:Button name="dlg-confirm" text="" class="dlg-btn comp-btn-primary" />
+                <ui:Button name="dlg-cancel" class="comp-btn-secondary dlg-btn" text="" />
+                <ui:Button name="dlg-confirm" class="comp-btn-primary dlg-btn" text="" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

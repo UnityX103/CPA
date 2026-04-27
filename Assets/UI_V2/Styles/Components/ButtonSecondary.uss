@@ -23,3 +23,15 @@
 .comp-btn-secondary:hover {
     background-color: rgb(250, 245, 240);
 }
+
+/* ── 状态变体：MSW87 (secondary-disabled) ── */
+.comp-btn-secondary--disabled,
+.comp-btn-secondary:disabled {
+    background-color: rgb(248, 245, 241); /* #F8F5F1 */
+    border-color: rgb(229, 221, 213); /* #E5DDD5 */
+    color: rgb(199, 184, 172); /* #C7B8AC */
+}
+
+.comp-btn-secondary--disabled:hover {
+    background-color: rgb(248, 245, 241);
+}

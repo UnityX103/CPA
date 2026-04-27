@@ -4,5 +4,5 @@
          editor-extension-mode="False">
   <ui:Style src="../../Styles/Variables.uss"/>
   <ui:Style src="../../Styles/Components/ButtonIcon.uss"/>
-  <ui:Button class="comp-btn-icon" text="-"/>
+  <ui:Button name="root" class="comp-btn-icon" text="-"/>
 </ui:UXML>

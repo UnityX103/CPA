@@ -30,7 +30,6 @@
     flex-direction: column;
     overflow: hidden;
     flex-shrink: 0;
-    cursor: move-arrow;
 }
 
 /* ── D3ZIc: pc-content-stack vertical gap:12 ──────────────
@@ -203,7 +202,6 @@
     background-color: rgb(233, 213, 195);
     align-items: center;
     justify-content: center;
-    cursor: link;
 }
 
 .pc-pin-btn-icon {

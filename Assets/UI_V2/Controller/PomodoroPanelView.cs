@@ -114,8 +114,9 @@ namespace APP.Pomodoro.Controller
         {
             _ppRoot        = pomodoroTemplateContainer.Q<VisualElement>("pp-root");
             _ppStreakValue = pomodoroTemplateContainer.Q<Label>("pp-streak-value");
-            _ppBtnPrimary   = pomodoroTemplateContainer.Q<Button>("pp-btn-primary");
-            _ppBtnSecondary = pomodoroTemplateContainer.Q<Button>("pp-btn-secondary");
+            // 按钮模板实例化后 AttributeOverrides 不生效 name，通过 Instance 容器向内查找
+            _ppBtnPrimary   = pomodoroTemplateContainer.Q<TemplateContainer>("pp-btn-primary")?.Q<Button>();
+            _ppBtnSecondary = pomodoroTemplateContainer.Q<TemplateContainer>("pp-btn-secondary")?.Q<Button>();
             // 查找 Clock TemplateContainer 并初始化 ClockView
             var ppClockContainer = pomodoroTemplateContainer.Q<TemplateContainer>("pp-clock");
             if (ppClockContainer != null)
@@ -144,8 +145,8 @@ namespace APP.Pomodoro.Controller
                 };
             }
 
-            // 设置齿轮按钮：在 PointerDown 阻断冒泡，避免触发整卡拖拽
-            var settingsBtn = pomodoroTemplateContainer.Q<VisualElement>("pp-settings-btn");
+            // 设置齿轮按钮：原生 ui:Button，PointerDown 阻断冒泡避免触发整卡拖拽
+            var settingsBtn = pomodoroTemplateContainer.Q<Button>("pp-settings-btn");
             if (settingsBtn != null)
             {
                 settingsBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());

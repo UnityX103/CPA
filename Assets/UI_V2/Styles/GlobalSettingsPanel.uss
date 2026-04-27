@@ -67,11 +67,16 @@
     overflow: visible;
 }
 
-.gsp-display-dropdown {
+/* 双 class 复合选择器：override 模板自身 .comp-input-dropdown 的 12px 垂直 padding，
+   否则 36px 高的 dropdown 内容区只剩 12px，14px 文字会被上下裁掉 */
+.comp-input-dropdown.gsp-display-dropdown {
     flex-direction: row;
     align-items: center;
     margin: 0;
-    padding: 0 32px 0 12px;
+    padding-top: 0;
+    padding-right: 32px;
+    padding-bottom: 0;
+    padding-left: 12px;
     width: 100%;
     height: 36px;
     min-height: 36px;

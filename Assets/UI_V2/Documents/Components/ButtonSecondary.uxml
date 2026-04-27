@@ -4,5 +4,5 @@
          editor-extension-mode="False">
   <ui:Style src="../../Styles/Variables.uss"/>
   <ui:Style src="../../Styles/Components/ButtonSecondary.uss"/>
-  <ui:Button class="comp-btn-secondary" text="Button"/>
+  <ui:Button name="root" class="comp-btn-secondary" text="Button"/>
 </ui:UXML>

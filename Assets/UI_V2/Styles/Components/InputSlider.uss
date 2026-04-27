@@ -34,12 +34,12 @@
 
 .comp-input-slider__fill {
     position: absolute;
-    left: 2px;
+    left: 0;
     top: 2px;
     height: 20px;
     width: 50%;
     background-color: rgb(102, 184, 255);
-    border-radius: 10px;
+    border-radius: 10px; /* Pencil: cornerRadius 13 -- 20px 高度下钳制为 10px，形成胶囊端 */
 }
 
 .comp-input-slider__control {

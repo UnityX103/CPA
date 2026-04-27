@@ -36,7 +36,7 @@ namespace APP.Pomodoro.Controller
         private ConfirmDialogController _scaleDialog;
         private float _pendingScale;
         private const float ScaleSliderDraggerSize = 24f;
-        private const float ScaleSliderFillLeftInset = 2f;
+        private const float ScaleSliderFillLeftInset = 0f;
 
         // ─── 目标显示器 ───────────────────────────────────────────
         private VisualElement _displayDropdown;
@@ -324,7 +324,7 @@ namespace APP.Pomodoro.Controller
             float normalized = Mathf.Clamp01(Mathf.InverseLerp(SettingsModel.MinScale, SettingsModel.MaxScale, value));
             float dragRange = Mathf.Max(0f, trackWidth - ScaleSliderDraggerSize);
             float thumbCenterX = (ScaleSliderDraggerSize * 0.5f) + (dragRange * normalized);
-            return Mathf.Max(0f, thumbCenterX - ScaleSliderFillLeftInset);
+            return Mathf.Max(0f, thumbCenterX);
         }
 
         internal static float  SnapToStep(float v) => Mathf.Round(v * 10f) / 10f;

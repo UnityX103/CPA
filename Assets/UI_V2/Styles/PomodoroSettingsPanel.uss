@@ -14,7 +14,7 @@
 
 .psp-metrics {
     flex-direction: row;
-    margin-bottom: 16px;
+    margin-bottom: 10px; /* Pencil JpJcn (pomoFooter) gap:10 */
 }
 
 .psp-metric {
@@ -31,6 +31,8 @@
 
 .psp-metric--warm {
     background-color: rgb(255, 247, 217);
+    border-width: 1px;
+    border-color: rgb(243, 210, 139); /* #F3D28B — Pencil UC3kS stroke */
 }
 
 .psp-metric-label {
@@ -78,34 +80,25 @@
     -unity-text-align: middle-right;
 }
 
-/* ── 应用按钮 ────────────────────────────────────────────── */
-/* 番茄钟 apply-btn 视觉与 GlobalSettingsPanel.uss 的 .apply-btn 不一致
-   （番茄钟要 100% 宽 / 38px 高 / 药丸形 / 橙红底），
-   因此用 .psp-root .apply-btn 作 scope，避免全局规则在后加载时覆盖。 */
+/* ── 设置面板 Toggle 覆写（Pencil pomoAutoToggle: fill #6366F1）── */
+.psp-root .comp-toggle-switch:checked .unity-toggle__input {
+    background-color: rgb(99, 102, 241); /* #6366F1 */
+}
+
+/* ── 应用按钮行 ──────────────────────────────────────────── */
+/* Pencil EOrsv (SettingsApplyRow): justifyContent end, 按钮 120px 宽
+   apply-btn 由 ButtonPrimary.uss (.comp-btn-primary) 提供基础样式，
+   面板只覆盖位置/间距，不重复组件内部样式。 */
+
+.psp-apply-row {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-bottom: 16px; /* Pencil gs1Tv gap:16 (apply ↔ footer) */
+}
 
 .psp-root .apply-btn {
-    /* 对齐 Pencil pspApply：padding [10,16], fontSize 14, 无显式 height（≈38px），
-       cornerRadius 999 → Unity 写 height/2 = 19px 保证药丸形。 */
-    width: 100%;
-    height: 38px;
-    padding: 10px 16px;
-    border-radius: 19px;
-    background-color: rgb(209, 95, 61);
-    color: rgb(255, 255, 255);
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    font-size: 14px;
-    margin: 0 0 16px 0;
-    border-width: 0;
-    transition: opacity 120ms ease-out;
-}
-
-.psp-root .apply-btn:hover {
-    background-color: rgb(232, 130, 74);
-}
-
-.psp-root .apply-btn:active {
-    background-color: rgb(188, 82, 50);
+    margin: 0;
 }
 
 .apply-btn--hidden {

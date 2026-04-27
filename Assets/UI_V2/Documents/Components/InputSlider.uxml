@@ -1,26 +1,11 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
-         editor-extension-mode="False">
-    <ui:Style src="../../Styles/Variables.uss"/>
-    <ui:Style src="../../Styles/Components/InputSlider.uss"/>
-
-    <!--
-      InputSlider — 统一滑动条组件
-      对应 Pencil 组件: Input/Slider (id = YwCv6)
-
-      C# 绑定名称：
-        gsp-scale-slider-wrap
-        gsp-scale-slider-fill
-        gsp-scale-slider
-        gsp-scale-value
-    -->
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI_V2/Styles/Variables.uss?fileID=7433441132597879392&amp;guid=4b56b48a338d343dfb0e16e579e22bef&amp;type=3#Variables" />
+    <Style src="project://database/Assets/UI_V2/Styles/Components/InputSlider.uss?fileID=7433441132597879392&amp;guid=f16e1b14faca44380abc9153ac13ca57&amp;type=3#InputSlider" />
     <ui:VisualElement class="comp-input-slider">
         <ui:VisualElement name="gsp-scale-slider-wrap" class="comp-input-slider__wrap">
             <ui:VisualElement class="comp-input-slider__track" />
-            <ui:VisualElement name="gsp-scale-slider-fill" class="comp-input-slider__fill" />
-            <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0"
-                       value="1.25" class="comp-input-slider__control" />
+            <ui:VisualElement name="gsp-scale-slider-fill" class="comp-input-slider__fill" style="width: 140px; left: 2px;" />
+            <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0" value="1.25" class="comp-input-slider__control" />
         </ui:VisualElement>
         <ui:Label name="gsp-scale-value" text="1.0×" class="comp-input-slider__value" />
     </ui:VisualElement>

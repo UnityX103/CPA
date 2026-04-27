@@ -1060,8 +1060,8 @@
     {
       "type": "frame",
       "id": "ce62U",
-      "x": -590,
-      "y": -542,
+      "x": -594,
+      "y": -529,
       "name": "Component Library",
       "width": 632,
       "fill": "#FAFAF9",
@@ -1990,6 +1990,7 @@
                       "id": "LTdDn",
                       "name": "states",
                       "width": 360,
+                      "height": 89,
                       "layout": "vertical",
                       "gap": 8,
                       "children": [
@@ -2015,7 +2016,7 @@
                           "id": "YwCv6",
                           "name": "Input/Slider",
                           "reusable": true,
-                          "width": 360,
+                          "width": "fill_container",
                           "height": 24,
                           "gap": 12,
                           "alignItems": "center",
@@ -2518,8 +2519,13 @@
                           "name": "RoomHistoryItem",
                           "reusable": true,
                           "width": "fill_container",
-                          "fill": "#FFFFFF",
+                          "fill": "#FFFFFFCC",
                           "cornerRadius": 10,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E7EB"
+                          },
                           "gap": 10,
                           "padding": [
                             10,
@@ -2643,8 +2649,13 @@
                           "name": "RoomMemberItem",
                           "reusable": true,
                           "width": "fill_container",
-                          "fill": "#FFFFFF",
+                          "fill": "#FFFFFFCC",
                           "cornerRadius": 10,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E5E7EB"
+                          },
                           "gap": 10,
                           "padding": [
                             10,
@@ -2964,6 +2975,163 @@
               ]
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "bfMCZ",
+          "name": "ConfirmDialog",
+          "reusable": true,
+          "width": 420,
+          "fill": "#FFFFFF",
+          "cornerRadius": 20,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000033",
+            "offset": {
+              "x": 0,
+              "y": 8
+            },
+            "blur": 32
+          },
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "lFbzX",
+              "name": "dlg-header",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yTKtB",
+                  "name": "dlg-title-wrap",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "D1pHM",
+                      "name": "dlg-title",
+                      "fill": "#1A1A1A",
+                      "content": "标题",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rq52v",
+                      "name": "dlg-subtitle",
+                      "fill": "#6B7280",
+                      "content": "副标题",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Vyl4X",
+              "x": 0,
+              "y": 0,
+              "name": "dlg-countdown",
+              "enabled": false,
+              "width": "fill_container(0)",
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "gwi14",
+                  "name": "dlg-countdown-text",
+                  "fill": "#D97706",
+                  "content": "剩余 5s 后自动还原",
+                  "fontFamily": "MaokenAssortedSans",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "sus5u",
+              "name": "dlg-body",
+              "fill": "#4B5563",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "正文占位正文占位正文占位",
+              "lineHeight": 1.5,
+              "fontFamily": "MaokenAssortedSans",
+              "fontSize": 14,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "06tss",
+              "name": "dlg-actions",
+              "width": "fill_container",
+              "gap": 12,
+              "justifyContent": "end",
+              "children": [
+                {
+                  "id": "kHgaW",
+                  "type": "ref",
+                  "ref": "RPLJq",
+                  "name": "dlg-cancel",
+                  "descendants": {
+                    "zgOkx": {
+                      "content": "取消",
+                      "fontSize": 13
+                    }
+                  }
+                },
+                {
+                  "id": "D6waS",
+                  "type": "ref",
+                  "ref": "Za5wE",
+                  "name": "dlg-confirm",
+                  "descendants": {
+                    "oNDTH": {
+                      "content": "确认",
+                      "fontSize": 13
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "dR7xG",
+          "type": "ref",
+          "ref": "bfMCZ",
+          "name": "Unsaved Changes Dialog",
+          "x": 32,
+          "y": 2184,
+          "descendants": {
+            "D1pHM": {
+              "content": "有未保存的更改"
+            },
+            "rq52v": {
+              "content": "请先应用或取消后再继续"
+            },
+            "Vyl4X": {
+              "enabled": false
+            },
+            "sus5u": {
+              "content": "你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？"
+            },
+            "D6waS/oNDTH": {
+              "content": "保存并继续",
+              "fontSize": 13
+            }
+          }
         }
       ]
     },
@@ -3023,7 +3191,7 @@
                     },
                     {
                       "type": "frame",
-                      "id": "jtlhD",
+                      "id": "UPUHf",
                       "name": "phaseBadge",
                       "clip": true,
                       "fill": "#D15F3D",
@@ -3037,21 +3205,26 @@
                       "children": [
                         {
                           "type": "ellipse",
-                          "id": "bI6eO",
+                          "id": "do3Bz",
                           "name": "dot",
                           "fill": "#FFFFFF",
                           "width": 6,
                           "height": 6
                         },
                         {
-                          "type": "text",
-                          "id": "qfQSq",
-                          "name": "label",
-                          "fill": "#FFFFFF",
-                          "content": "专注中",
-                          "fontFamily": "MaokenAssortedSans",
-                          "fontSize": 10,
-                          "fontWeight": "700"
+                          "id": "ResRN",
+                          "type": "ref",
+                          "ref": "JZ0T6",
+                          "name": "phaseLabel",
+                          "fill": "#00000000",
+                          "padding": 0,
+                          "descendants": {
+                            "Z8Bzt": {
+                              "content": "专注中",
+                              "fill": "#FFFFFF",
+                              "fontSize": 10
+                            }
+                          }
                         }
                       ]
                     }
@@ -3174,12 +3347,6 @@
             "1JKIJ": {
               "content": "远端玩家"
             },
-            "jtlhD": {
-              "fill": "#D15F3D"
-            },
-            "qfQSq": {
-              "content": "专注中"
-            },
             "7XQkG": {
               "content": "3/4 轮"
             },
@@ -3200,10 +3367,10 @@
             "1JKIJ": {
               "content": "小南"
             },
-            "jtlhD": {
-              "fill": "#6FA68A"
+            "UPUHf": {
+              "fill": "#34A853"
             },
-            "qfQSq": {
+            "ResRN/Z8Bzt": {
               "content": "休息中"
             },
             "7XQkG": {
@@ -3226,10 +3393,10 @@
             "1JKIJ": {
               "content": "阿白"
             },
-            "jtlhD": {
-              "fill": "#C9A04A"
+            "UPUHf": {
+              "fill": "#E08C10"
             },
-            "qfQSq": {
+            "ResRN/Z8Bzt": {
               "content": "已暂停"
             },
             "7XQkG": {
@@ -3252,10 +3419,10 @@
             "1JKIJ": {
               "content": "柚子"
             },
-            "jtlhD": {
-              "fill": "#8FAE7A"
+            "UPUHf": {
+              "fill": "#6366F1"
             },
-            "qfQSq": {
+            "ResRN/Z8Bzt": {
               "content": "已完成"
             },
             "7XQkG": {
@@ -3278,11 +3445,11 @@
             "1JKIJ": {
               "content": "新成员"
             },
-            "jtlhD": {
-              "fill": "#A89A8C"
+            "UPUHf": {
+              "fill": "#B5A49A"
             },
-            "qfQSq": {
-              "content": "空闲"
+            "ResRN/Z8Bzt": {
+              "content": "待加入"
             },
             "7XQkG": {
               "content": "0/4 轮"
@@ -3529,139 +3696,6 @@
     },
     {
       "type": "frame",
-      "id": "bfMCZ",
-      "x": 2978,
-      "y": 348,
-      "name": "ConfirmDialog",
-      "reusable": true,
-      "width": 420,
-      "fill": "#FFFFFF",
-      "cornerRadius": 20,
-      "effect": {
-        "type": "shadow",
-        "shadowType": "outer",
-        "color": "#00000033",
-        "offset": {
-          "x": 0,
-          "y": 8
-        },
-        "blur": 32
-      },
-      "layout": "vertical",
-      "gap": 16,
-      "padding": 24,
-      "children": [
-        {
-          "type": "frame",
-          "id": "lFbzX",
-          "name": "dlg-header",
-          "width": "fill_container",
-          "justifyContent": "space_between",
-          "children": [
-            {
-              "type": "frame",
-              "id": "yTKtB",
-              "name": "dlg-title-wrap",
-              "layout": "vertical",
-              "gap": 4,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "D1pHM",
-                  "name": "dlg-title",
-                  "fill": "#1A1A1A",
-                  "content": "标题",
-                  "fontFamily": "MaokenAssortedSans",
-                  "fontSize": 16,
-                  "fontWeight": "700"
-                },
-                {
-                  "type": "text",
-                  "id": "rq52v",
-                  "name": "dlg-subtitle",
-                  "fill": "#6B7280",
-                  "content": "副标题",
-                  "fontFamily": "MaokenAssortedSans",
-                  "fontSize": 12,
-                  "fontWeight": "500"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "Vyl4X",
-          "x": 0,
-          "y": 0,
-          "name": "dlg-countdown",
-          "enabled": false,
-          "width": "fill_container(0)",
-          "justifyContent": "center",
-          "children": [
-            {
-              "type": "text",
-              "id": "gwi14",
-              "name": "dlg-countdown-text",
-              "fill": "#D97706",
-              "content": "剩余 5s 后自动还原",
-              "fontFamily": "MaokenAssortedSans",
-              "fontSize": 13,
-              "fontWeight": "700"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "id": "sus5u",
-          "name": "dlg-body",
-          "fill": "#4B5563",
-          "textGrowth": "fixed-width",
-          "width": "fill_container",
-          "content": "正文占位正文占位正文占位",
-          "lineHeight": 1.5,
-          "fontFamily": "MaokenAssortedSans",
-          "fontSize": 14,
-          "fontWeight": "500"
-        },
-        {
-          "type": "frame",
-          "id": "06tss",
-          "name": "dlg-actions",
-          "width": "fill_container",
-          "gap": 12,
-          "justifyContent": "end",
-          "children": [
-            {
-              "id": "kHgaW",
-              "type": "ref",
-              "ref": "RPLJq",
-              "name": "dlg-cancel",
-              "descendants": {
-                "zgOkx": {
-                  "content": "取消",
-                  "fontSize": 13
-                }
-              }
-            },
-            {
-              "id": "D6waS",
-              "type": "ref",
-              "ref": "Za5wE",
-              "name": "dlg-confirm",
-              "descendants": {
-                "oNDTH": {
-                  "content": "确认",
-                  "fontSize": 13
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "Pdj9C",
       "x": 1741,
       "y": 1751,
@@ -3742,37 +3776,11 @@
       ]
     },
     {
-      "id": "dR7xG",
-      "type": "ref",
-      "ref": "bfMCZ",
-      "name": "Unsaved Changes Dialog",
-      "x": 2430,
-      "y": 337,
-      "descendants": {
-        "D1pHM": {
-          "content": "有未保存的更改"
-        },
-        "rq52v": {
-          "content": "请先应用或取消后再继续"
-        },
-        "Vyl4X": {
-          "enabled": false
-        },
-        "sus5u": {
-          "content": "你修改了番茄钟设置但尚未应用。离开此面板将丢失这些改动，是否先保存并继续？"
-        },
-        "D6waS/oNDTH": {
-          "content": "保存并继续",
-          "fontSize": 13
-        }
-      }
-    },
-    {
       "id": "oqb2P",
       "type": "ref",
       "ref": "8Le5R",
       "name": "Online Settings Panel / busy",
-      "x": 2350,
+      "x": 3612,
       "y": 777
     }
   ],

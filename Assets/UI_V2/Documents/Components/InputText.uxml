@@ -12,6 +12,6 @@
       C# 绑定名称：
         .comp-input-text — 根 TextField
     -->
-    <ui:TextField class="comp-input-text" />
+    <ui:TextField name="root" class="comp-input-text" />
 
 </ui:UXML>

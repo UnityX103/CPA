@@ -1,74 +1,76 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/OnlineSettingsPanel.uss"/>
-    <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
-    <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
-    <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
-    <ui:Style src="../Styles/Components/ButtonIcon.uss"/>
-    <ui:Style src="../Styles/Components/ButtonCopy.uss"/>
-    <ui:Style src="../Styles/Components/InputText.uss"/>
+    <ui:Template name="ToggleSwitch" src="Components/ToggleSwitch.uxml"/>
+    <ui:Template name="InputText" src="Components/InputText.uxml"/>
+    <ui:Template name="ButtonPrimary" src="Components/ButtonPrimary.uxml"/>
+    <ui:Template name="ButtonSecondary" src="Components/ButtonSecondary.uxml"/>
+    <ui:Template name="ButtonCopy" src="Components/ButtonCopy.uxml"/>
 
     <!--
-      OnlineSettingsPanel — 联机设置面板
-      对应 Pencil 组件: Online Settings Panel (id = 8Le5R)
-      三个卡片通过 C# class 切换显示/隐藏：
-        osp-join-card  — 未加入时显示
-        osp-room-card  — 已加入时显示
-        osp-hist-card  — 未加入时显示
+      OnlineSettingsPanel — 联机设置面板 (Pencil 8Le5R)
+      所有按钮/输入/Toggle 通过 Components/* 模板复用；
+      成员项与历史项由 C# 通过 RoomMemberItem.uxml / RoomHistoryItem.uxml 模板克隆生成。
     -->
     <ui:VisualElement name="osp-root" class="osp-root">
         <!-- Pencil: onlAutoRow — 自动联网开关 -->
+        <!-- 注意: AttributeOverrides 不能重命名内部 root 元素的 name；name 必须挂在 ui:Instance 自己 -->
         <ui:VisualElement class="osp-row">
             <ui:Label text="自动联网" class="osp-row-label" />
-            <ui:Toggle name="osp-auto-toggle" value="true" class="comp-toggle-switch" />
+            <ui:Instance name="osp-auto-toggle" template="ToggleSwitch">
+                <AttributeOverrides element-name="root" class="comp-toggle-switch" />
+            </ui:Instance>
         </ui:VisualElement>
 
-        <!-- ══ 加入房间卡片（未加入时显示）══ -->
+        <!-- ══ 加入房间卡片 ══ -->
         <ui:VisualElement name="osp-join-card" class="osp-card osp-join-card">
             <ui:Label text="加入房间" class="osp-card-title" />
-            <!-- 用户名 -->
             <ui:VisualElement class="osp-field">
                 <ui:Label text="用户名" class="osp-field-label" />
-                <ui:TextField name="osp-username" value="我的昵称" class="comp-input-text" />
+                <ui:Instance name="osp-username" template="InputText">
+                    <AttributeOverrides element-name="root" value="我的昵称" class="comp-input-text" />
+                </ui:Instance>
             </ui:VisualElement>
-            <!-- 房间号 -->
             <ui:VisualElement class="osp-field">
                 <ui:Label text="房间号" class="osp-field-label" />
-                <ui:TextField name="osp-room-id" value="ROOM-001" class="comp-input-text" />
+                <ui:Instance name="osp-room-id" template="InputText">
+                    <AttributeOverrides element-name="root" value="123456" class="comp-input-text" />
+                </ui:Instance>
             </ui:VisualElement>
-            <!-- 加入按钮：房间不存在时服务端会自动走 create_room，所以不需要独立的创建按钮 -->
-            <ui:Button name="osp-join-btn" text="加入房间" class="comp-btn-primary" />
+            <ui:Instance name="osp-join-btn" template="ButtonPrimary">
+                <AttributeOverrides element-name="root" text="加入房间" class="comp-btn-primary" />
+            </ui:Instance>
         </ui:VisualElement>
 
-        <!-- ══ 当前房间卡片（已加入时显示）══ -->
+        <!-- ══ 当前房间卡片 ══ -->
         <ui:VisualElement name="osp-room-card" class="osp-card osp-room-card">
             <ui:Label name="osp-reconnect-banner" text="正在重新连接..." class="osp-reconnect-banner osp-hidden" />
-            <!-- 房间头部：房间信息 + 退出按钮 -->
             <ui:VisualElement class="osp-room-head">
                 <ui:VisualElement class="osp-room-info">
                     <ui:VisualElement class="osp-room-name-row">
                         <ui:Label name="osp-room-name" text="ROOM-001" class="osp-room-name" />
-                        <ui:Button name="osp-copy-btn" text="复制" class="comp-btn-copy" />
+                        <ui:Instance name="osp-copy-btn" template="ButtonCopy">
+                            <AttributeOverrides element-name="root" text="复制" class="comp-btn-copy" />
+                        </ui:Instance>
                     </ui:VisualElement>
                     <ui:Label name="osp-room-status" text="已连接 · 3 位成员" class="osp-room-status" />
                 </ui:VisualElement>
-                <ui:Button name="osp-exit-btn" text="退出房间" class="comp-btn-secondary" />
+                <ui:Instance name="osp-exit-btn" template="ButtonSecondary">
+                    <AttributeOverrides element-name="root" text="退出房间" class="comp-btn-secondary" />
+                </ui:Instance>
             </ui:VisualElement>
-            <!-- 成员列表 -->
-            <ui:VisualElement name="osp-member-list" class="osp-member-list">
-                <!-- 成员项由 C# 动态生成 -->
-            </ui:VisualElement>
+            <!-- 成员列表（C# 用 RoomMemberItem 模板克隆生成） -->
+            <ui:VisualElement name="osp-member-list" class="osp-member-list" />
         </ui:VisualElement>
 
-        <!-- ══ 历史房间卡片（未加入时显示）══ -->
+        <!-- ══ 历史房间卡片 ══ -->
         <ui:VisualElement name="osp-hist-card" class="osp-card osp-hist-card">
             <ui:Label text="历史房间" class="osp-card-title" />
-            <!-- 历史项由 C# 动态生成 -->
+            <!-- 历史项（C# 用 RoomHistoryItem 模板克隆生成） -->
             <ui:VisualElement name="osp-hist-list" class="osp-hist-list" />
         </ui:VisualElement>
 
-        <!-- Busy 蒙层：加入/退出/创建房间过程中阻断面板交互；默认隐藏（display:none）
-             外层 overlay 吸收点击；内层 card 是带背景的药丸，保证文字在半透明蒙层上清晰可见。 -->
+        <!-- Busy 蒙层 -->
         <ui:VisualElement name="osp-busy-overlay" class="osp-busy-overlay osp-hidden">
             <ui:VisualElement class="osp-busy-card">
                 <ui:Label name="osp-busy-text" text="处理中…" class="osp-busy-text" />
