@@ -1,0 +1,47 @@
+/*
+ * InputDropdown.uss
+ * Pencil 组件: Input/Dropdown (Frjkw)
+ * 折叠态：灰边 + 灰雪佛龙；展开态：橙字 + 橙雪佛龙（向上）
+ */
+
+.comp-input-dropdown {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(229, 231, 235); /* #E5E7EB */
+    background-color: rgba(255, 255, 255, 0.8); /* #FFFFFFCC */
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.comp-input-dropdown__value {
+    font-size: 14px;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.comp-input-dropdown__chevron {
+    font-size: 14px;
+    color: rgb(107, 114, 128); /* #6B7280 */
+    -unity-text-align: middle-center;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+/* ── 展开态变体：Q37wW (openDrop) ── */
+.comp-input-dropdown--open .comp-input-dropdown__value {
+    color: rgb(209, 95, 61); /* #D15F3D */
+}
+
+.comp-input-dropdown--open .comp-input-dropdown__chevron {
+    color: rgb(209, 95, 61);
+    rotate: 180deg;
+}

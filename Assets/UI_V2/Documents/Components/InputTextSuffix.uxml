@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Components/InputTextSuffix.uss"/>
+  <!--
+    Pencil 组件: Input/TextSuffix (0cT2B)
+    数字 + 单位组合；warm 变体（休息时长）通过 .comp-input-suffix—-warm 切换
+  -->
+  <ui:VisualElement name="root" class="comp-input-suffix">
+    <ui:TextField name="value" value="" class="comp-input-suffix__field"/>
+    <ui:Label name="hint" text="分钟" class="comp-input-suffix__hint"/>
+  </ui:VisualElement>
+</ui:UXML>

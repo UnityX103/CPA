@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Components/RoomHistoryItem.uss"/>
+  <!--
+    Pencil 组件: RoomHistoryItem (bSMet)
+    历史房间项；pRJCD (oldRoom) 用 .comp-room-history-item—-old 灰化文案
+  -->
+  <ui:VisualElement name="root" class="comp-room-history-item">
+    <ui:Label name="room-name" class="comp-room-history-item__name" text=""/>
+    <ui:VisualElement class="comp-room-history-item__spacer"/>
+    <ui:Label name="time" class="comp-room-history-item__time" text=""/>
+    <ui:Label name="enter-icon" class="comp-room-history-item__icon" text="↪" picking-mode="Ignore"/>
+  </ui:VisualElement>
+</ui:UXML>

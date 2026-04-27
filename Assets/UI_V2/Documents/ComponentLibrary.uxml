@@ -1,0 +1,414 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/ComponentLibrary.uss"/>
+
+    <!--
+        Component USS：inline 用法（手写 VisualElement + comp-* class）需要这里显式挂载，
+        否则 flex-direction:row、padding、border 等只在每个 Component .uxml 里被加载，
+        导致 ComponentLibrary 渲染时 children 退化成 column 堆叠。
+    -->
+    <ui:Style src="../Styles/Components/ButtonTab.uss"/>
+    <ui:Style src="../Styles/Components/ButtonIcon.uss"/>
+    <ui:Style src="../Styles/Components/ButtonPrimary.uss"/>
+    <ui:Style src="../Styles/Components/ButtonSecondary.uss"/>
+    <ui:Style src="../Styles/Components/ButtonClose.uss"/>
+    <ui:Style src="../Styles/Components/ButtonCopy.uss"/>
+    <ui:Style src="../Styles/Components/ButtonPin.uss"/>
+    <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
+    <ui:Style src="../Styles/Components/InputSlider.uss"/>
+    <ui:Style src="../Styles/Components/InputText.uss"/>
+    <ui:Style src="../Styles/Components/InputDropdown.uss"/>
+    <ui:Style src="../Styles/Components/InputTextSuffix.uss"/>
+    <ui:Style src="../Styles/Components/RoomHistoryItem.uss"/>
+    <ui:Style src="../Styles/Components/RoomMemberItem.uss"/>
+    <ui:Style src="../Styles/Components/PanelTitle.uss"/>
+    <ui:Style src="../Styles/Components/SettingsApplyRow.uss"/>
+
+    <ui:Template name="ButtonTab" src="Components/ButtonTab.uxml"/>
+    <ui:Template name="ButtonIcon" src="Components/ButtonIcon.uxml"/>
+    <ui:Template name="ButtonPrimary" src="Components/ButtonPrimary.uxml"/>
+    <ui:Template name="ButtonSecondary" src="Components/ButtonSecondary.uxml"/>
+    <ui:Template name="ButtonClose" src="Components/ButtonClose.uxml"/>
+    <ui:Template name="ButtonCopy" src="Components/ButtonCopy.uxml"/>
+    <ui:Template name="ButtonPin" src="Components/ButtonPin.uxml"/>
+    <ui:Template name="ToggleSwitch" src="Components/ToggleSwitch.uxml"/>
+    <ui:Template name="InputSlider" src="Components/InputSlider.uxml"/>
+    <ui:Template name="InputText" src="Components/InputText.uxml"/>
+    <ui:Template name="InputDropdown" src="Components/InputDropdown.uxml"/>
+    <ui:Template name="InputTextSuffix" src="Components/InputTextSuffix.uxml"/>
+    <ui:Template name="RoomHistoryItem" src="Components/RoomHistoryItem.uxml"/>
+    <ui:Template name="RoomMemberItem" src="Components/RoomMemberItem.uxml"/>
+    <ui:Template name="PanelTitle" src="Components/PanelTitle.uxml"/>
+    <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
+
+    <!--
+        Pencil ce62U "组件库 / Component Library" — 组件冒烟回归面板。
+        每行 = 信息列（名称 + 描述）+ 状态列（同一组件的若干变体）。
+        用途：导入到 Components.unity 场景，直接在 Game 视图肉眼检查所有组件能否正常渲染。
+    -->
+    <ui:ScrollView name="cl-scroll" mode="Vertical" class="cl-scroll">
+        <ui:VisualElement name="cl-root" class="cl-root">
+
+            <!-- Header -->
+            <ui:Label class="cl-panel-title" text="组件库"/>
+            <ui:Label class="cl-panel-subtitle" text="按类别浏览所有可复用组件、状态与变体"/>
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- Buttons -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="Buttons"/>
+                <ui:VisualElement class="cl-grid">
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Tab 标签按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于标签页切换，如设置分类"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonTab">
+                                <AttributeOverrides element-name="root" class="comp-btn-tab" text="Tab"/>
+                            </ui:Instance>
+                            <ui:Instance template="ButtonTab">
+                                <AttributeOverrides element-name="root" class="comp-btn-tab comp-btn-tab--inactive" text="Tab"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Icon 图标按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于折叠、展开等图标操作"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonIcon"/>
+                            <ui:Instance template="ButtonIcon">
+                                <AttributeOverrides element-name="root" class="comp-btn-icon" text="↓"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Primary 主按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于主要操作，如开始、确认"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonPrimary">
+                                <AttributeOverrides element-name="root" class="comp-btn-primary cl-btn-fixed" text="开始"/>
+                            </ui:Instance>
+                            <ui:Instance template="ButtonPrimary">
+                                <AttributeOverrides element-name="root" class="comp-btn-primary comp-btn-primary--disabled cl-btn-fixed" text="开始"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Secondary 次按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于次要操作，如跳过、取消"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonSecondary">
+                                <AttributeOverrides element-name="root" class="comp-btn-secondary cl-btn-fixed" text="跳过"/>
+                            </ui:Instance>
+                            <ui:Instance template="ButtonSecondary">
+                                <AttributeOverrides element-name="root" class="comp-btn-secondary comp-btn-secondary--disabled cl-btn-fixed" text="跳过"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Close 关闭按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于关闭弹窗、面板"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonClose"/>
+                            <ui:Instance template="ButtonClose">
+                                <AttributeOverrides element-name="root" class="comp-btn-close comp-btn-close--hover" text="✕"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Copy 复制按钮"/>
+                            <ui:Label class="cl-row__desc" text="用于复制邀请码、链接"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonCopy"/>
+                            <ui:Instance template="ButtonCopy">
+                                <AttributeOverrides element-name="root" class="comp-btn-copy comp-btn-copy--pressed" text="已复制"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Pin 置顶按钮"/>
+                            <ui:Label class="cl-row__desc" text="切换窗口置顶/取消置顶"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ButtonPin"/>
+                            <ui:Instance template="ButtonPin">
+                                <AttributeOverrides element-name="root" class="comp-btn-pin comp-btn-pin--off"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- Toggles -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="Toggles"/>
+                <ui:VisualElement class="cl-grid">
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Toggle Switch 开关"/>
+                            <ui:Label class="cl-row__desc" text="用于启用/禁用功能，如联网、自动切换"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states">
+                            <ui:Instance template="ToggleSwitch">
+                                <AttributeOverrides element-name="root" value="true"/>
+                            </ui:Instance>
+                            <ui:Instance template="ToggleSwitch"/>
+                            <ui:Instance template="ToggleSwitch">
+                                <AttributeOverrides element-name="root" class="comp-toggle-switch comp-toggle-switch--disabled"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- Inputs -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="Inputs"/>
+                <ui:VisualElement class="cl-grid">
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Slider 滑动条"/>
+                            <ui:Label class="cl-row__desc" text="用于数值范围选择，如界面缩放"/>
+                        </ui:VisualElement>
+                        <!--
+                            Slider 直接 inline，不走 ui:Instance/TemplateContainer。
+                            TemplateContainer 在某些 Unity 版本不响应 align-items:stretch 且
+                            自身 width:100% 不下发到 .comp-input-slider，导致 wrap.flex-grow:1
+                            算成 0 → 控制器读 wrap 宽度 = 0 → fill 不刷新 + Slider 值锁在 lowValue。
+                        -->
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:VisualElement class="comp-input-slider">
+                                <ui:VisualElement name="gsp-scale-slider-wrap" class="comp-input-slider__wrap">
+                                    <ui:VisualElement class="comp-input-slider__track"/>
+                                    <ui:VisualElement name="gsp-scale-slider-fill" class="comp-input-slider__fill" style="width: 140px; left: 2px;"/>
+                                    <ui:Slider name="gsp-scale-slider" low-value="0.5" high-value="2.0" value="1.0" class="comp-input-slider__control"/>
+                                </ui:VisualElement>
+                                <ui:Label name="gsp-scale-value" text="1.0×" class="comp-input-slider__value"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Input/Text 文本输入"/>
+                            <ui:Label class="cl-row__desc" text="单行文本框，空态与已填态。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:Instance template="InputText"/>
+                            <ui:Instance template="InputText">
+                                <AttributeOverrides element-name="root" value="番茄工坊"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Input/Dropdown 下拉框"/>
+                            <ui:Label class="cl-row__desc" text="折叠态与展开/选中态。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:VisualElement class="comp-input-dropdown">
+                                <ui:Label class="comp-input-dropdown__value" text="显示器 1"/>
+                                <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="comp-input-dropdown comp-input-dropdown--open">
+                                <ui:Label class="comp-input-dropdown__value" text="显示器 2"/>
+                                <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Input/TextSuffix 后缀输入"/>
+                            <ui:Label class="cl-row__desc" text="数字 + 单位后缀，常用于时长。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:Instance template="InputTextSuffix"/>
+                            <ui:Instance template="InputTextSuffix">
+                                <AttributeOverrides element-name="value" value="60"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- List Items -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="List Items"/>
+                <ui:VisualElement class="cl-grid">
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="RoomHistoryItem 历史项"/>
+                            <ui:Label class="cl-row__desc" text="房间名 + 时间，含进入图标。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:VisualElement class="comp-room-history-item">
+                                <ui:Label class="comp-room-history-item__name" text="ROOM-101"/>
+                                <ui:VisualElement class="comp-room-history-item__spacer"/>
+                                <ui:Label class="comp-room-history-item__time" text="刚刚"/>
+                                <ui:Label class="comp-room-history-item__icon" text="↪" picking-mode="Ignore"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="comp-room-history-item comp-room-history-item--old">
+                                <ui:Label class="comp-room-history-item__name" text="ROOM-042"/>
+                                <ui:VisualElement class="comp-room-history-item__spacer"/>
+                                <ui:Label class="comp-room-history-item__time" text="3 天前"/>
+                                <ui:Label class="comp-room-history-item__icon" text="↪" picking-mode="Ignore"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="RoomMemberItem 成员项"/>
+                            <ui:Label class="cl-row__desc" text="在线 / 专注中 / 离线。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:VisualElement class="comp-room-member-item comp-room-member-item--online">
+                                <ui:VisualElement class="comp-room-member-item__dot"/>
+                                <ui:Label class="comp-room-member-item__name" text="小红"/>
+                                <ui:VisualElement class="comp-room-member-item__spacer"/>
+                                <ui:Label class="comp-room-member-item__status" text="在线"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="comp-room-member-item comp-room-member-item--offline">
+                                <ui:VisualElement class="comp-room-member-item__dot"/>
+                                <ui:Label class="comp-room-member-item__name" text="小李"/>
+                                <ui:VisualElement class="comp-room-member-item__spacer"/>
+                                <ui:Label class="comp-room-member-item__status" text="离线"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- Layout & Misc -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="Layout &amp; Misc"/>
+                <ui:VisualElement class="cl-grid">
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="Panel Title 面板标题"/>
+                            <ui:Label class="cl-row__desc" text="标题 + 副标题组合，用于面板分区。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:Instance template="PanelTitle"/>
+                            <ui:Instance template="PanelTitle">
+                                <AttributeOverrides element-name="panel-title" text="联机房间"/>
+                                <AttributeOverrides element-name="panel-subtitle" text="创建或加入房间，与朋友共同专注。"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="SettingsApplyRow 应用行"/>
+                            <ui:Label class="cl-row__desc" text="右对齐主按钮行，含确认变体。"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+                            <ui:Instance template="SettingsApplyRow"/>
+                            <ui:Instance template="SettingsApplyRow">
+                                <AttributeOverrides element-name="apply-btn" text="确认"/>
+                            </ui:Instance>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="cl-divider"/>
+
+            <!-- Dialogs：ConfirmDialog 通用确认弹窗，复用 PanelTitle / ButtonPrimary / ButtonSecondary 模板。
+                 预览不走 absolute overlay；运行时仍由 ConfirmDialog.uxml + ConfirmDialogController 负责。 -->
+            <ui:VisualElement class="cl-section">
+                <ui:Label class="cl-section-label" text="Dialogs"/>
+                <ui:VisualElement class="cl-grid">
+
+                    <ui:VisualElement class="cl-row">
+                        <ui:VisualElement class="cl-row__info">
+                            <ui:Label class="cl-row__name" text="ConfirmDialog 通用确认对话框"/>
+                            <ui:Label class="cl-row__desc" text="标题 + 副标题（PanelTitle）+ 正文 + 主/次按钮，可选倒计时行"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cl-row__states cl-row__states--vertical">
+
+                            <!-- 形态 A：默认（无倒计时） -->
+                            <ui:VisualElement class="cl-dlg-card">
+                                <ui:Instance template="PanelTitle">
+                                    <AttributeOverrides element-name="panel-title" text="保留当前缩放？"/>
+                                    <AttributeOverrides element-name="panel-subtitle" text="此操作将影响所有窗口的渲染比例"/>
+                                </ui:Instance>
+                                <ui:Label class="cl-dlg-body" text="检测到全局缩放已修改，请选择保留新值还是还原到上次的设置。"/>
+                                <ui:VisualElement class="cl-dlg-actions">
+                                    <ui:Instance template="ButtonSecondary">
+                                        <AttributeOverrides element-name="root" class="comp-btn-secondary cl-dlg-btn" text="还原"/>
+                                    </ui:Instance>
+                                    <ui:Instance template="ButtonPrimary">
+                                        <AttributeOverrides element-name="root" class="comp-btn-primary cl-dlg-btn" text="保留"/>
+                                    </ui:Instance>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- 形态 B：含倒计时行 -->
+                            <ui:VisualElement class="cl-dlg-card">
+                                <ui:Instance template="PanelTitle">
+                                    <AttributeOverrides element-name="panel-title" text="保留当前缩放？"/>
+                                    <AttributeOverrides element-name="panel-subtitle" text="若无操作将自动还原"/>
+                                </ui:Instance>
+                                <ui:VisualElement class="cl-dlg-countdown">
+                                    <ui:Label class="cl-dlg-countdown-text" text="剩余 8s 后自动还原"/>
+                                </ui:VisualElement>
+                                <ui:Label class="cl-dlg-body" text="检测到全局缩放已修改，请在倒计时结束前确认是否保留。"/>
+                                <ui:VisualElement class="cl-dlg-actions">
+                                    <ui:Instance template="ButtonSecondary">
+                                        <AttributeOverrides element-name="root" class="comp-btn-secondary cl-dlg-btn" text="还原"/>
+                                    </ui:Instance>
+                                    <ui:Instance template="ButtonPrimary">
+                                        <AttributeOverrides element-name="root" class="comp-btn-primary cl-dlg-btn" text="保留"/>
+                                    </ui:Instance>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:ScrollView>
+</ui:UXML>

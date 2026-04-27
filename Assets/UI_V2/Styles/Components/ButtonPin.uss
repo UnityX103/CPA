@@ -1,0 +1,31 @@
+/*
+ * ButtonPin.uss
+ * Pencil 组件: Button/Pin (cM79C, ref→G6VSO + 图标覆盖)
+ * 22×22 圆形按钮，pin / pin-off 由 modifier class 切换
+ */
+
+.comp-btn-pin {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: rgb(240, 224, 208); /* #F0E0D0 */
+    align-items: center;
+    justify-content: center;
+}
+
+.comp-btn-pin:hover {
+    background-color: rgb(232, 214, 196);
+}
+
+.comp-btn-pin__icon {
+    width: 14px;
+    height: 14px;
+    background-image: url("project://database/Assets/UI_V2/Icons/pin.png");
+    -unity-background-image-tint-color: rgb(143, 119, 102); /* #8F7766 */
+}
+
+/* 状态变体：9s9Qu (Pin-Off Preview) */
+.comp-btn-pin--off .comp-btn-pin__icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/pin-off.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
+}

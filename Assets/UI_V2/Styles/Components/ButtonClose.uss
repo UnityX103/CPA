@@ -1,0 +1,27 @@
+/*
+ * ButtonClose.uss
+ * Pencil 组件: Button/Close (UAbZg)
+ * 圆形透明关闭按钮，hover 显示淡棕底
+ */
+
+.comp-btn-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(162, 139, 121); /* #A28B79 */
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 6px;
+}
+
+.comp-btn-close:hover {
+    background-color: rgb(240, 224, 208); /* #F0E0D0 */
+}
+
+/* 状态变体：lMnjs (close-hover) */
+.comp-btn-close--hover {
+    background-color: rgb(240, 224, 208);
+}

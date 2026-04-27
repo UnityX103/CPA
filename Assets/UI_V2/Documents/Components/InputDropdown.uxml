@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Variables.uss"/>
+  <ui:Style src="../../Styles/Components/InputDropdown.uss"/>
+  <!--
+    Pencil 组件: Input/Dropdown (Frjkw)
+    折叠态默认；展开态由 .comp-input-dropdown—-open 切换
+  -->
+  <ui:VisualElement name="root" class="comp-input-dropdown">
+    <ui:Label name="value" class="comp-input-dropdown__value" text=""/>
+    <ui:Label name="chevron" class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore"/>
+  </ui:VisualElement>
+</ui:UXML>

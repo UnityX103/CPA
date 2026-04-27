@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Variables.uss"/>
+  <ui:Style src="../../Styles/Components/ButtonPin.uss"/>
+  <!--
+    Pencil 组件: Button/Pin (cM79C, ref→G6VSO)
+    默认显示 pin 图标 (pinned 态)；切换 .comp-btn-pin—-off class 进入 unpinned 态
+  -->
+  <ui:VisualElement name="root" class="comp-btn-pin">
+    <ui:VisualElement name="icon" class="comp-btn-pin__icon"/>
+  </ui:VisualElement>
+</ui:UXML>

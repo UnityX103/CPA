@@ -1,0 +1,21 @@
+/*
+ * SettingsApplyRow.uss
+ * Pencil 组件: SettingsApplyRow (EOrsv)
+ * 右对齐的应用按钮行；fLVRh 变体改为"确认"
+ */
+
+.comp-settings-apply-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.comp-settings-apply-row__btn {
+    width: 120px;
+    font-size: 14px;
+}
+
+/* 草稿与 Model 一致时隐藏（与现有 .apply-btn--hidden 一致） */
+.comp-settings-apply-row--hidden {
+    display: none;
+}

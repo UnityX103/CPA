@@ -1,0 +1,82 @@
+/*
+ * RoomMemberItem.uss
+ * Pencil 组件: RoomMemberItem (ixVy7)
+ * 状态变体: TIVOK (online), TvPDU (offline)；扩展 idle/rest 与现有 PencilOnlineSettingsPanel 联动
+ */
+
+.comp-room-member-item {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* #FFFFFFCC */
+    border-width: 1px;
+    border-color: rgb(229, 231, 235); /* #E5E7EB */
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    width: 100%;
+}
+
+.comp-room-member-item__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgb(99, 102, 241); /* #6366F1 focus 默认 */
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.comp-room-member-item__name {
+    font-size: 13px;
+    color: rgb(26, 26, 26); /* #1A1A1A */
+    -unity-text-align: middle-left;
+}
+
+.comp-room-member-item__spacer {
+    flex-grow: 1;
+}
+
+.comp-room-member-item__status {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(99, 102, 241); /* #6366F1 默认 focus */
+    -unity-text-align: middle-right;
+}
+
+/* TIVOK: 在线 */
+.comp-room-member-item--online .comp-room-member-item__dot {
+    background-color: rgb(74, 222, 128); /* #4ADE80 */
+}
+.comp-room-member-item--online .comp-room-member-item__status {
+    color: rgb(74, 222, 128);
+}
+
+/* TvPDU: 离线 */
+.comp-room-member-item--offline .comp-room-member-item__dot {
+    background-color: rgb(156, 163, 175); /* #9CA3AF */
+}
+.comp-room-member-item--offline .comp-room-member-item__status {
+    color: rgb(156, 163, 175);
+    -unity-font-style: normal;
+}
+
+/* idle: 自己未开始 */
+.comp-room-member-item--idle .comp-room-member-item__dot {
+    background-color: rgb(209, 213, 219); /* #D1D5DB */
+}
+.comp-room-member-item--idle .comp-room-member-item__name {
+    -unity-font-style: bold;
+}
+.comp-room-member-item--idle .comp-room-member-item__status {
+    color: rgb(156, 163, 175);
+    -unity-font-style: normal;
+}
+
+/* rest: 休息中 */
+.comp-room-member-item--rest .comp-room-member-item__dot {
+    background-color: rgb(217, 119, 6); /* amber */
+}
+.comp-room-member-item--rest .comp-room-member-item__status {
+    color: rgb(217, 119, 6);
+}

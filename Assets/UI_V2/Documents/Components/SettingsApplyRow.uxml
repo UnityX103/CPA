@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Variables.uss"/>
+  <ui:Style src="../../Styles/Components/ButtonPrimary.uss"/>
+  <ui:Style src="../../Styles/Components/SettingsApplyRow.uss"/>
+  <!--
+    Pencil 组件: SettingsApplyRow (EOrsv)
+    右对齐主按钮行；fLVRh (applyConfirm) 用 .comp-settings-apply-row—-confirm 切换"确认"文案
+  -->
+  <ui:VisualElement class="comp-settings-apply-row">
+    <ui:Button name="apply-btn" class="comp-btn-primary comp-settings-apply-row__btn" text="应用"/>
+  </ui:VisualElement>
+</ui:UXML>
