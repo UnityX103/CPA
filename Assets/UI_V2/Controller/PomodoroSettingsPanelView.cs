@@ -1,5 +1,7 @@
+using APP.Pomodoro.Model;
 using System;
 using System.Globalization;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,8 +15,11 @@ namespace APP.Pomodoro.Controller
     public sealed class PomodoroSettingsPanelView
     {
         // ─── 事件（父级 Controller 订阅）────────────────────────
-        /// <summary>阶段切换窗口提示开关（psp-hint-toggle）变化时触发</summary>
-        public event Action<bool> OnHintToggleChanged;
+        /// <summary>计时结束提示行点击时触发</summary>
+        public event Action OnEndActionRowClicked;
+
+        /// <summary>视频文件行点击时触发</summary>
+        public event Action OnVideoPathRowClicked;
 
         /// <summary>专注时长（分钟）提交时触发（Blur 或回车）</summary>
         public event Action<int> OnFocusMinutesChanged;
@@ -26,11 +31,14 @@ namespace APP.Pomodoro.Controller
         public event Action OnApplyClicked;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
-        private readonly Toggle _hintToggle;     // Instance name="psp-hint-toggle" 内 Toggle
-        private readonly TextField _focusValue;  // Instance name="psp-focus-suffix" 内 TextField
-        private readonly TextField _breakValue;  // Instance name="psp-break-suffix" 内 TextField
-        private readonly Label  _soundLabel;     // name="psp-sound-label"
-        private readonly Button _applyBtn;       // name="apply-btn"
+        private readonly TextField _focusValue;             // Instance name="psp-focus-suffix" 内 TextField
+        private readonly TextField _breakValue;             // Instance name="psp-break-suffix" 内 TextField
+        private readonly Label _soundLabel;                 // name="psp-sound-label"
+        private readonly VisualElement _endActionRow;       // name="psp-end-action-row"
+        private readonly Label _endActionStateLabel;        // name="psp-end-action-state"
+        private readonly VisualElement _videoPathRow;       // name="psp-video-path-row"
+        private readonly Label _videoPathStateLabel;        // name="psp-video-path-state"
+        private readonly Button _applyBtn;                  // name="apply-btn"
 
         // 最近一次 Refresh 时的 Model 值，用于非法输入回滚与去抖
         private int _lastFocusMin = 1;
@@ -51,13 +59,16 @@ namespace APP.Pomodoro.Controller
             }
 
             // 元素通过 Instance 容器向内查找（AttributeOverrides 不覆盖 name）
-            _hintToggle   = panelRoot.Q<TemplateContainer>("psp-hint-toggle")?.Q<Toggle>();
-            _focusValue   = panelRoot.Q<TemplateContainer>("psp-focus-suffix")?.Q<TextField>("value");
-            _breakValue   = panelRoot.Q<TemplateContainer>("psp-break-suffix")?.Q<TextField>("value");
-            _soundLabel   = panelRoot.Q<Label>("psp-sound-label");
-            _applyBtn     = panelRoot.Q<Button>("apply-btn");
+            _focusValue = panelRoot.Q<TemplateContainer>("psp-focus-suffix")?.Q<TextField>("value");
+            _breakValue = panelRoot.Q<TemplateContainer>("psp-break-suffix")?.Q<TextField>("value");
+            _soundLabel = panelRoot.Q<Label>("psp-sound-label");
+            _endActionRow = panelRoot.Q<VisualElement>("psp-end-action-row");
+            _endActionStateLabel = panelRoot.Q<Label>("psp-end-action-state");
+            _videoPathRow = panelRoot.Q<VisualElement>("psp-video-path-row");
+            _videoPathStateLabel = panelRoot.Q<Label>("psp-video-path-state");
+            _applyBtn = panelRoot.Q<Button>("apply-btn");
 
-            RegisterToggleCallbacks();
+            RegisterRowCallbacks();
             RegisterDurationCallbacks();
             RegisterApplyCallback();
         }
@@ -69,9 +80,15 @@ namespace APP.Pomodoro.Controller
         /// </summary>
         /// <param name="focusMinutes">专注时长（分钟）</param>
         /// <param name="breakMinutes">休息时长（分钟）</param>
-        /// <param name="hintEnabled">阶段切换窗口提示是否启用</param>
         /// <param name="soundName">当前选中的提示音名称</param>
-        public void Refresh(int focusMinutes, int breakMinutes, bool hintEnabled, string soundName)
+        /// <param name="mode">计时结束提示动作</param>
+        /// <param name="videoPath">视频文件路径</param>
+        public void Refresh(
+            int focusMinutes,
+            int breakMinutes,
+            string soundName,
+            PomodoroEndActionMode mode,
+            string videoPath)
         {
             _lastFocusMin = focusMinutes;
             _lastBreakMin = breakMinutes;
@@ -84,8 +101,17 @@ namespace APP.Pomodoro.Controller
                 _soundLabel.text = soundName ?? string.Empty;
             }
 
-            // Toggle 用 SetValueWithoutNotify 避免触发回调循环
-            _hintToggle?.SetValueWithoutNotify(hintEnabled);
+            if (_endActionStateLabel != null)
+            {
+                _endActionStateLabel.text = mode == PomodoroEndActionMode.PlayVideo ? "播放视频" : "弹窗到顶部";
+            }
+
+            _videoPathRow?.EnableInClassList("is-video-mode", mode == PomodoroEndActionMode.PlayVideo);
+
+            if (_videoPathStateLabel != null)
+            {
+                _videoPathStateLabel.text = string.IsNullOrEmpty(videoPath) ? "未选择" : Path.GetFileName(videoPath);
+            }
         }
 
         /// <summary>
@@ -141,18 +167,6 @@ namespace APP.Pomodoro.Controller
         }
 
         /// <summary>
-        /// 以编程方式写入 psp-hint-toggle 的值，并触发 <see cref="OnHintToggleChanged"/>。
-        /// 用户拨动开关时由 ValueChangedCallback 走同一条路径；
-        /// EditMode 测试无 Panel 上下文，<c>Toggle.value = x</c> 不会发 ChangeEvent，
-        /// 因此测试通过此方法复用同一条提交路径。
-        /// </summary>
-        public void CommitHintToggle(bool value)
-        {
-            _hintToggle?.SetValueWithoutNotify(value);
-            OnHintToggleChanged?.Invoke(value);
-        }
-
-        /// <summary>
         /// 读取 psp-break-value 当前文本：合法（整数 ≥0）则触发 <see cref="OnBreakMinutesChanged"/>；
         /// 非法则回滚到最近一次 <see cref="Refresh"/> 传入的值。
         /// </summary>
@@ -182,12 +196,10 @@ namespace APP.Pomodoro.Controller
 
         // ─── 私有辅助 ─────────────────────────────────────────────
 
-        private void RegisterToggleCallbacks()
+        private void RegisterRowCallbacks()
         {
-            _hintToggle?.RegisterValueChangedCallback(evt =>
-            {
-                OnHintToggleChanged?.Invoke(evt.newValue);
-            });
+            _endActionRow?.RegisterCallback<ClickEvent>(_ => OnEndActionRowClicked?.Invoke());
+            _videoPathRow?.RegisterCallback<ClickEvent>(_ => OnVideoPathRowClicked?.Invoke());
         }
 
         private void RegisterDurationCallbacks()

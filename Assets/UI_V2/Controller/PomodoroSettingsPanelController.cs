@@ -1,6 +1,7 @@
 using APP.Pomodoro.Command;
 using APP.Pomodoro.Model;
 using QFramework;
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,6 +14,10 @@ namespace APP.Pomodoro.Controller
     /// </summary>
     public sealed class PomodoroSettingsPanelController : IController
     {
+        public static Func<string> VideoFilePicker;
+
+        private const string SoundName = "柔和铃声";
+
         // ─── QFramework ──────────────────────────────────────────
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
@@ -21,14 +26,16 @@ namespace APP.Pomodoro.Controller
         private IPomodoroModel _model;
 
         // 基线（与 Model 最近一次同步的值）
-        private int  _baseFocusMin;
-        private int  _baseBreakMin;
-        private bool _baseHint;
+        private int _baseFocusMin;
+        private int _baseBreakMin;
+        private PomodoroEndActionMode _baseEndActionMode;
+        private string _baseVideoPath = string.Empty;
 
         // 草稿（用户当前输入/拨动但尚未应用的值）
-        private int  _draftFocusMin;
-        private int  _draftBreakMin;
-        private bool _draftHint;
+        private int _draftFocusMin;
+        private int _draftBreakMin;
+        private PomodoroEndActionMode _draftEndActionMode;
+        private string _draftVideoPath = string.Empty;
 
         // ─── 公开查询 ────────────────────────────────────────────
 
@@ -36,7 +43,8 @@ namespace APP.Pomodoro.Controller
         public bool IsDirty =>
                _draftFocusMin != _baseFocusMin
             || _draftBreakMin != _baseBreakMin
-            || _draftHint     != _baseHint;
+            || _draftEndActionMode != _baseEndActionMode
+            || !string.Equals(_draftVideoPath, _baseVideoPath, StringComparison.Ordinal);
 
         // ─── 初始化 ──────────────────────────────────────────────
 
@@ -48,7 +56,8 @@ namespace APP.Pomodoro.Controller
             _model = model;
 
             _view = new PomodoroSettingsPanelView(container);
-            _view.OnHintToggleChanged += OnHintToggleChanged;
+            _view.OnEndActionRowClicked += OnEndActionRowClicked;
+            _view.OnVideoPathRowClicked += OnVideoPathRowClicked;
             _view.OnFocusMinutesChanged += OnFocusMinutesChanged;
             _view.OnBreakMinutesChanged += OnBreakMinutesChanged;
             _view.OnApplyClicked += TryApply;
@@ -61,7 +70,9 @@ namespace APP.Pomodoro.Controller
                     .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
                 _model.CompletionClipIndex.Register(_ => RefreshFromModel())
                     .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
-                _model.AutoJumpToTopOnComplete.Register(_ => RefreshFromModel())
+                _model.EndActionMode.Register(_ => RefreshFromModel())
+                    .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
+                _model.EndActionVideoPath.Register(_ => RefreshFromModel())
                     .UnRegisterWhenGameObjectDestroyed(lifecycleOwner);
             }
 
@@ -88,13 +99,16 @@ namespace APP.Pomodoro.Controller
                 resetProgress: true));
 
             this.SendCommand(new Cmd_PomodoroApplyMetaSettings(
-                _draftHint,
+                _model.AutoJumpToTopOnComplete.Value,
                 _model.AutoStartBreak.Value,
-                _model.CompletionClipIndex.Value));
+                _model.CompletionClipIndex.Value,
+                _draftEndActionMode,
+                _draftVideoPath ?? string.Empty));
 
             _baseFocusMin = _draftFocusMin;
             _baseBreakMin = _draftBreakMin;
-            _baseHint     = _draftHint;
+            _baseEndActionMode = _draftEndActionMode;
+            _baseVideoPath = _draftVideoPath ?? string.Empty;
             _view?.SetApplyVisible(false);
         }
 
@@ -118,26 +132,56 @@ namespace APP.Pomodoro.Controller
 
             int focusMin = _model.FocusDurationSeconds.Value / 60;
             int breakMin = _model.BreakDurationSeconds.Value / 60;
-            bool hintEnabled = _model.AutoJumpToTopOnComplete.Value;
-            string soundName = "柔和铃声"; // 暂用固定文本
+            PomodoroEndActionMode mode = _model.EndActionMode.Value;
+            string videoPath = _model.EndActionVideoPath.Value ?? string.Empty;
 
             // Model 是权威源，把基线和草稿都同步为 Model 当前值
-            _baseFocusMin  = focusMin;
-            _baseBreakMin  = breakMin;
-            _baseHint      = hintEnabled;
+            _baseFocusMin = focusMin;
+            _baseBreakMin = breakMin;
+            _baseEndActionMode = mode;
+            _baseVideoPath = videoPath;
             _draftFocusMin = focusMin;
             _draftBreakMin = breakMin;
-            _draftHint     = hintEnabled;
+            _draftEndActionMode = mode;
+            _draftVideoPath = videoPath;
 
-            _view.Refresh(focusMin, breakMin, hintEnabled, soundName);
+            _view.Refresh(focusMin, breakMin, SoundName, mode, videoPath);
             _view.SetApplyVisible(false);
         }
 
         // ─── 事件回调 ────────────────────────────────────────────
 
-        private void OnHintToggleChanged(bool enabled)
+        private void OnEndActionRowClicked()
         {
-            _draftHint = enabled;
+            _draftEndActionMode = _draftEndActionMode == PomodoroEndActionMode.PlayVideo
+                ? PomodoroEndActionMode.TopWindow
+                : PomodoroEndActionMode.PlayVideo;
+
+            _view?.Refresh(_draftFocusMin, _draftBreakMin, SoundName, _draftEndActionMode, _draftVideoPath);
+            EvaluateDirty();
+        }
+
+        private void OnVideoPathRowClicked()
+        {
+            if (_draftEndActionMode != PomodoroEndActionMode.PlayVideo)
+            {
+                return;
+            }
+
+            Func<string> picker = VideoFilePicker;
+            if (picker == null)
+            {
+                return;
+            }
+
+            string selectedPath = picker();
+            if (string.IsNullOrWhiteSpace(selectedPath))
+            {
+                return;
+            }
+
+            _draftVideoPath = selectedPath;
+            _view?.Refresh(_draftFocusMin, _draftBreakMin, SoundName, _draftEndActionMode, _draftVideoPath);
             EvaluateDirty();
         }
 

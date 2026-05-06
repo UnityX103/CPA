@@ -22,6 +22,8 @@ namespace APP.Pomodoro.Tests
         private int _originalFocusSeconds;
         private int _originalBreakSeconds;
         private bool _originalAutoJumpToTop;
+        private PomodoroEndActionMode _originalEndActionMode;
+        private string _originalEndActionVideoPath;
 
         [SetUp]
         public void SetUp()
@@ -31,6 +33,8 @@ namespace APP.Pomodoro.Tests
             _originalFocusSeconds = _model.FocusDurationSeconds.Value;
             _originalBreakSeconds = _model.BreakDurationSeconds.Value;
             _originalAutoJumpToTop = _model.AutoJumpToTopOnComplete.Value;
+            _originalEndActionMode = _model.EndActionMode.Value;
+            _originalEndActionVideoPath = _model.EndActionVideoPath.Value;
         }
 
         [TearDown]
@@ -40,6 +44,8 @@ namespace APP.Pomodoro.Tests
             _model.FocusDurationSeconds.Value = _originalFocusSeconds;
             _model.BreakDurationSeconds.Value = _originalBreakSeconds;
             _model.AutoJumpToTopOnComplete.Value = _originalAutoJumpToTop;
+            _model.EndActionMode.Value = _originalEndActionMode;
+            _model.EndActionVideoPath.Value = _originalEndActionVideoPath;
             Object.DestroyImmediate(_lifecycleOwner);
         }
 
@@ -188,25 +194,24 @@ namespace APP.Pomodoro.Tests
         }
 
         [Test]
-        public void HintToggle_FlipsApplyVisibilityAndIsDirty()
+        public void EndActionRow_FlipsApplyVisibilityAndIsDirty()
         {
-            (PomodoroSettingsPanelController controller, PomodoroSettingsPanelView view, VisualElement root)
-                = BuildPanel();
-            Toggle hint = root.Q<Toggle>("psp-hint-toggle");
+            (PomodoroSettingsPanelController controller, _, VisualElement root) = BuildPanel();
             Button applyBtn = root.Q<Button>("apply-btn");
-            Assert.That(hint, Is.Not.Null);
+            Assert.That(applyBtn, Is.Not.Null, "apply-btn 按钮必须存在");
 
-            bool originalHint = hint.value;
-            view.CommitHintToggle(!originalHint);
+            MethodInfo method = typeof(PomodoroSettingsPanelController)
+                .GetMethod("OnEndActionRowClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null, "OnEndActionRowClicked 方法应存在");
 
+            method.Invoke(controller, null);
             Assert.That(controller.IsDirty, Is.True,
-                "拨动 hint toggle 应让草稿与基线出现差异");
+                "切换计时结束提示应让草稿与基线出现差异");
             Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.False);
 
-            // 拨回去，dirty 应归零
-            view.CommitHintToggle(originalHint);
+            method.Invoke(controller, null);
             Assert.That(controller.IsDirty, Is.False,
-                "toggle 回到基线值后 IsDirty 应归零");
+                "切回基线值后 IsDirty 应归零");
             Assert.That(applyBtn.ClassListContains("apply-btn--hidden"), Is.True);
         }
 

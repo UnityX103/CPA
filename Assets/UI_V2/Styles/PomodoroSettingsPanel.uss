@@ -53,7 +53,9 @@
     flex-direction: column;
 }
 
-.psp-row {
+.psp-row,
+.psp-end-action-row,
+.psp-video-path-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -64,6 +66,15 @@
     padding-top: 14px;
     padding-bottom: 14px;
     margin-bottom: 10px;
+}
+
+.psp-video-path-row {
+    display: none;
+    margin-bottom: 0;
+}
+
+.psp-video-path-row.is-video-mode {
+    display: flex;
 }
 
 .psp-row-label {
@@ -80,9 +91,13 @@
     -unity-text-align: middle-right;
 }
 
-/* ── 设置面板 Toggle 覆写（Pencil pomoAutoToggle: fill #6366F1）── */
-.psp-root .comp-toggle-switch:checked .unity-toggle__input {
-    background-color: rgb(99, 102, 241); /* #6366F1 */
+.psp-video-path-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    background-color: rgb(107, 114, 128);
+    border-radius: 4px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 /* ── 应用按钮行 ──────────────────────────────────────────── */

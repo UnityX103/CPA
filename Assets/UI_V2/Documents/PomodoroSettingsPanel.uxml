@@ -1,7 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/PomodoroSettingsPanel.uss"/>
-    <ui:Template name="ToggleSwitch" src="Components/ToggleSwitch.uxml"/>
     <ui:Template name="InputTextSuffix" src="Components/InputTextSuffix.uxml"/>
     <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
 
@@ -32,15 +31,18 @@
 
         <!-- Pencil: pomoFooter — 设置行 -->
         <ui:VisualElement class="psp-settings">
-            <ui:VisualElement class="psp-row">
-                <ui:Label text="阶段切换时自动指定窗口提示" class="psp-row-label" />
-                <ui:Instance name="psp-hint-toggle" template="ToggleSwitch">
-                    <AttributeOverrides element-name="root" class="comp-toggle-switch" />
-                </ui:Instance>
-            </ui:VisualElement>
-            <ui:VisualElement class="psp-row" style="margin-bottom: 0;">
+            <ui:VisualElement name="psp-sound-row" class="psp-row">
                 <ui:Label text="结束提示音" class="psp-row-label" />
                 <ui:Label name="psp-sound-label" text="柔和铃声" class="psp-row-value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="psp-end-action-row" class="psp-row psp-end-action-row">
+                <ui:Label text="计时结束提示" class="psp-row-label" />
+                <ui:Label name="psp-end-action-state" text="弹窗到顶部" class="psp-row-value psp-end-action-state" />
+            </ui:VisualElement>
+            <ui:VisualElement name="psp-video-path-row" class="psp-row psp-video-path-row">
+                <ui:Label text="视频文件" class="psp-row-label" />
+                <ui:Label name="psp-video-path-state" text="未选择" class="psp-row-value psp-video-path-state" />
+                <ui:VisualElement name="psp-video-path-icon" class="psp-video-path-icon" />
             </ui:VisualElement>
         </ui:VisualElement>
 
