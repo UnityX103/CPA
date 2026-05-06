@@ -21,6 +21,9 @@ namespace APP.Pomodoro.Model
         public BindableProperty<bool> AutoStartBreak { get; } = new BindableProperty<bool>(true);
         public BindableProperty<int> TargetMonitorIndex { get; } = new BindableProperty<int>(0);
         public BindableProperty<int> CompletionClipIndex { get; } = new BindableProperty<int>(0);
+        public BindableProperty<PomodoroEndActionMode> EndActionMode { get; }
+            = new BindableProperty<PomodoroEndActionMode>(Model.PomodoroEndActionMode.TopWindow);
+        public BindableProperty<string> EndActionVideoPath { get; } = new BindableProperty<string>(string.Empty);
         public BindableProperty<Vector2> PomodoroPanelPosition { get; }
             = new BindableProperty<Vector2>(new Vector2(float.NegativeInfinity, float.NegativeInfinity));
 
@@ -47,6 +50,9 @@ namespace APP.Pomodoro.Model
         public bool AutoStartBreak = true;
         public int TargetMonitorIndex;
         public int CompletionClipIndex;
+        // 计时结束提示（v1.1+ 新增）；旧存档缺字段时默认 TopWindow + 空路径
+        public int EndActionMode;
+        public string EndActionVideoPath;
         // 番茄钟面板位置（UI 坐标系）。旧存档解析出 (0,0)，靠 HasPomodoroPanelPosition 区分"未设置"
         public float PomodoroPanelPositionX;
         public float PomodoroPanelPositionY;
@@ -95,6 +101,13 @@ namespace APP.Pomodoro.Model
             if (!json.Contains("\"AutoStartBreak\""))
             {
                 state.AutoStartBreak = true;
+            }
+
+            // 兼容旧存档：v1.0 没有 EndActionMode/EndActionVideoPath 字段
+            // JsonUtility 在缺字段时会写默认值 (0 / null)，恰好等于 TopWindow + 空串，行为正确
+            if (!json.Contains("\"EndActionVideoPath\"") || state.EndActionVideoPath == null)
+            {
+                state.EndActionVideoPath = string.Empty;
             }
 
             // 旧版本曾以像素写入面板位置；任意维度越界 ([0,1] 之外) 或非有限值（NaN/Infinity）
@@ -146,6 +159,8 @@ namespace APP.Pomodoro.Model
                 AutoStartBreak = model.AutoStartBreak.Value,
                 TargetMonitorIndex = Mathf.Max(0, model.TargetMonitorIndex.Value),
                 CompletionClipIndex = Mathf.Max(0, model.CompletionClipIndex.Value),
+                EndActionMode = (int)model.EndActionMode.Value,
+                EndActionVideoPath = model.EndActionVideoPath.Value ?? string.Empty,
                 PomodoroPanelPositionX = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x) ? 0f : model.PomodoroPanelPosition.Value.x,
                 PomodoroPanelPositionY = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.y) ? 0f : model.PomodoroPanelPosition.Value.y,
                 HasPomodoroPanelPosition = !float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x)
@@ -189,6 +204,8 @@ namespace APP.Pomodoro.Model
             model.AutoStartBreak.Value = state.AutoStartBreak;
             model.TargetMonitorIndex.Value = Mathf.Max(0, state.TargetMonitorIndex);
             model.CompletionClipIndex.Value = Mathf.Max(0, state.CompletionClipIndex);
+            model.EndActionMode.Value = ParseEndActionMode(state.EndActionMode);
+            model.EndActionVideoPath.Value = state.EndActionVideoPath ?? string.Empty;
             // 越界数据已在 TryLoad 中被重置为 HasPomodoroPanelPosition=false；
             // 此处直接按字段取值——合法 ratio 原样读入；否则保持 sentinel，等 View 首帧计算默认。
             model.PomodoroPanelPosition.Value = state.HasPomodoroPanelPosition
@@ -222,6 +239,13 @@ namespace APP.Pomodoro.Model
             return Enum.IsDefined(typeof(PomodoroWindowAnchor), value)
                 ? (PomodoroWindowAnchor)value
                 : PomodoroWindowAnchor.Bottom;
+        }
+
+        private static PomodoroEndActionMode ParseEndActionMode(int value)
+        {
+            return Enum.IsDefined(typeof(PomodoroEndActionMode), value)
+                ? (PomodoroEndActionMode)value
+                : PomodoroEndActionMode.TopWindow;
         }
     }
 }

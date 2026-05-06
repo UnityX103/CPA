@@ -47,4 +47,20 @@ namespace APP.Pomodoro.Event
             ToPhase = toPhase;
         }
     }
+
+    /// <summary>
+    /// 请求播放计时结束视频。
+    /// PomodoroEndActionSystem 在阶段自然推进且 EndActionMode==PlayVideo 时发出，
+    /// 由 VideoCompletionOverlay 监听并启动播放。
+    /// </summary>
+    public readonly struct E_RequestPlayCompletionVideo
+    {
+        /// <summary>本地视频绝对路径（已校验非空）</summary>
+        public readonly string VideoPath;
+
+        public E_RequestPlayCompletionVideo(string videoPath)
+        {
+            VideoPath = videoPath;
+        }
+    }
 }

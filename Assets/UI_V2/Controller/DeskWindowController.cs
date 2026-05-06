@@ -221,6 +221,10 @@ namespace APP.Pomodoro.Controller
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
             _model.CompletionClipIndex.Register(_ => SaveState(false))
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.EndActionMode.Register(_ => SaveState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
+            _model.EndActionVideoPath.Register(_ => SaveState(false))
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         private void SaveState(bool flushToDisk)

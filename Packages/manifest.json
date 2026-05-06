@@ -1,16 +1,18 @@
 {
   "dependencies": {
-    "com.coplaydev.unity-mcp": "file:../localpackage/com.unity.mcp",
     "com.kirurobo.uniwinc": "https://github.com/kirurobo/UniWindowController.git#upm",
     "com.nz.appmonitor": "file:../localpackage/com.nz.appmonitor",
     "com.nz.visualtest": "file:../localpackage/com.nz.visualtest",
-    "com.unity.collab-proxy": "2.5.2",
+    "com.unity.ai.assistant": "2.6.0-pre.1",
+    "com.unity.ai.inference": "2.6.1",
+    "com.unity.collab-proxy": "2.12.4",
     "com.unity.feature.development": "1.0.2",
     "com.unity.ide.rider": "3.0.39",
-    "com.unity.ide.visualstudio": "2.0.22",
-    "com.unity.test-framework": "1.4.6",
+    "com.unity.ide.visualstudio": "2.0.26",
+    "com.unity.test-framework": "1.6.0",
     "com.unity.ugui": "2.0.0",
     "com.unity.modules.accessibility": "1.0.0",
+    "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.audio": "1.0.0",
     "com.unity.modules.imageconversion": "1.0.0",
@@ -24,7 +26,8 @@
     "com.unity.modules.uielements": "1.0.0",
     "com.unity.modules.unityanalytics": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unitywebrequesttexture": "1.0.0"
+    "com.unity.modules.unitywebrequesttexture": "1.0.0",
+    "com.unity.modules.vectorgraphics": "1.0.0"
   },
   "testables": [
     "com.nz.visualtest",

@@ -45,6 +45,19 @@ namespace APP.Pomodoro.Model
         BindableProperty<int> CompletionClipIndex { get; }
 
         /// <summary>
+        /// 计时结束时执行的提示动作。
+        /// 对应番茄设置面板"计时结束提示"行（Pencil pomoEndAction）。
+        /// 默认 <see cref="PomodoroEndActionMode.TopWindow"/>。
+        /// </summary>
+        BindableProperty<PomodoroEndActionMode> EndActionMode { get; }
+
+        /// <summary>
+        /// 当 <see cref="EndActionMode"/> 为 <see cref="PomodoroEndActionMode.PlayVideo"/> 时，
+        /// 计时结束应播放的本地视频绝对路径。空串表示尚未选择，此时回退到 TopWindow。
+        /// </summary>
+        BindableProperty<string> EndActionVideoPath { get; }
+
+        /// <summary>
         /// 番茄钟面板（YRqeB）左上角相对主面板（父容器）的归一化位置，x/y ∈ [0, 1]。
         /// 0 = 父容器左/上边；1 = 父容器右/下边。View 在 GeometryChanged 时根据当前父容器尺寸换算成像素应用。
         /// 值为 Vector2.negativeInfinity 时代表"未初始化"——View 首帧计算默认右下角锚点后回写比例。
