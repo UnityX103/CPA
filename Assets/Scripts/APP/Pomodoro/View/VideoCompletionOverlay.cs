@@ -14,6 +14,7 @@ namespace APP.Pomodoro.View
         private RenderTexture _renderTexture;
         private GameObject _canvasGo;
         private RawImage _rawImage;
+        private Material _chromaMaterial;
 
         IArchitecture IBelongToArchitecture.GetArchitecture()
         {
@@ -80,6 +81,18 @@ namespace APP.Pomodoro.View
             rt.offsetMax = Vector2.zero;
             _rawImage.texture = _renderTexture;
 
+            Material sourceMaterial = Resources.Load<Material>("PomodoroVideoChromaKey");
+            if (sourceMaterial != null)
+            {
+                // 默认对视频做绿幕扣除，绿色通道远高于红蓝时按 alpha 渐变透明。
+                _chromaMaterial = new Material(sourceMaterial);
+                _rawImage.material = _chromaMaterial;
+            }
+            else
+            {
+                Debug.LogWarning("[VideoCompletionOverlay] 未找到 Resources/PomodoroVideoChromaKey 材质，将使用默认材质播放。");
+            }
+
             Button btn = imageGo.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
             btn.onClick.AddListener(Hide);
@@ -112,9 +125,21 @@ namespace APP.Pomodoro.View
 
             if (_canvasGo != null)
             {
+                if (_rawImage != null)
+                {
+                    _rawImage.material = null;
+                    _rawImage.texture = null;
+                }
+
                 Destroy(_canvasGo);
                 _canvasGo = null;
                 _rawImage = null;
+            }
+
+            if (_chromaMaterial != null)
+            {
+                Destroy(_chromaMaterial);
+                _chromaMaterial = null;
             }
 
             if (_renderTexture != null)

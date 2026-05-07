@@ -17,7 +17,8 @@
       "Skill(update-config)",
       "mcp__plugin_oh-my-claudecode_t__notepad_read",
       "Bash(git remote *)",
-      "mcp__context7__resolve-library-id"
+      "mcp__context7__resolve-library-id",
+      "mcp__plugin_oh-my-claudecode_t__state_write"
     ],
     "deny": [
       "Bash(rm *)",
@@ -31,5 +32,8 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "pencil"
-  ]
+  ],
+  "enabledPlugins": {
+    "oh-my-claudecode@omc": true
+  }
 }
