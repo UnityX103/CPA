@@ -17,6 +17,9 @@ namespace APP.Pomodoro.System
         /// </summary>
         void PreviewMoveToMonitor(int monitorIndex);
 
+        /// <summary>当前窗口是否处于置顶状态</summary>
+        bool IsTopmost { get; }
+
         /// <summary>设置窗口置顶状态</summary>
         void SetTopmost(bool isTopmost);
     }

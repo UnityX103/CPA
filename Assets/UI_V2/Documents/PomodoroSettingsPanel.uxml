@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/Components/InputDropdown.uss"/>
     <ui:Style src="../Styles/PomodoroSettingsPanel.uss"/>
     <ui:Template name="InputTextSuffix" src="Components/InputTextSuffix.uxml"/>
     <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
@@ -37,12 +38,24 @@
             </ui:VisualElement>
             <ui:VisualElement name="psp-end-action-row" class="psp-row psp-end-action-row">
                 <ui:Label text="计时结束提示" class="psp-row-label" />
-                <ui:Label name="psp-end-action-state" text="弹窗到顶部" class="psp-row-value psp-end-action-state" />
+                <ui:VisualElement name="psp-end-action-dropdown" class="comp-input-dropdown psp-row-dropdown">
+                    <ui:Label name="psp-end-action-dropdown-value" class="comp-input-dropdown__value" text="弹窗到顶部" />
+                    <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="psp-end-action-menu" class="comp-input-dropdown-menu comp-input-dropdown-menu--hidden" />
             <ui:VisualElement name="psp-video-path-row" class="psp-row psp-video-path-row">
                 <ui:Label text="视频文件" class="psp-row-label" />
-                <ui:Label name="psp-video-path-state" text="未选择" class="psp-row-value psp-video-path-state" />
-                <ui:VisualElement name="psp-video-path-icon" class="psp-video-path-icon" />
+                <ui:VisualElement name="psp-video-path-dropdown" class="comp-input-dropdown psp-row-dropdown">
+                    <ui:Label name="psp-video-path-dropdown-value" class="comp-input-dropdown__value" text="未选择" />
+                    <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="psp-video-path-menu" class="comp-input-dropdown-menu comp-input-dropdown-menu--hidden" />
+            <ui:VisualElement name="psp-video-custom-row" class="psp-row psp-video-custom-row">
+                <ui:Label text="自定义视频文件" class="psp-row-label" />
+                <ui:Label name="psp-video-custom-state" text="未选择" class="psp-row-value psp-video-custom-state" />
+                <ui:VisualElement name="psp-video-custom-icon" class="psp-video-custom-icon" />
             </ui:VisualElement>
         </ui:VisualElement>
 

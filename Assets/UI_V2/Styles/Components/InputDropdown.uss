@@ -45,3 +45,51 @@
     color: rgb(209, 95, 61);
     rotate: 180deg;
 }
+
+/* ── 共享下拉菜单（与触发器配合使用）─────────────────────────────
+   菜单是触发器的兄弟节点，inline 展开（不用 absolute），
+   通过 .comp-input-dropdown-menu--hidden 切换 display: none ↔ flex。
+   各面板只负责 wrap 容器尺寸/位置；菜单本体的视觉规则统一在这里。 */
+.comp-input-dropdown-menu {
+    flex-direction: column;
+    flex-shrink: 0;
+    background-color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-color: rgb(229, 231, 235);
+    border-radius: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.comp-input-dropdown-menu--hidden {
+    display: none;
+}
+
+.comp-input-dropdown-menu-item {
+    height: 32px;
+    min-height: 32px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.comp-input-dropdown-menu-item:hover {
+    background-color: rgb(246, 247, 248);
+}
+
+.comp-input-dropdown-menu-item-label {
+    flex-grow: 1;
+    color: rgb(26, 26, 26);
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.comp-input-dropdown-menu-item--selected .comp-input-dropdown-menu-item-label {
+    color: rgb(209, 95, 61); /* 选中态橙色，对齐 Pencil openDrop */
+    -unity-font-style: bold;
+}

@@ -31,7 +31,7 @@ namespace APP.Pomodoro.Model
     {
         /// <summary>把窗口弹到顶部（默认；继承旧的"阶段切换自动指定窗口提示"行为）</summary>
         TopWindow = 0,
-        /// <summary>播放预先选定的视频</summary>
+        /// <summary>播放预先选定的视频（内置视频列表里的某一项 或 用户自定义文件）</summary>
         PlayVideo = 1,
     }
 }

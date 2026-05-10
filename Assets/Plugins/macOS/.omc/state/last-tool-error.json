@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__pencil__batch_design",
+  "tool_input_preview": "{\"filePath\":\"/Users/xpy/Desktop/NanZhai/CPA/AUI/PUI.pen\",\"operations\":\"modeDD=I(\\\"I6SsL5\\\",{type:\\\"ref\\\",ref:\\\"Frjkw\\\",name:\\\"pomoEndActionDropdown\\\",width:\\\"fit_content\\\",descendants:{d5bpi:{content:...",
+  "error": "MCP error -32603: ## Failure during operation execution\n\n- `U(\"eMsXC\", ...)`: Error: Node not found for override path: undefined\n\nAll operations in this block have been rolled back. Fix the issues and run `batch_design` again.",
+  "timestamp": "2026-05-07T10:30:25.452Z",
+  "retry_count": 1
+}

@@ -54,8 +54,16 @@ namespace APP.Pomodoro.Model
         /// <summary>
         /// 当 <see cref="EndActionMode"/> 为 <see cref="PomodoroEndActionMode.PlayVideo"/> 时，
         /// 计时结束应播放的本地视频绝对路径。空串表示尚未选择，此时回退到 TopWindow。
+        /// 仅在 <see cref="EndActionVideoIndex"/> == -1（用户选了"自定义"）时生效。
         /// </summary>
         BindableProperty<string> EndActionVideoPath { get; }
+
+        /// <summary>
+        /// 当前选中的内置视频在 PomodoroBuiltInVideosConfig.Entries 里的下标（0-based）。
+        /// -1 表示用户在"视频选择"下拉里选了"自定义"，此时改用 <see cref="EndActionVideoPath"/>。
+        /// 默认 0。在 <see cref="EndActionMode"/> = PlayVideo 且非 -1 时被使用。
+        /// </summary>
+        BindableProperty<int> EndActionVideoIndex { get; }
 
         /// <summary>
         /// 番茄钟面板（YRqeB）左上角相对主面板（父容器）的归一化位置，x/y ∈ [0, 1]。

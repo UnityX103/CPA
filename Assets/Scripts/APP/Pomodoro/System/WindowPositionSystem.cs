@@ -13,6 +13,8 @@ namespace APP.Pomodoro.System
         private UniWindowController _uwc;
         private Coroutine _refitCoroutine;
 
+        public bool IsTopmost => _uwc != null && _uwc.isTopmost;
+
         protected override void OnInit() { }
 
         public void Initialize(UniWindowController uwc)

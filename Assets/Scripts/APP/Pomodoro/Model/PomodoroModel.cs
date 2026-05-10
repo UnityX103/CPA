@@ -24,6 +24,7 @@ namespace APP.Pomodoro.Model
         public BindableProperty<PomodoroEndActionMode> EndActionMode { get; }
             = new BindableProperty<PomodoroEndActionMode>(Model.PomodoroEndActionMode.TopWindow);
         public BindableProperty<string> EndActionVideoPath { get; } = new BindableProperty<string>(string.Empty);
+        public BindableProperty<int> EndActionVideoIndex { get; } = new BindableProperty<int>(0);
         public BindableProperty<Vector2> PomodoroPanelPosition { get; }
             = new BindableProperty<Vector2>(new Vector2(float.NegativeInfinity, float.NegativeInfinity));
 
@@ -53,6 +54,9 @@ namespace APP.Pomodoro.Model
         // 计时结束提示（v1.1+ 新增）；旧存档缺字段时默认 TopWindow + 空路径
         public int EndActionMode;
         public string EndActionVideoPath;
+        // 内置视频下标（v1.2+ 新增）；旧存档缺字段时默认 0；-1 表示"自定义"
+        public int EndActionVideoIndex;
+        public bool HasEndActionVideoIndex;
         // 番茄钟面板位置（UI 坐标系）。旧存档解析出 (0,0)，靠 HasPomodoroPanelPosition 区分"未设置"
         public float PomodoroPanelPositionX;
         public float PomodoroPanelPositionY;
@@ -110,6 +114,14 @@ namespace APP.Pomodoro.Model
                 state.EndActionVideoPath = string.Empty;
             }
 
+            // 兼容旧存档：v1.1 没有 EndActionVideoIndex 字段；缺字段时回到默认 0（首个内置视频）
+            // 用 HasEndActionVideoIndex 区分"显式存了 0"和"压根没存"
+            if (!json.Contains("\"HasEndActionVideoIndex\""))
+            {
+                state.HasEndActionVideoIndex = false;
+                state.EndActionVideoIndex = 0;
+            }
+
             // 旧版本曾以像素写入面板位置；任意维度越界 ([0,1] 之外) 或非有限值（NaN/Infinity）
             // 视为脏数据，直接丢弃并立即重写 PlayerPrefs，让 View 首帧按默认右下角重新计算 ratio。
             // 注意：NaN < 0 与 NaN > 1 结果都是 false，必须用 !IsFinite 单独兜底。
@@ -161,6 +173,8 @@ namespace APP.Pomodoro.Model
                 CompletionClipIndex = Mathf.Max(0, model.CompletionClipIndex.Value),
                 EndActionMode = (int)model.EndActionMode.Value,
                 EndActionVideoPath = model.EndActionVideoPath.Value ?? string.Empty,
+                EndActionVideoIndex = model.EndActionVideoIndex.Value,
+                HasEndActionVideoIndex = true,
                 PomodoroPanelPositionX = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x) ? 0f : model.PomodoroPanelPosition.Value.x,
                 PomodoroPanelPositionY = float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.y) ? 0f : model.PomodoroPanelPosition.Value.y,
                 HasPomodoroPanelPosition = !float.IsNegativeInfinity(model.PomodoroPanelPosition.Value.x)
@@ -206,6 +220,10 @@ namespace APP.Pomodoro.Model
             model.CompletionClipIndex.Value = Mathf.Max(0, state.CompletionClipIndex);
             model.EndActionMode.Value = ParseEndActionMode(state.EndActionMode);
             model.EndActionVideoPath.Value = state.EndActionVideoPath ?? string.Empty;
+            // -1 表示"自定义"；>=0 表示内置视频索引；老存档没字段时回到默认 0
+            model.EndActionVideoIndex.Value = state.HasEndActionVideoIndex
+                ? (state.EndActionVideoIndex < -1 ? 0 : state.EndActionVideoIndex)
+                : 0;
             // 越界数据已在 TryLoad 中被重置为 HasPomodoroPanelPosition=false；
             // 此处直接按字段取值——合法 ratio 原样读入；否则保持 sentinel，等 View 首帧计算默认。
             model.PomodoroPanelPosition.Value = state.HasPomodoroPanelPosition

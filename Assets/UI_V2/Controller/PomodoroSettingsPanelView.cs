@@ -1,5 +1,6 @@
 using APP.Pomodoro.Model;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -10,16 +11,25 @@ namespace APP.Pomodoro.Controller
     /// <summary>
     /// 番茄钟设置面板视图辅助类。
     /// 绑定 PomodoroSettingsPanel.uxml 中的动态元素，向父级 Controller 暴露事件。
-    /// 由 DeskWindowController（或等效 Controller）实例化并持有。
+    ///
+    /// 计时结束提示行 / 视频选择行用"自定义下拉框"模式（对齐 GlobalSettingsPanel 目标显示器）：
+    ///   - 触发器（.comp-input-dropdown.psp-row-dropdown）：白色 pill + chevron。
+    ///   - 触发器后面挂兄弟节点 .psp-row-dropdown-menu，display:none ↔ flex 切换，
+    ///     菜单项由 C# 动态构建（每次 Refresh 重建一次），点击后回填值并隐藏菜单。
+    ///   - 不依赖 Unity 内置 DropdownField popup（其在嵌入 UIDocument 中表现不一致）。
+    /// 自定义视频文件行（psp-video-custom-row）仍是普通 ClickEvent，作为系统文件选择器入口。
     /// </summary>
     public sealed class PomodoroSettingsPanelView
     {
         // ─── 事件（父级 Controller 订阅）────────────────────────
-        /// <summary>计时结束提示行点击时触发</summary>
-        public event Action OnEndActionRowClicked;
+        /// <summary>计时结束 mode 下拉选中变化（index 对应 ModeDisplayChoices 顺序，与 PomodoroEndActionMode 枚举值一致）</summary>
+        public event Action<int> OnEndActionModeSelected;
 
-        /// <summary>视频文件行点击时触发</summary>
-        public event Action OnVideoPathRowClicked;
+        /// <summary>视频选择下拉选中变化：内置项是 0..N-1，"自定义"翻译为 -1</summary>
+        public event Action<int> OnVideoSelectionChanged;
+
+        /// <summary>自定义视频文件行点击时触发（Jvg0I 文件选择器入口）</summary>
+        public event Action OnVideoCustomRowClicked;
 
         /// <summary>专注时长（分钟）提交时触发（Blur 或回车）</summary>
         public event Action<int> OnFocusMinutesChanged;
@@ -31,26 +41,46 @@ namespace APP.Pomodoro.Controller
         public event Action OnApplyClicked;
 
         // ─── UXML 元素引用 ────────────────────────────────────────
-        private readonly TextField _focusValue;             // Instance name="psp-focus-suffix" 内 TextField
-        private readonly TextField _breakValue;             // Instance name="psp-break-suffix" 内 TextField
-        private readonly Label _soundLabel;                 // name="psp-sound-label"
-        private readonly VisualElement _endActionRow;       // name="psp-end-action-row"
-        private readonly Label _endActionStateLabel;        // name="psp-end-action-state"
-        private readonly VisualElement _videoPathRow;       // name="psp-video-path-row"
-        private readonly Label _videoPathStateLabel;        // name="psp-video-path-state"
-        private readonly Button _applyBtn;                  // name="apply-btn"
+        private readonly TextField _focusValue;
+        private readonly TextField _breakValue;
+        private readonly Label _soundLabel;
 
-        // 最近一次 Refresh 时的 Model 值，用于非法输入回滚与去抖
+        // 计时结束提示行（mode 下拉）
+        private readonly VisualElement _endActionRow;
+        private readonly VisualElement _endActionDropdown;     // 触发器
+        private readonly Label _endActionValueLabel;            // 触发器内显示文本
+        private readonly VisualElement _endActionMenu;          // 兄弟节点：选项列表
+
+        // 视频文件行（视频选择下拉）
+        private readonly VisualElement _videoPathRow;
+        private readonly VisualElement _videoPathDropdown;
+        private readonly Label _videoPathValueLabel;
+        private readonly VisualElement _videoPathMenu;
+
+        // 自定义视频文件行
+        private readonly VisualElement _videoCustomRow;
+        private readonly Label _videoCustomStateLabel;
+
+        private readonly Button _applyBtn;
+
+        // 状态
         private int _lastFocusMin = 1;
         private int _lastBreakMin = 0;
+        private bool _endActionMenuOpen;
+        private bool _videoPathMenuOpen;
+        // 视频菜单当前内置项数（Refresh 时更新）：用于把 chosenIndex 翻译回 -1（自定义）。
+        private int _videoBuiltInCount;
+
+        /// <summary>计时结束 mode 的固定 choices 顺序——下标必须严格对齐 PomodoroEndActionMode 枚举：
+        /// 0=TopWindow, 1=PlayVideo。Controller 直接 cast 即可。</summary>
+        private static readonly string[] ModeDisplayChoices =
+        {
+            "弹窗到顶部",  // index 0 = TopWindow
+            "播放视频",    // index 1 = PlayVideo
+        };
 
         // ─── 构造 ─────────────────────────────────────────────────
 
-        /// <param name="panelRoot">
-        /// PomodoroSettingsPanel.uxml 的根 VisualElement。
-        /// 通过 <c>ui:Instance</c> 嵌入时传入 TemplateContainer：
-        /// <code>root.Q&lt;TemplateContainer&gt;("panel-pomodoro-s")</code>
-        /// </param>
         public PomodoroSettingsPanelView(VisualElement panelRoot)
         {
             if (panelRoot == null)
@@ -58,37 +88,43 @@ namespace APP.Pomodoro.Controller
                 throw new ArgumentNullException(nameof(panelRoot));
             }
 
-            // 元素通过 Instance 容器向内查找（AttributeOverrides 不覆盖 name）
             _focusValue = panelRoot.Q<TemplateContainer>("psp-focus-suffix")?.Q<TextField>("value");
             _breakValue = panelRoot.Q<TemplateContainer>("psp-break-suffix")?.Q<TextField>("value");
             _soundLabel = panelRoot.Q<Label>("psp-sound-label");
+
             _endActionRow = panelRoot.Q<VisualElement>("psp-end-action-row");
-            _endActionStateLabel = panelRoot.Q<Label>("psp-end-action-state");
+            _endActionDropdown = panelRoot.Q<VisualElement>("psp-end-action-dropdown");
+            _endActionValueLabel = panelRoot.Q<Label>("psp-end-action-dropdown-value");
+            _endActionMenu = panelRoot.Q<VisualElement>("psp-end-action-menu");
+
             _videoPathRow = panelRoot.Q<VisualElement>("psp-video-path-row");
-            _videoPathStateLabel = panelRoot.Q<Label>("psp-video-path-state");
+            _videoPathDropdown = panelRoot.Q<VisualElement>("psp-video-path-dropdown");
+            _videoPathValueLabel = panelRoot.Q<Label>("psp-video-path-dropdown-value");
+            _videoPathMenu = panelRoot.Q<VisualElement>("psp-video-path-menu");
+
+            _videoCustomRow = panelRoot.Q<VisualElement>("psp-video-custom-row");
+            _videoCustomStateLabel = panelRoot.Q<Label>("psp-video-custom-state");
             _applyBtn = panelRoot.Q<Button>("apply-btn");
 
+            RegisterDropdownTriggerCallbacks();
             RegisterRowCallbacks();
             RegisterDurationCallbacks();
             RegisterApplyCallback();
+            // 默认两个菜单都收起
+            SetEndActionMenuVisible(false);
+            SetVideoPathMenuVisible(false);
         }
 
         // ─── 公开 API ─────────────────────────────────────────────
 
-        /// <summary>
-        /// 用 Model 数据刷新整个设置面板（不触发事件）。
-        /// </summary>
-        /// <param name="focusMinutes">专注时长（分钟）</param>
-        /// <param name="breakMinutes">休息时长（分钟）</param>
-        /// <param name="soundName">当前选中的提示音名称</param>
-        /// <param name="mode">计时结束提示动作</param>
-        /// <param name="videoPath">视频文件路径</param>
         public void Refresh(
             int focusMinutes,
             int breakMinutes,
             string soundName,
             PomodoroEndActionMode mode,
-            string videoPath)
+            int videoIndex,
+            IReadOnlyList<string> builtInDisplayNames,
+            string customVideoPath)
         {
             _lastFocusMin = focusMinutes;
             _lastBreakMin = breakMinutes;
@@ -101,22 +137,42 @@ namespace APP.Pomodoro.Controller
                 _soundLabel.text = soundName ?? string.Empty;
             }
 
-            if (_endActionStateLabel != null)
+            // ── 计时结束 mode 下拉 ──
+            if (_endActionValueLabel != null)
             {
-                _endActionStateLabel.text = mode == PomodoroEndActionMode.PlayVideo ? "播放视频" : "弹窗到顶部";
+                _endActionValueLabel.text = ModeDisplayName(mode);
             }
+            RebuildEndActionMenu(mode);
+            SetEndActionMenuVisible(false);
 
+            // ── "视频文件"行 mode == PlayVideo 时显示 ──
             _videoPathRow?.EnableInClassList("is-video-mode", mode == PomodoroEndActionMode.PlayVideo);
 
-            if (_videoPathStateLabel != null)
+            // ── 视频选择下拉 ──
+            _videoBuiltInCount = builtInDisplayNames?.Count ?? 0;
+            if (_videoPathValueLabel != null)
             {
-                _videoPathStateLabel.text = string.IsNullOrEmpty(videoPath) ? "未选择" : Path.GetFileName(videoPath);
+                _videoPathValueLabel.text = ResolveVideoChoiceText(videoIndex, builtInDisplayNames);
+            }
+            RebuildVideoPathMenu(videoIndex, builtInDisplayNames);
+            SetVideoPathMenuVisible(false);
+            // 当视频文件行隐藏（非 PlayVideo）时，菜单也强制隐藏（菜单本身不带 is-video-mode 控制）
+            _videoPathMenu?.EnableInClassList(
+                "psp-row-dropdown-menu--hidden",
+                mode != PomodoroEndActionMode.PlayVideo || !_videoPathMenuOpen);
+
+            // ── "自定义视频文件"行：mode == PlayVideo && videoIndex == -1 时显示 ──
+            bool customVisible = mode == PomodoroEndActionMode.PlayVideo && videoIndex == -1;
+            _videoCustomRow?.EnableInClassList("is-custom-video", customVisible);
+
+            if (_videoCustomStateLabel != null)
+            {
+                _videoCustomStateLabel.text = string.IsNullOrEmpty(customVideoPath)
+                    ? "未选择"
+                    : Path.GetFileName(customVideoPath);
             }
         }
 
-        /// <summary>
-        /// 控制"应用"按钮的显隐。true 表示有未保存草稿，按钮浮出。
-        /// </summary>
         public void SetApplyVisible(bool visible)
         {
             if (_applyBtn == null)
@@ -127,21 +183,12 @@ namespace APP.Pomodoro.Controller
             _applyBtn.EnableInClassList("apply-btn--hidden", !visible);
         }
 
-        /// <summary>
-        /// 强制 Commit 尚未失焦的 TextField，把当前文本同步到 Controller 草稿。
-        /// 供"关闭 / 切 tab 前"的守卫流程使用，避免光标还在输入框内时改动遗失。
-        /// </summary>
         public void ForceCommitDrafts()
         {
             CommitFocusValue();
             CommitBreakValue();
         }
 
-        /// <summary>
-        /// 读取 psp-focus-value 当前文本：合法（整数 ≥1）则触发 <see cref="OnFocusMinutesChanged"/>；
-        /// 非法则回滚到最近一次 <see cref="Refresh"/> 传入的值。
-        /// 公开以便 EditMode 测试绕过 BlurEvent / KeyDownEvent 直接触发提交。
-        /// </summary>
         public void CommitFocusValue()
         {
             if (_focusValue == null)
@@ -166,10 +213,6 @@ namespace APP.Pomodoro.Controller
             }
         }
 
-        /// <summary>
-        /// 读取 psp-break-value 当前文本：合法（整数 ≥0）则触发 <see cref="OnBreakMinutesChanged"/>；
-        /// 非法则回滚到最近一次 <see cref="Refresh"/> 传入的值。
-        /// </summary>
         public void CommitBreakValue()
         {
             if (_breakValue == null)
@@ -196,10 +239,148 @@ namespace APP.Pomodoro.Controller
 
         // ─── 私有辅助 ─────────────────────────────────────────────
 
+        private static string ModeDisplayName(PomodoroEndActionMode mode)
+        {
+            return mode switch
+            {
+                PomodoroEndActionMode.PlayVideo => "播放视频",
+                _ => "弹窗到顶部",
+            };
+        }
+
+        private static string ResolveVideoChoiceText(int videoIndex, IReadOnlyList<string> builtInDisplayNames)
+        {
+            if (videoIndex == -1)
+            {
+                return "自定义";
+            }
+            if (builtInDisplayNames == null || videoIndex < 0 || videoIndex >= builtInDisplayNames.Count)
+            {
+                return "自定义";
+            }
+            string name = builtInDisplayNames[videoIndex];
+            return string.IsNullOrEmpty(name) ? $"视频 {videoIndex + 1}" : name;
+        }
+
+        private void RebuildEndActionMenu(PomodoroEndActionMode currentMode)
+        {
+            if (_endActionMenu == null)
+            {
+                return;
+            }
+            _endActionMenu.Clear();
+
+            int currentIndex = (int)currentMode;
+            for (int i = 0; i < ModeDisplayChoices.Length; i++)
+            {
+                int captured = i;
+                VisualElement item = BuildMenuItem(ModeDisplayChoices[i], i == currentIndex);
+                item.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SetEndActionMenuVisible(false);
+                    OnEndActionModeSelected?.Invoke(captured);
+                });
+                _endActionMenu.Add(item);
+            }
+        }
+
+        private void RebuildVideoPathMenu(int currentVideoIndex, IReadOnlyList<string> builtInDisplayNames)
+        {
+            if (_videoPathMenu == null)
+            {
+                return;
+            }
+            _videoPathMenu.Clear();
+
+            int builtInCount = builtInDisplayNames?.Count ?? 0;
+            for (int i = 0; i < builtInCount; i++)
+            {
+                int videoIdx = i;
+                string display = string.IsNullOrEmpty(builtInDisplayNames[i])
+                    ? $"视频 {i + 1}"
+                    : builtInDisplayNames[i];
+                bool selected = currentVideoIndex == videoIdx;
+                VisualElement item = BuildMenuItem(display, selected);
+                item.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SetVideoPathMenuVisible(false);
+                    OnVideoSelectionChanged?.Invoke(videoIdx);
+                });
+                _videoPathMenu.Add(item);
+            }
+
+            // 末项："自定义"
+            VisualElement custom = BuildMenuItem("自定义", currentVideoIndex == -1);
+            custom.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                evt.StopPropagation();
+                SetVideoPathMenuVisible(false);
+                OnVideoSelectionChanged?.Invoke(-1);
+            });
+            _videoPathMenu.Add(custom);
+        }
+
+        private static VisualElement BuildMenuItem(string text, bool selected)
+        {
+            VisualElement item = new VisualElement();
+            item.AddToClassList("psp-row-dropdown-menu-item");
+            if (selected)
+            {
+                item.AddToClassList("psp-row-dropdown-menu-item--selected");
+            }
+            Label label = new Label(text);
+            label.AddToClassList("psp-row-dropdown-menu-item-label");
+            item.Add(label);
+            return item;
+        }
+
+        private void RegisterDropdownTriggerCallbacks()
+        {
+            if (_endActionDropdown != null)
+            {
+                _endActionDropdown.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SetEndActionMenuVisible(!_endActionMenuOpen);
+                    // 同时折叠另一个菜单（避免两个同时开）
+                    if (_endActionMenuOpen)
+                    {
+                        SetVideoPathMenuVisible(false);
+                    }
+                });
+            }
+            if (_videoPathDropdown != null)
+            {
+                _videoPathDropdown.RegisterCallback<PointerUpEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SetVideoPathMenuVisible(!_videoPathMenuOpen);
+                    if (_videoPathMenuOpen)
+                    {
+                        SetEndActionMenuVisible(false);
+                    }
+                });
+            }
+        }
+
+        private void SetEndActionMenuVisible(bool visible)
+        {
+            _endActionMenuOpen = visible;
+            _endActionMenu?.EnableInClassList("psp-row-dropdown-menu--hidden", !visible);
+        }
+
+        private void SetVideoPathMenuVisible(bool visible)
+        {
+            _videoPathMenuOpen = visible;
+            _videoPathMenu?.EnableInClassList("psp-row-dropdown-menu--hidden", !visible);
+        }
+
         private void RegisterRowCallbacks()
         {
-            _endActionRow?.RegisterCallback<ClickEvent>(_ => OnEndActionRowClicked?.Invoke());
-            _videoPathRow?.RegisterCallback<ClickEvent>(_ => OnVideoPathRowClicked?.Invoke());
+            // 自定义视频文件行点击 = 触发文件选择器（mode/video 行自身已有触发器接管点击）
+            _videoCustomRow?.RegisterCallback<ClickEvent>(_ => OnVideoCustomRowClicked?.Invoke());
         }
 
         private void RegisterDurationCallbacks()
@@ -235,9 +416,7 @@ namespace APP.Pomodoro.Controller
             {
                 return;
             }
-
             _applyBtn.clicked += () => OnApplyClicked?.Invoke();
         }
-
     }
 }

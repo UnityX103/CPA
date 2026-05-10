@@ -30,12 +30,12 @@ Unity 编辑器菜单：**Build → Build and Package macOS App**
 
 Unity 在资源刷新时自动编译，无需手动命令。通过以下方式查看错误：
 - Unity Console 窗口
-- MCP 工具：`read_console`（filter types: error/warning）
-- MCP 工具：`validate_script`（级别：basic / standard）
+- MCP 工具：`Unity_GetConsoleLogs`（参数 `logTypes`：`error` / `warning` / `log`）
+- MCP 工具：`Unity_ValidateScript`（级别：basic / standard）
 
 ### 测试
 
-通过 MCP 运行单个测试：`run_tests`，参数 `testNames: ["Full.Test.Name"]`
+通过 MCP 运行测试需要走 `Unity_RunCommand` 调 `UnityEditor.TestTools.TestRunner.Api`（官方 MCP 不提供 `run_tests` / `get_test_job` 这类封装），详见下方「MCP 集成 / 跑 EditMode / PlayMode 测试」小节。
 
 项目级视觉验证技能：`.claude/skills/unity-visual-image-validation/SKILL.md`，用于 `VisualImageTestBase` 测试产物的 `manifest.json` 与截图工件复核。
 
@@ -267,16 +267,28 @@ Editor 代码   → *.Editor.asmdef（含 #if UNITY_EDITOR 守卫）
 
 ## MCP 集成
 
-项目内置 MCP for Unity，Claude Code 可直接操控编辑器：
+本项目使用 **Unity 官方 MCP**（工具前缀 `mcp__unity-mcp__*`，例如 `mcp__unity-mcp__Unity_RunCommand`），不是第三方 MCP-for-Unity（前缀 `mcp__UnityMCP__*`）。两套 MCP 工具命名不同，调用前必须确认 prefix —— 第三方 MCP 的 `run_tests` / `get_test_job` / `read_console` 等便利封装在官方 MCP 中并不存在。
+
+常用官方工具：
 
 | 工具 | 用途 |
 |------|------|
-| `run_tests` | 执行指定测试 |
-| `get_test_job` | 查询测试执行状态 |
-| `read_console` | 读取 Unity 控制台日志 |
-| `validate_script` | 静态代码分析 |
-| `manage_scene` | 场景操作 |
-| `manage_gameobject` | GameObject 操作 |
+| `Unity_RunCommand` | 编译并执行任意 C# 脚本（实现 `IRunCommand`）；唯一的「通用入口」，跑测试、读 SessionState、调编辑器 API 都走这个 |
+| `Unity_GetConsoleLogs` | 读取 Unity 控制台日志（`logTypes`：`error` / `warning` / `log`） |
+| `Unity_ValidateScript` | 静态代码分析 |
+| `Unity_ManageScene` / `Unity_ManageGameObject` / `Unity_ManageAsset` / `Unity_ManageScript` / `Unity_ManageEditor` | 场景 / GameObject / 资源 / 脚本 / 编辑器管理 |
+| `Unity_FindInFile` / `Unity_Grep` / `Unity_FindProjectAssets` | 工程内查找 |
+| `Unity_ScriptApplyEdits` / `Unity_ApplyTextEdits` / `Unity_CreateScript` / `Unity_DeleteScript` | 脚本批量编辑与增删 |
+
+### 跑 EditMode / PlayMode 测试
+
+官方 MCP 没有现成的 `run_tests` 包装，必须通过 `Unity_RunCommand` 调 `UnityEditor.TestTools.TestRunner.Api`，并用 `SessionState` 桥接异步结果（两次调用）：
+
+1. **第一次 `Unity_RunCommand`**：注册 `ICallbacks` 监听器，把 `RunFinished(ITestResultAdaptor)` 的 `PassCount` / `FailCount` / `SkipCount` / `TestStatus` / `Duration` 写入 `SessionState.SetString(key, ...)`，然后 `api.Execute(new ExecutionSettings(filter))` 异步触发；命令立即返回。
+2. **第二次 `Unity_RunCommand`**（间隔几秒）：`SessionState.GetString(key, "missing")`，读出 `done|state=Passed|pass=3|fail=0|...` 这种汇总串。
+3. **`Filter` 字段**：`testMode = TestMode.EditMode`；过滤建议优先用 `assemblyNames`（asmdef 名），用 `testNames` / `groupNames` 时要传 fixture 全限定名（如 `APP.Pomodoro.Tests.NativeFilePickerTests`）。
+
+`CommandScript` 的命名和访问级别必须严格遵守模板：`internal class CommandScript : IRunCommand`——类名固定 `CommandScript`，访问级别固定 `internal`，否则会报 NRE 或「Inconsistent Accessibility」。
 
 ## 版本控制
 

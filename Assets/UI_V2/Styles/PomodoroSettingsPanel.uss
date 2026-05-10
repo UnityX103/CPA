@@ -8,6 +8,9 @@
 .psp-root {
     flex-direction: column;
     width: 100%;
+    /* 父级 settings-content 是 ScrollView：容器要保留自然高度，不要被 flex-shrink 压扁，
+       否则内容溢出时 ScrollView 看不到滚动需求，会变成"压缩"而非"滚动"。 */
+    flex-shrink: 0;
 }
 
 /* ── 指标卡片区（两列）────────────────────────────────────── */
@@ -15,6 +18,7 @@
 .psp-metrics {
     flex-direction: row;
     margin-bottom: 10px; /* Pencil JpJcn (pomoFooter) gap:10 */
+    flex-shrink: 0;
 }
 
 .psp-metric {
@@ -22,6 +26,7 @@
     flex-direction: column;
     border-radius: 16px;
     padding: 16px;
+    flex-shrink: 0;
 }
 
 .psp-metric--neutral {
@@ -51,11 +56,13 @@
 
 .psp-settings {
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .psp-row,
 .psp-end-action-row,
-.psp-video-path-row {
+.psp-video-path-row,
+.psp-video-custom-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -66,6 +73,8 @@
     padding-top: 14px;
     padding-bottom: 14px;
     margin-bottom: 10px;
+    /* 保留自然高度，让 ScrollView 处理溢出而不是把行压扁 */
+    flex-shrink: 0;
 }
 
 .psp-video-path-row {
@@ -74,6 +83,16 @@
 }
 
 .psp-video-path-row.is-video-mode {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.psp-video-custom-row {
+    display: none;
+    margin-bottom: 0;
+}
+
+.psp-video-custom-row.is-custom-video {
     display: flex;
 }
 
@@ -91,13 +110,94 @@
     -unity-text-align: middle-right;
 }
 
-.psp-video-path-icon {
+/* ── 行内自定义下拉框（参考 GlobalSettingsPanel 的目标显示器实现）─────────
+   触发器（.psp-row-dropdown）：复用 Components/InputDropdown.uss 的 .comp-input-dropdown 基础样式，
+   只覆盖"嵌在行右侧"必要的尺寸与对齐：紧凑高度、最小宽度、不撑满行。
+   菜单（.psp-row-dropdown-menu）：触发器的下一个兄弟节点，inline 展开，display:none ↔ flex 切换，
+   不用 absolute 定位（避免和后续行的渲染顺序打架）。 */
+
+.comp-input-dropdown.psp-row-dropdown {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    margin-left: 8px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-width: 140px;
+    min-height: 36px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.psp-row-dropdown-menu {
+    flex-direction: column;
+    flex-shrink: 0;
+    background-color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-color: rgb(229, 231, 235);
+    border-radius: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: -4px;          /* 跟上方触发行更紧贴 */
+    margin-bottom: 10px;       /* 跟下一行保持原 .psp-row 的间距 */
+}
+
+.psp-row-dropdown-menu--hidden {
+    display: none;
+}
+
+.psp-row-dropdown-menu-item {
+    height: 32px;
+    min-height: 32px;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.psp-row-dropdown-menu-item:hover {
+    background-color: rgb(246, 247, 248);
+}
+
+.psp-row-dropdown-menu-item-label {
+    flex-grow: 1;
+    color: rgb(26, 26, 26);
+    font-size: 13px;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+.psp-row-dropdown-menu-item--selected .psp-row-dropdown-menu-item-label {
+    color: rgb(209, 95, 61);   /* 选中态：橙色，对齐 Pencil openDrop */
+    -unity-font-style: bold;
+}
+
+.psp-video-custom-icon {
     width: 16px;
     height: 16px;
     margin-left: 8px;
-    background-color: rgb(107, 114, 128);
-    border-radius: 4px;
+    background-image: url("project://database/Assets/UI_V2/Icons/folder.png");
     -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 行内下拉触发器的 chevron：保留 InputDropdown 模板里的 Label "▾"，
+   但把字符隐掉，换成 lucide chevron-down PNG（256×256 等比导出）。
+   仅作用在 .psp-row-dropdown 的 chevron，不影响其他面板（GlobalSettingsPanel）的 ▾ 字符。 */
+.psp-row-dropdown .comp-input-dropdown__chevron {
+    font-size: 0;
+    color: rgba(0, 0, 0, 0);
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    background-image: url("project://database/Assets/UI_V2/Icons/chevron-down.png");
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
 }
 
 /* ── 应用按钮行 ──────────────────────────────────────────── */
@@ -110,6 +210,7 @@
     flex-direction: row;
     justify-content: flex-end;
     margin-bottom: 16px; /* Pencil gs1Tv gap:16 (apply ↔ footer) */
+    flex-shrink: 0;
 }
 
 .psp-root .apply-btn {

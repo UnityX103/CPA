@@ -193,14 +193,16 @@
                   ]
                 },
                 {
-                  "type": "text",
-                  "id": "y3NjFV",
-                  "name": "pomoEndActionState",
-                  "fill": "#6366F1",
-                  "content": "弹窗到顶部",
-                  "fontFamily": "MaokenAssortedSans",
-                  "fontSize": 12,
-                  "fontWeight": "700"
+                  "id": "Tp1bH",
+                  "type": "ref",
+                  "ref": "Frjkw",
+                  "name": "pomoEndActionDropdown",
+                  "width": "fit_content",
+                  "descendants": {
+                    "d5bpi": {
+                      "content": "弹窗到顶部"
+                    }
+                  }
                 }
               ]
             },
@@ -241,15 +243,62 @@
                   ]
                 },
                 {
+                  "id": "dELwq",
+                  "type": "ref",
+                  "ref": "Frjkw",
+                  "name": "pomoVideoPathDropdown",
+                  "width": "fit_content",
+                  "descendants": {
+                    "d5bpi": {
+                      "content": "未选择"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Jvg0I",
+              "name": "pomoVideoCustom",
+              "width": "fill_container",
+              "fill": "#F6F7F8",
+              "cornerRadius": 16,
+              "padding": [
+                14,
+                16
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
                   "type": "frame",
-                  "id": "XKfRo",
+                  "id": "n3DQc",
+                  "name": "pomoVideoPathLeft",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "odFzx",
+                      "name": "pomoVideoPathLabel",
+                      "fill": "#1A1A1A",
+                      "content": "自定义视频文件",
+                      "fontFamily": "MaokenAssortedSans",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Tv9l8",
                   "name": "pomoVideoPathRight",
                   "gap": 8,
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "hAmke",
+                      "id": "hRsIx",
                       "name": "pomoVideoPathState",
                       "fill": "#9CA3AF",
                       "content": "未选择",
@@ -259,7 +308,7 @@
                     },
                     {
                       "type": "icon_font",
-                      "id": "nUxXm",
+                      "id": "YQwLD",
                       "name": "pomoVideoPathIcon",
                       "width": 16,
                       "height": 16,
@@ -3848,17 +3897,26 @@
       "x": 2393,
       "y": 337,
       "descendants": {
-        "y3NjFV": {
+        "Tp1bH/d5bpi": {
           "content": "播放视频"
         },
         "WSnlp": {
           "enabled": true
         },
-        "hAmke": {
-          "content": "funny_cat.mp4",
-          "fill": "#6366F1"
+        "dELwq/d5bpi": {
+          "content": "funny_cat.mp4"
         }
       }
+    },
+    {
+      "type": "note",
+      "id": "Qx6mh",
+      "x": 2965,
+      "y": 537,
+      "name": "pomoVideoCustomConditionNote",
+      "width": 320,
+      "height": 120,
+      "content": "状态说明\n\n本行（自定义视频文件）仅在「视频文件」下拉框选中「自定义」时才显示；选择配置表里其他视频时，此行隐藏。"
     }
   ],
   "themes": {
