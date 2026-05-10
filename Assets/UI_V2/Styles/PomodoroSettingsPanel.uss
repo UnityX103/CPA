@@ -132,50 +132,12 @@
     padding-right: 12px;
 }
 
-.psp-row-dropdown-menu {
-    flex-direction: column;
-    flex-shrink: 0;
-    background-color: rgb(255, 255, 255);
-    border-top-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-color: rgb(229, 231, 235);
-    border-radius: 12px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    margin-top: -4px;          /* 跟上方触发行更紧贴 */
-    margin-bottom: 10px;       /* 跟下一行保持原 .psp-row 的间距 */
-}
-
-.psp-row-dropdown-menu--hidden {
-    display: none;
-}
-
-.psp-row-dropdown-menu-item {
-    height: 32px;
-    min-height: 32px;
-    flex-direction: row;
-    align-items: center;
-    padding-left: 12px;
-    padding-right: 12px;
-}
-
-.psp-row-dropdown-menu-item:hover {
-    background-color: rgb(246, 247, 248);
-}
-
-.psp-row-dropdown-menu-item-label {
-    flex-grow: 1;
-    color: rgb(26, 26, 26);
-    font-size: 13px;
-    -unity-font-style: normal;
-    -unity-text-align: middle-left;
-}
-
-.psp-row-dropdown-menu-item--selected .psp-row-dropdown-menu-item-label {
-    color: rgb(209, 95, 61);   /* 选中态：橙色，对齐 Pencil openDrop */
-    -unity-font-style: bold;
+/* 菜单本体（视觉、菜单项、选中态）统一在 Components/InputDropdown.uss 的
+   .comp-input-dropdown-menu* 一族，PSP 这里只保留行内位置覆盖：
+   margin-top:-4px 让菜单跟上方触发行更紧贴，margin-bottom:10px 维持 .psp-row 间距。 */
+.comp-input-dropdown-menu.psp-row-dropdown-menu {
+    margin-top: -4px;
+    margin-bottom: 10px;
 }
 
 .psp-video-custom-icon {

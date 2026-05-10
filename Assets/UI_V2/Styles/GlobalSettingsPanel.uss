@@ -106,7 +106,10 @@
     -unity-text-align: middle-center;
 }
 
-.gsp-display-menu {
+/* 菜单本体（视觉、菜单项、选中态）统一在 Components/InputDropdown.uss 的
+   .comp-input-dropdown-menu* 一族，GSP 这里只保留位置覆盖：
+   absolute 定位让菜单浮在 wrap 之外，不撑开后续布局。 */
+.comp-input-dropdown-menu.gsp-display-menu {
     position: absolute;
     left: 0;
     top: 40px;
@@ -114,35 +117,4 @@
     min-height: 0;
     min-width: 0;
     max-width: 100%;
-    background-color: var(--color-bg-white);
-    border-width: 1px;
-    border-color: var(--color-border-gray);
-    border-radius: 10px;
-    padding: 4px 0;
-    flex-direction: column;
-}
-
-.gsp-display-menu--hidden {
-    display: none;
-}
-
-.gsp-display-menu-item {
-    height: 32px;
-    min-height: 32px;
-    flex-direction: row;
-    align-items: center;
-    padding: 0 12px;
-    background-color: var(--color-bg-white);
-}
-
-.gsp-display-menu-item:hover {
-    background-color: var(--color-bg-surface);
-}
-
-.gsp-display-menu-item-label {
-    flex-grow: 1;
-    color: var(--color-text-dark);
-    font-size: 13px;
-    -unity-font-style: normal;
-    -unity-text-align: middle-left;
 }

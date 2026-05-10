@@ -236,13 +236,13 @@ namespace APP.NetworkIntegration.Tests
             foreach (string choice in choices)
             {
                 var item = new VisualElement();
-                item.AddToClassList("gsp-display-menu-item");
+                item.AddToClassList("comp-input-dropdown-menu-item");
                 var label = new Label(choice);
-                label.AddToClassList("gsp-display-menu-item-label");
+                label.AddToClassList("comp-input-dropdown-menu-item-label");
                 item.Add(label);
                 menu.Add(item);
             }
-            menu.EnableInClassList("gsp-display-menu--hidden", true);
+            menu.EnableInClassList("comp-input-dropdown-menu--hidden", true);
         }
 
         private VisualElement CreateRuntimePanelRoot()

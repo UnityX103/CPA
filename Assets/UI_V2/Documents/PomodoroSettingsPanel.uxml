@@ -43,7 +43,7 @@
                     <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="psp-end-action-menu" class="comp-input-dropdown-menu comp-input-dropdown-menu--hidden" />
+            <ui:VisualElement name="psp-end-action-menu" class="comp-input-dropdown-menu psp-row-dropdown-menu comp-input-dropdown-menu--hidden" />
             <ui:VisualElement name="psp-video-path-row" class="psp-row psp-video-path-row">
                 <ui:Label text="视频文件" class="psp-row-label" />
                 <ui:VisualElement name="psp-video-path-dropdown" class="comp-input-dropdown psp-row-dropdown">
@@ -51,7 +51,7 @@
                     <ui:Label class="comp-input-dropdown__chevron" text="▾" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="psp-video-path-menu" class="comp-input-dropdown-menu comp-input-dropdown-menu--hidden" />
+            <ui:VisualElement name="psp-video-path-menu" class="comp-input-dropdown-menu psp-row-dropdown-menu comp-input-dropdown-menu--hidden" />
             <ui:VisualElement name="psp-video-custom-row" class="psp-row psp-video-custom-row">
                 <ui:Label text="自定义视频文件" class="psp-row-label" />
                 <ui:Label name="psp-video-custom-state" text="未选择" class="psp-row-value psp-video-custom-state" />

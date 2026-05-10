@@ -29,7 +29,7 @@
                     <ui:Label name="gsp-display-dropdown-value" class="comp-input-dropdown__value" text="" />
                     <ui:Label class="comp-input-dropdown__chevron gsp-display-chevron" text="▾" picking-mode="Ignore" />
                 </ui:VisualElement>
-                <ui:VisualElement name="gsp-display-menu" class="gsp-display-menu gsp-display-menu--hidden" />
+                <ui:VisualElement name="gsp-display-menu" class="comp-input-dropdown-menu gsp-display-menu comp-input-dropdown-menu--hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

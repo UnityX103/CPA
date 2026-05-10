@@ -18,8 +18,11 @@ namespace APP.NetworkIntegration.Tests
         private const string PanelSettingsPath = "Assets/UI_V2/PanelSettings_Settings.asset";
         private const string GlobalSettingsPanelPath = "Assets/UI_V2/Documents/GlobalSettingsPanel.uxml";
 
-        private const string DropdownMenuHiddenClassName = "gsp-display-menu--hidden";
-        private const string DropdownMenuItemClassName = "gsp-display-menu-item";
+        // 与 GlobalSettingsPanel.uxml / Components/InputDropdown.uss 保持一致：菜单 hide / item / label
+        // 都走 Frjkw 共享组件的 comp-input-dropdown-menu* 一族，gsp-display-menu 只剩 absolute 位置覆盖。
+        private const string DropdownMenuHiddenClassName = "comp-input-dropdown-menu--hidden";
+        private const string DropdownMenuItemClassName = "comp-input-dropdown-menu-item";
+        private const string DropdownMenuItemLabelClassName = "comp-input-dropdown-menu-item-label";
 
         private GameObject _host;
         private GameObject _cameraHost;
@@ -136,7 +139,7 @@ namespace APP.NetworkIntegration.Tests
                 var item = new VisualElement();
                 item.AddToClassList(DropdownMenuItemClassName);
                 var label = new Label(choice);
-                label.AddToClassList("gsp-display-menu-item-label");
+                label.AddToClassList(DropdownMenuItemLabelClassName);
                 item.Add(label);
                 menu.Add(item);
             }

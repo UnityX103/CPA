@@ -12,11 +12,11 @@ namespace APP.Pomodoro.Controller
     /// 番茄钟设置面板视图辅助类。
     /// 绑定 PomodoroSettingsPanel.uxml 中的动态元素，向父级 Controller 暴露事件。
     ///
-    /// 计时结束提示行 / 视频选择行用"自定义下拉框"模式（对齐 GlobalSettingsPanel 目标显示器）：
+    /// 计时结束提示行 / 视频选择行用与 GlobalSettingsPanel 共用的 InputDropdownBinding（Pencil Frjkw）：
     ///   - 触发器（.comp-input-dropdown.psp-row-dropdown）：白色 pill + chevron。
-    ///   - 触发器后面挂兄弟节点 .psp-row-dropdown-menu，display:none ↔ flex 切换，
-    ///     菜单项由 C# 动态构建（每次 Refresh 重建一次），点击后回填值并隐藏菜单。
-    ///   - 不依赖 Unity 内置 DropdownField popup（其在嵌入 UIDocument 中表现不一致）。
+    ///   - 触发器后面挂兄弟节点 .comp-input-dropdown-menu，display:none ↔ flex 通过
+    ///     .comp-input-dropdown-menu--hidden 切换，菜单项由 InputDropdownBinding 统一构建。
+    ///   - 不再单独维护 psp-row-dropdown-menu 一套 class，避免与 Frjkw 组件不同步。
     /// 自定义视频文件行（psp-video-custom-row）仍是普通 ClickEvent，作为系统文件选择器入口。
     /// </summary>
     public sealed class PomodoroSettingsPanelView
@@ -47,15 +47,11 @@ namespace APP.Pomodoro.Controller
 
         // 计时结束提示行（mode 下拉）
         private readonly VisualElement _endActionRow;
-        private readonly VisualElement _endActionDropdown;     // 触发器
-        private readonly Label _endActionValueLabel;            // 触发器内显示文本
-        private readonly VisualElement _endActionMenu;          // 兄弟节点：选项列表
+        private readonly InputDropdownBinding _endActionDropdown;
 
         // 视频文件行（视频选择下拉）
         private readonly VisualElement _videoPathRow;
-        private readonly VisualElement _videoPathDropdown;
-        private readonly Label _videoPathValueLabel;
-        private readonly VisualElement _videoPathMenu;
+        private readonly InputDropdownBinding _videoPathDropdown;
 
         // 自定义视频文件行
         private readonly VisualElement _videoCustomRow;
@@ -66,10 +62,6 @@ namespace APP.Pomodoro.Controller
         // 状态
         private int _lastFocusMin = 1;
         private int _lastBreakMin = 0;
-        private bool _endActionMenuOpen;
-        private bool _videoPathMenuOpen;
-        // 视频菜单当前内置项数（Refresh 时更新）：用于把 chosenIndex 翻译回 -1（自定义）。
-        private int _videoBuiltInCount;
 
         /// <summary>计时结束 mode 的固定 choices 顺序——下标必须严格对齐 PomodoroEndActionMode 枚举：
         /// 0=TopWindow, 1=PlayVideo。Controller 直接 cast 即可。</summary>
@@ -93,26 +85,37 @@ namespace APP.Pomodoro.Controller
             _soundLabel = panelRoot.Q<Label>("psp-sound-label");
 
             _endActionRow = panelRoot.Q<VisualElement>("psp-end-action-row");
-            _endActionDropdown = panelRoot.Q<VisualElement>("psp-end-action-dropdown");
-            _endActionValueLabel = panelRoot.Q<Label>("psp-end-action-dropdown-value");
-            _endActionMenu = panelRoot.Q<VisualElement>("psp-end-action-menu");
+            VisualElement endActionTrigger = panelRoot.Q<VisualElement>("psp-end-action-dropdown");
+            Label endActionValue = panelRoot.Q<Label>("psp-end-action-dropdown-value");
+            VisualElement endActionMenu = panelRoot.Q<VisualElement>("psp-end-action-menu");
+            if (endActionTrigger != null && endActionValue != null && endActionMenu != null)
+            {
+                _endActionDropdown = new InputDropdownBinding(endActionTrigger, endActionValue, endActionMenu);
+            }
 
             _videoPathRow = panelRoot.Q<VisualElement>("psp-video-path-row");
-            _videoPathDropdown = panelRoot.Q<VisualElement>("psp-video-path-dropdown");
-            _videoPathValueLabel = panelRoot.Q<Label>("psp-video-path-dropdown-value");
-            _videoPathMenu = panelRoot.Q<VisualElement>("psp-video-path-menu");
+            VisualElement videoTrigger = panelRoot.Q<VisualElement>("psp-video-path-dropdown");
+            Label videoValue = panelRoot.Q<Label>("psp-video-path-dropdown-value");
+            VisualElement videoMenu = panelRoot.Q<VisualElement>("psp-video-path-menu");
+            if (videoTrigger != null && videoValue != null && videoMenu != null)
+            {
+                _videoPathDropdown = new InputDropdownBinding(videoTrigger, videoValue, videoMenu);
+            }
 
             _videoCustomRow = panelRoot.Q<VisualElement>("psp-video-custom-row");
             _videoCustomStateLabel = panelRoot.Q<Label>("psp-video-custom-state");
             _applyBtn = panelRoot.Q<Button>("apply-btn");
 
-            RegisterDropdownTriggerCallbacks();
+            // 两个菜单互斥
+            if (_endActionDropdown != null && _videoPathDropdown != null)
+            {
+                _endActionDropdown.OnAboutToOpen += () => _videoPathDropdown.Close();
+                _videoPathDropdown.OnAboutToOpen += () => _endActionDropdown.Close();
+            }
+
             RegisterRowCallbacks();
             RegisterDurationCallbacks();
             RegisterApplyCallback();
-            // 默认两个菜单都收起
-            SetEndActionMenuVisible(false);
-            SetVideoPathMenuVisible(false);
         }
 
         // ─── 公开 API ─────────────────────────────────────────────
@@ -138,28 +141,25 @@ namespace APP.Pomodoro.Controller
             }
 
             // ── 计时结束 mode 下拉 ──
-            if (_endActionValueLabel != null)
+            if (_endActionDropdown != null)
             {
-                _endActionValueLabel.text = ModeDisplayName(mode);
+                _endActionDropdown.SetTriggerText(ModeDisplayName(mode));
+                _endActionDropdown.SetItems(ModeDisplayChoices, (int)mode, OnEndActionModeSelected);
             }
-            RebuildEndActionMenu(mode);
-            SetEndActionMenuVisible(false);
 
             // ── "视频文件"行 mode == PlayVideo 时显示 ──
             _videoPathRow?.EnableInClassList("is-video-mode", mode == PomodoroEndActionMode.PlayVideo);
 
             // ── 视频选择下拉 ──
             _videoBuiltInCount = builtInDisplayNames?.Count ?? 0;
-            if (_videoPathValueLabel != null)
+            if (_videoPathDropdown != null)
             {
-                _videoPathValueLabel.text = ResolveVideoChoiceText(videoIndex, builtInDisplayNames);
+                _videoPathDropdown.SetTriggerText(ResolveVideoChoiceText(videoIndex, builtInDisplayNames));
+                _videoPathDropdown.SetItems(
+                    BuildVideoChoices(builtInDisplayNames),
+                    ResolveVideoSelectedIndex(videoIndex, _videoBuiltInCount),
+                    OnVideoSelectionChangedFromMenu);
             }
-            RebuildVideoPathMenu(videoIndex, builtInDisplayNames);
-            SetVideoPathMenuVisible(false);
-            // 当视频文件行隐藏（非 PlayVideo）时，菜单也强制隐藏（菜单本身不带 is-video-mode 控制）
-            _videoPathMenu?.EnableInClassList(
-                "psp-row-dropdown-menu--hidden",
-                mode != PomodoroEndActionMode.PlayVideo || !_videoPathMenuOpen);
 
             // ── "自定义视频文件"行：mode == PlayVideo && videoIndex == -1 时显示 ──
             bool customVisible = mode == PomodoroEndActionMode.PlayVideo && videoIndex == -1;
@@ -262,120 +262,44 @@ namespace APP.Pomodoro.Controller
             return string.IsNullOrEmpty(name) ? $"视频 {videoIndex + 1}" : name;
         }
 
-        private void RebuildEndActionMenu(PomodoroEndActionMode currentMode)
+        // 把"内置项 0..N-1 + 末项=自定义"组织成 InputDropdownBinding 的 choices 数组。
+        private static IReadOnlyList<string> BuildVideoChoices(IReadOnlyList<string> builtInDisplayNames)
         {
-            if (_endActionMenu == null)
-            {
-                return;
-            }
-            _endActionMenu.Clear();
-
-            int currentIndex = (int)currentMode;
-            for (int i = 0; i < ModeDisplayChoices.Length; i++)
-            {
-                int captured = i;
-                VisualElement item = BuildMenuItem(ModeDisplayChoices[i], i == currentIndex);
-                item.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    evt.StopPropagation();
-                    SetEndActionMenuVisible(false);
-                    OnEndActionModeSelected?.Invoke(captured);
-                });
-                _endActionMenu.Add(item);
-            }
-        }
-
-        private void RebuildVideoPathMenu(int currentVideoIndex, IReadOnlyList<string> builtInDisplayNames)
-        {
-            if (_videoPathMenu == null)
-            {
-                return;
-            }
-            _videoPathMenu.Clear();
-
             int builtInCount = builtInDisplayNames?.Count ?? 0;
+            string[] choices = new string[builtInCount + 1];
             for (int i = 0; i < builtInCount; i++)
             {
-                int videoIdx = i;
-                string display = string.IsNullOrEmpty(builtInDisplayNames[i])
-                    ? $"视频 {i + 1}"
-                    : builtInDisplayNames[i];
-                bool selected = currentVideoIndex == videoIdx;
-                VisualElement item = BuildMenuItem(display, selected);
-                item.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    evt.StopPropagation();
-                    SetVideoPathMenuVisible(false);
-                    OnVideoSelectionChanged?.Invoke(videoIdx);
-                });
-                _videoPathMenu.Add(item);
+                string raw = builtInDisplayNames[i];
+                choices[i] = string.IsNullOrEmpty(raw) ? $"视频 {i + 1}" : raw;
             }
-
-            // 末项："自定义"
-            VisualElement custom = BuildMenuItem("自定义", currentVideoIndex == -1);
-            custom.RegisterCallback<PointerUpEvent>(evt =>
-            {
-                evt.StopPropagation();
-                SetVideoPathMenuVisible(false);
-                OnVideoSelectionChanged?.Invoke(-1);
-            });
-            _videoPathMenu.Add(custom);
+            choices[builtInCount] = "自定义";
+            return choices;
         }
 
-        private static VisualElement BuildMenuItem(string text, bool selected)
+        // 把 videoIndex（-1=自定义；其余 0..builtInCount-1=内置）翻译成菜单 selectedIndex（末项=自定义）。
+        private static int ResolveVideoSelectedIndex(int videoIndex, int builtInCount)
         {
-            VisualElement item = new VisualElement();
-            item.AddToClassList("psp-row-dropdown-menu-item");
-            if (selected)
+            if (videoIndex == -1)
             {
-                item.AddToClassList("psp-row-dropdown-menu-item--selected");
+                return builtInCount; // 末项 = "自定义"
             }
-            Label label = new Label(text);
-            label.AddToClassList("psp-row-dropdown-menu-item-label");
-            item.Add(label);
-            return item;
-        }
-
-        private void RegisterDropdownTriggerCallbacks()
-        {
-            if (_endActionDropdown != null)
+            if (videoIndex >= 0 && videoIndex < builtInCount)
             {
-                _endActionDropdown.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    evt.StopPropagation();
-                    SetEndActionMenuVisible(!_endActionMenuOpen);
-                    // 同时折叠另一个菜单（避免两个同时开）
-                    if (_endActionMenuOpen)
-                    {
-                        SetVideoPathMenuVisible(false);
-                    }
-                });
+                return videoIndex;
             }
-            if (_videoPathDropdown != null)
-            {
-                _videoPathDropdown.RegisterCallback<PointerUpEvent>(evt =>
-                {
-                    evt.StopPropagation();
-                    SetVideoPathMenuVisible(!_videoPathMenuOpen);
-                    if (_videoPathMenuOpen)
-                    {
-                        SetEndActionMenuVisible(false);
-                    }
-                });
-            }
+            return -1;
         }
 
-        private void SetEndActionMenuVisible(bool visible)
+        // 菜单 onSelect(index) → 翻译成 videoIndex 后转发：末项 → -1，其余原样。
+        private void OnVideoSelectionChangedFromMenu(int menuIndex)
         {
-            _endActionMenuOpen = visible;
-            _endActionMenu?.EnableInClassList("psp-row-dropdown-menu--hidden", !visible);
+            int builtInCount = _videoBuiltInCount;
+            int videoIndex = (menuIndex == builtInCount) ? -1 : menuIndex;
+            OnVideoSelectionChanged?.Invoke(videoIndex);
         }
 
-        private void SetVideoPathMenuVisible(bool visible)
-        {
-            _videoPathMenuOpen = visible;
-            _videoPathMenu?.EnableInClassList("psp-row-dropdown-menu--hidden", !visible);
-        }
+        // 缓存最近一次 Refresh 时的内置项数（用于 menuIndex → videoIndex 翻译）。
+        private int _videoBuiltInCount;
 
         private void RegisterRowCallbacks()
         {

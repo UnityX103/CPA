@@ -85,7 +85,9 @@ namespace APP.NetworkIntegration.Tests
 
                 model.EndActionMode.Value = PomodoroEndActionMode.PlayVideo;
                 model.EndActionVideoPath.Value = string.Empty;
-                yield return null;
+                // is-video-mode class 切换 display: none → flex 后，UIToolkit 需要至少 1 个 layout pass
+                // 才会重算 worldBound，单帧 yield 不够稳，poll 直到行被布局完成或超时
+                yield return WaitUntilHasWidth(uiDocument.rootVisualElement, "psp-video-path-row", 30);
 
                 AssertRendered(uiDocument.rootVisualElement, "psp-end-action-row");
                 AssertRendered(uiDocument.rootVisualElement, "psp-video-path-row");
@@ -95,7 +97,7 @@ namespace APP.NetworkIntegration.Tests
                     "PlayVideo 模式 + 视频路径未选");
 
                 model.EndActionVideoPath.Value = "/Users/test/funny_cat.mp4";
-                yield return null;
+                yield return WaitUntilHasWidth(uiDocument.rootVisualElement, "psp-video-path-row", 30);
 
                 AssertRendered(uiDocument.rootVisualElement, "psp-end-action-row");
                 AssertRendered(uiDocument.rootVisualElement, "psp-video-path-row");
@@ -213,6 +215,20 @@ namespace APP.NetworkIntegration.Tests
         {
             for (int frame = 0; frame < frameCount; frame++)
             {
+                yield return null;
+            }
+        }
+
+        private static IEnumerator WaitUntilHasWidth(VisualElement root, string elementName, int frameLimit)
+        {
+            for (int frame = 0; frame < frameLimit; frame++)
+            {
+                VisualElement element = root.Q<VisualElement>(elementName);
+                if (element != null && element.worldBound.width > 0f && element.worldBound.height > 0f)
+                {
+                    yield break;
+                }
+
                 yield return null;
             }
         }
