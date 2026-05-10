@@ -94,16 +94,19 @@
     -unity-text-align: middle-left;
 }
 
+/* chevron 走 lucide chevron-down PNG（256×256 等比导出），
+   和 PSP 行内下拉触发器同款，避免 ▾ 字符在 absolute 布局下渲染丢失。
+   absolute 定位贴在右侧 12px、上下居中。 */
 .gsp-display-chevron {
     position: absolute;
     right: 12px;
-    top: 0;
-    bottom: 0;
+    top: 10px;
     width: 16px;
-    color: rgb(107, 114, 128);
-    font-size: 14px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    height: 16px;
+    font-size: 0;
+    color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/UI_V2/Icons/chevron-down.png");
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 /* 菜单本体（视觉、菜单项、选中态）统一在 Components/InputDropdown.uss 的
