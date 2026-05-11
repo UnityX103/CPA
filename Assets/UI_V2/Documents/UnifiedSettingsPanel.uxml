@@ -18,7 +18,9 @@
             <ui:VisualElement class="settings-spacer" />
             <!-- Pencil: mNjRm (UAbZg ref) — 关闭按钮，直接用 ui:Button + comp-btn-close 样式
                  不走模板实例：避免内层 Button 的 Clickable 吞 PointerUp 导致父 wrapper 收不到事件 -->
-            <ui:Button name="settings-close" class="comp-btn-close settings-close" text="✕" />
+            <ui:Button name="settings-close" class="comp-btn-close settings-close">
+                <ui:VisualElement class="comp-btn-close__icon" picking-mode="Ignore"/>
+            </ui:Button>
         </ui:VisualElement>
         <ui:VisualElement class="settings-body">
             <ui:VisualElement class="settings-sidebar">

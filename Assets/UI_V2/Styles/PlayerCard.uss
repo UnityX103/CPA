@@ -1,12 +1,13 @@
 /*
  * PlayerCard.uss
- * 严格对齐 Pencil 设计稿 drqFB（153×97）
+ * 严格对齐 Pencil 设计稿 drqFB（153×94）
  * snapshot_layout + batch_get 精确还原
  *
- * 圆角规则（cornerRadius:999）：
- *   jtlhD  phaseBadge  h=16  → 16/2  = 8px
- *   eGfPq  roundsPill  h=21  → 21/2  = 10.5 → 取 10px（向下取整）
- *   bI6eO  dot         6×6   → 6/2   = 3px（正圆）
+ * 圆角规则（cornerRadius:999 → height/2）：
+ *   UPUHf  phaseBadge       h≈16  → 8px
+ *   sNd3p  keyCounterPill   h≈22  → 12px (Pencil padding [4,8] + 11px 字)
+ *   k7z58  keyBadge         cornerRadius:3 → 3px
+ *   do3Bz  dot              6×6   → 3px (正圆)
  */
 
 /* ── drqFB: 根容器 153×94 ──────────────────────────────── */
@@ -117,17 +118,20 @@
     margin-left: 10px;
 }
 
-/* ── eGfPq: roundsPill 53×21  cornerRadius:999 → 21/2=10px ─ */
-/* padding: [5,10] → top/bottom:5px, left/right:10px           */
-/* stroke: #EFDCCD 1px                                         */
-.pc-rounds-pill {
+/* ── sNd3p: keyCounterPill cornerRadius:999 → ~22/2=12px ─────
+   padding: [4,8] → top/bottom:4px, left/right:8px
+   gap: 5 → keyBadge margin-right:5px
+   stroke: #EFDCCD 1px
+   设计语义：白色 keyBadge（按键名）+ 计数 (#A28B79 11/700)
+   ──────────────────────────────────────────────────────────── */
+.pc-key-counter-pill {
     flex-direction: row;
     align-items: center;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 12px;
     background-color: rgb(255, 243, 234);
     border-width: 1px;
     border-color: rgb(239, 220, 205);
@@ -135,7 +139,42 @@
     overflow: hidden;
 }
 
-/* ── 7XQkG: rounds 33×11  fontSize:11 bold #A28B79 ──────── */
+/* 远端没标记同步按键时整 pill 隐藏，让 PlayerCardController 通过 toggle 这个 class 控制可见 */
+.pc-key-counter-pill--hidden {
+    display: none;
+}
+
+/* ── k7z58: keyBadge cornerRadius:3 padding[1,4] white #EFDCCD ── */
+.pc-key-badge {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 3px;
+    background-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+/* ── tvUJz: keyLabel "Space" Maoken 9/700 #5B4636 ───────── */
+.pc-key-label {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
+    white-space: nowrap;
+}
+
+/* ── w8eEg: keyCount "47" Maoken 11/700 #A28B79 ──────────
+   保留 .pc-rounds 别名（PlayerCardView 通过 Q<Label>("pc-rounds") 写入）
+   两个选择器同款样式，二选一会被命中 */
+.pc-key-count,
 .pc-rounds {
     font-size: 11px;
     -unity-font-style: bold;

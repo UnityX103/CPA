@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Variables.uss"/>
+  <ui:Style src="../../Styles/Components/BindingKeyRow.uss"/>
+  <!--
+    Pencil 组件: BindingKeyRow (RU5zF)
+    listener (ui:Button) + sync (VisualElement + 内 dot) + delete (VisualElement + × Label)
+    用 VisualElement 而非 ui:Button，避开 .unity-button 默认 flex/padding 干扰。
+    sync dot 默认灰，synced modifier 染橙。del 用 × 字符 (U+00D7) Maoken 有。
+  -->
+  <ui:VisualElement name="root" class="comp-binding-key-row">
+    <ui:Button name="bk-row-listener" class="comp-binding-key-row__listener" focusable="true">
+      <ui:Label name="bk-row-key" class="comp-binding-key-row__key" text="鼠标左键" picking-mode="Ignore"/>
+      <ui:Label name="bk-row-hint" class="comp-binding-key-row__hint" text="点击重新绑定" picking-mode="Ignore"/>
+      <ui:VisualElement name="bk-row-pulse" class="comp-binding-key-row__pulse" picking-mode="Ignore"/>
+      <ui:Label name="bk-row-prompt" class="comp-binding-key-row__prompt" text="正在监听输入..." picking-mode="Ignore"/>
+    </ui:Button>
+    <ui:VisualElement name="bk-row-sync-btn" class="comp-binding-key-row__icon-btn comp-binding-key-row__sync-btn">
+      <ui:VisualElement name="bk-row-sync-icon" class="comp-binding-key-row__sync-icon" picking-mode="Ignore"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="bk-row-del-btn" class="comp-binding-key-row__icon-btn comp-binding-key-row__del-btn">
+      <ui:VisualElement name="bk-row-del-icon" class="comp-binding-key-row__del-icon" picking-mode="Ignore"/>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

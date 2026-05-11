@@ -1,0 +1,85 @@
+/*
+ * KeyCounterPill.uss
+ * Pencil 组件: KeyCounterPill (h31Sl)
+ *
+ * cornerRadius:999 → height/2 ≈ 12px (字 11 + padding 4+4 ≈ 22-24)
+ * 白色 keyBadge (cornerRadius:3, padding[1,4], stroke #EFDCCD/1)
+ * + count text (#A28B79 11/700)
+ */
+
+.comp-key-counter-pill {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 12px;
+    background-color: rgb(255, 243, 234);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.comp-key-counter-pill__badge {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 3px;
+    background-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.comp-key-counter-pill__key {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: rgb(91, 70, 54);
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
+    white-space: nowrap;
+}
+
+.comp-key-counter-pill__count {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
+}
+
+/* 鼠标按键图标占位：默认隐藏，badge 命中 mouse-* 修饰类后切到 flex + 背景图 */
+.comp-key-counter-pill__icon {
+    display: none;
+    width: 11px;
+    height: 11px;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.comp-key-counter-pill__badge--mouse .comp-key-counter-pill__key {
+    display: none;
+}
+
+.comp-key-counter-pill__badge--mouse .comp-key-counter-pill__icon {
+    display: flex;
+}
+
+.comp-key-counter-pill__badge--mouse-left .comp-key-counter-pill__icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/mouse-left.png");
+}
+
+.comp-key-counter-pill__badge--mouse-right .comp-key-counter-pill__icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/mouse-right.png");
+}
+
+.comp-key-counter-pill__badge--mouse-middle .comp-key-counter-pill__icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/mouse-middle.png");
+}

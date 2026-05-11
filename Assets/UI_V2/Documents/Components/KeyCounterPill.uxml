@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:Style src="../../Styles/Variables.uss"/>
+  <ui:Style src="../../Styles/Components/KeyCounterPill.uss"/>
+  <!--
+    Pencil 组件: KeyCounterPill (h31Sl)
+    白色 keyBadge(按键名) + 计数；PlayerCard 与 InputCounterPanel 共用。
+    控制器通过 Q<Label>("key-counter-pill-key" / "key-counter-pill-count") 写入文本。
+  -->
+  <ui:VisualElement name="root" class="comp-key-counter-pill">
+    <ui:VisualElement name="key-counter-pill-badge" class="comp-key-counter-pill__badge">
+      <ui:Label name="key-counter-pill-key" class="comp-key-counter-pill__key" text="Space"/>
+      <!-- 鼠标按键场景：Controller 给 badge 加 mouse-{left|right|middle} class，
+           USS 将 Label 切到 display:none、用对应 mouse-*.png 做 background-image -->
+      <ui:VisualElement name="key-counter-pill-icon" class="comp-key-counter-pill__icon"/>
+    </ui:VisualElement>
+    <ui:Label name="key-counter-pill-count" class="comp-key-counter-pill__count" text="47"/>
+  </ui:VisualElement>
+</ui:UXML>

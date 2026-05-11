@@ -1,0 +1,148 @@
+/*
+ * BindingKeyRow.uss
+ * Pencil 组件: BindingKeyRow (RU5zF)
+ * listener + sync(dot) + del(×) 三件套；行高钉死 36px；icon 用 VisualElement。
+ */
+
+.comp-binding-key-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 36px;
+    min-height: 36px;
+    flex-shrink: 0;
+}
+
+/* ── listener Button ─────────────────────────────────────── */
+.comp-binding-key-row__listener {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 36px;
+    min-height: 36px;
+    margin: 0;
+    margin-right: 8px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-width: 1px;
+    border-color: var(--color-border-gray);
+    border-radius: 12px;
+    color: var(--color-text-dark);
+    -unity-text-align: middle-left;
+}
+
+.comp-binding-key-row__listener:hover {
+    border-color: var(--color-accent-orange);
+}
+
+.comp-binding-key-row__key {
+    color: var(--color-text-dark);
+    font-size: 14px;
+    -unity-text-align: middle-left;
+    flex-shrink: 0;
+}
+
+.comp-binding-key-row__hint {
+    color: rgb(156, 163, 175);
+    font-size: 11px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+.comp-binding-key-row__pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--color-accent-orange);
+    margin-right: 8px;
+    display: none;
+}
+
+.comp-binding-key-row__prompt {
+    color: var(--color-accent-orange);
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    display: none;
+}
+
+.comp-binding-key-row--listening .comp-binding-key-row__listener {
+    background-color: rgb(255, 241, 238);
+    border-color: var(--color-accent-orange);
+    border-width: 2px;
+    justify-content: center;
+}
+
+.comp-binding-key-row--listening .comp-binding-key-row__key,
+.comp-binding-key-row--listening .comp-binding-key-row__hint {
+    display: none;
+}
+
+.comp-binding-key-row--listening .comp-binding-key-row__pulse,
+.comp-binding-key-row--listening .comp-binding-key-row__prompt {
+    display: flex;
+}
+
+/* ── icon button (VisualElement, 36×36 圆) ───────────────── */
+.comp-binding-key-row__icon-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+    margin: 0;
+    margin-right: 8px;
+    padding: 0;
+    border-radius: 18px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-width: 1px;
+    border-color: var(--color-border-gray);
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.comp-binding-key-row__del-btn {
+    margin-right: 0;
+}
+
+.comp-binding-key-row__icon-btn:hover {
+    border-color: var(--color-accent-orange);
+}
+
+/* sync 按钮：lucide radio-tower PNG（256×256 等比导出），灰 → 橙 (synced) tint */
+.comp-binding-key-row__sync-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    background-image: url("project://database/Assets/UI_V2/Icons/radio-tower.png");
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(156, 163, 175);
+}
+
+.comp-binding-key-row--synced .comp-binding-key-row__sync-btn {
+    border-color: var(--color-accent-orange);
+    border-width: 2px;
+    background-color: rgb(255, 241, 238);
+}
+
+.comp-binding-key-row--synced .comp-binding-key-row__sync-icon {
+    -unity-background-image-tint-color: var(--color-accent-orange);
+}
+
+/* del lucide trash-2 PNG，替代原 × 字形（U+00D7 在 Maoken 下视觉不一致） */
+.comp-binding-key-row__del-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-image: url("project://database/Assets/UI_V2/Icons/trash-2.png");
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(156, 163, 175);
+}

@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+    <ui:Style src="../Styles/Variables.uss"/>
+    <ui:Style src="../Styles/InputCounterPanel.uss"/>
+    <ui:Style src="../Styles/Components/KeyCounterPill.uss"/>
+    <ui:Template name="KeyCounterPill" src="Components/KeyCounterPill.uxml"/>
+
+    <!-- Pencil ZmuFh: InputCounterPanel — 简化版 PlayerCard，绑定开启时显示
+         布局：head( pill-list(N×KeyCounterPill) | pin ) + divider + footer(appIcon + appText)
+         pill-list 在运行时按 BindingKeyEntry 增量克隆/移除；首个 pill 用作模板，默认 Space/47。 -->
+    <ui:VisualElement name="icp-root" class="icp-root">
+
+        <ui:VisualElement name="icp-head" class="icp-head">
+            <ui:VisualElement name="icp-pill-list" class="icp-pill-list">
+                <ui:Instance template="KeyCounterPill" name="icp-key-counter" class="icp-key-counter"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="icp-pin-btn" class="icp-pin-btn">
+                <ui:VisualElement name="icp-pin-btn-icon" class="icp-pin-btn-icon"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="icp-divider"/>
+
+        <ui:VisualElement class="icp-footer">
+            <ui:VisualElement name="icp-app-icon" class="icp-app-icon"/>
+            <ui:Label name="icp-app-text" class="icp-app-text" text="VS Code"/>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

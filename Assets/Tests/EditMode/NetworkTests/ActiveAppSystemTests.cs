@@ -75,6 +75,60 @@ namespace APP.Network.Tests
         }
 
         [Test]
+        public void Tick_SameBundleIdButIconChanged_EmitsChangedWithNewIcon()
+        {
+            // macOS 同一 App 换版 / 首次延迟拿到真实图标时，BundleId 不变但 PNG 字节会变——
+            // 必须仍触发 Changed，让 InputCounterPanelController / PlayerCardController 拿到新图。
+            byte[] iconV1 = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            byte[] iconV2 = new byte[] { 0x09, 0x08, 0x07, 0x06 };
+            byte[] current = iconV1;
+            var fake = new FakeAppMonitor
+            {
+                NextAppInfo = new AppInfo { AppName = "Safari", BundleId = "com.apple.Safari", IsSuccess = true }
+            };
+            var sys = new ActiveAppSystem(fake, () => current);
+
+            int changedCount = 0;
+            sys.Changed += _ => changedCount++;
+
+            sys.Tick(3.1f);
+            Assert.That(changedCount, Is.EqualTo(1), "首次 Tick 应触发 Changed。");
+            Assert.That(sys.Current.IconPngBytes, Is.EqualTo(iconV1));
+
+            current = iconV2;
+            sys.Tick(3.1f);
+            Assert.That(changedCount, Is.EqualTo(2), "同 bundleId 但图标内容变化也应触发 Changed。");
+            Assert.That(sys.Current.IconPngBytes, Is.EqualTo(iconV2));
+
+            sys.Tick(3.1f);
+            Assert.That(changedCount, Is.EqualTo(2), "图标和 bundleId 都没变时不应重复触发。");
+        }
+
+        [Test]
+        public void Tick_SameBundleIdNullThenEmptyIcon_DoesNotEmitSecondChanged()
+        {
+            // CaptureIconPng 已把 byte[0] 归一化成 null，所以同 bundleId 下 null↔byte[0] 不应被
+            // 视为图标变了——否则下游 ICP 会每 3s 重建一次 fallback，闪烁/掉帧。
+            byte[] supply = null;
+            var fake = new FakeAppMonitor
+            {
+                NextAppInfo = new AppInfo { AppName = "Safari", BundleId = "com.apple.Safari", IsSuccess = true }
+            };
+            var sys = new ActiveAppSystem(fake, () => supply);
+
+            int changedCount = 0;
+            sys.Changed += _ => changedCount++;
+
+            sys.Tick(3.1f);                                 // 第一次：null
+            Assert.That(changedCount, Is.EqualTo(1));
+            Assert.That(sys.Current.IconPngBytes, Is.Null);
+
+            supply = new byte[0];                           // 第二次：空数组（归一化后仍为 null）
+            sys.Tick(3.1f);
+            Assert.That(changedCount, Is.EqualTo(1), "null↔byte[0] 归一化后不应触发新 Changed。");
+        }
+
+        [Test]
         public void Tick_WhenPermissionDenied_EmptyBundleId()
         {
             var fake = new FakeAppMonitor

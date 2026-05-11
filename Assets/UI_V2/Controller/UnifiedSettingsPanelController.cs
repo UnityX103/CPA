@@ -42,6 +42,7 @@ namespace APP.Pomodoro.Controller
         private VisualTreeAsset _petTemplate;
         private VisualTreeAsset _globalTemplate;
         private VisualTreeAsset _confirmDialogTemplate;
+        private VisualTreeAsset _bindingRowTemplate;
         private IPomodoroModel _model;
         private IRoomModel _roomModel;
         private GameObject _lifecycleOwner;
@@ -70,7 +71,8 @@ namespace APP.Pomodoro.Controller
             VisualTreeAsset petTemplate,
             VisualTreeAsset globalTemplate,
             VisualTreeAsset confirmDialogTemplate,
-            GameObject lifecycleOwner)
+            GameObject lifecycleOwner,
+            VisualTreeAsset bindingRowTemplate = null)
         {
             _model = model;
             _roomModel = roomModel;
@@ -79,6 +81,7 @@ namespace APP.Pomodoro.Controller
             _petTemplate = petTemplate;
             _globalTemplate = globalTemplate;
             _confirmDialogTemplate = confirmDialogTemplate;
+            _bindingRowTemplate = bindingRowTemplate;
             _lifecycleOwner = lifecycleOwner;
 
             // 查询 overlay 及子元素
@@ -310,7 +313,8 @@ namespace APP.Pomodoro.Controller
                             _globalRoot,
                             _scaleDialogHost,
                             _confirmDialogTemplate,
-                            _lifecycleOwner);
+                            _lifecycleOwner,
+                            _bindingRowTemplate);
                     }
 
                     return _globalRoot;

@@ -10,11 +10,11 @@
     border-radius: 15px;
     border-width: 0;
     background-color: rgba(0, 0, 0, 0);
-    color: rgb(162, 139, 121); /* #A28B79 */
-    font-size: 14px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
     padding: 6px;
+    margin: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 .comp-btn-close:hover {
@@ -24,4 +24,13 @@
 /* 状态变体：lMnjs (close-hover) */
 .comp-btn-close--hover {
     background-color: rgb(240, 224, 208);
+}
+
+/* lucide x PNG (256×256)，替代 ✕ (U+2715) — Maoken 缺该 glyph 导致空白 */
+.comp-btn-close__icon {
+    width: 18px;
+    height: 18px;
+    background-image: url("project://database/Assets/UI_V2/Icons/x.png");
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(162, 139, 121); /* #A28B79 */
 }

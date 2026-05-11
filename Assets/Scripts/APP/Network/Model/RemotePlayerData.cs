@@ -4,6 +4,8 @@ namespace APP.Network.Model
 {
     /// <summary>
     /// 远端玩家的只读快照。
+    /// BindingKeyLabel 为 null 或空字符串时表示对端没有标记同步的按键 →
+    /// PlayerCardController 把 KeyCounterPill 整体隐藏。
     /// </summary>
     public sealed class RemotePlayerData
     {
@@ -17,6 +19,8 @@ namespace APP.Network.Model
         public string ActiveAppName;
         public string ActiveAppBundleId;
         public string ActiveAppIconId;
+        public string BindingKeyLabel;
+        public int    BindingPressCount;
 
         public RemotePlayerData Clone()
         {
@@ -32,6 +36,8 @@ namespace APP.Network.Model
                 ActiveAppName = ActiveAppName,
                 ActiveAppBundleId = ActiveAppBundleId,
                 ActiveAppIconId = ActiveAppIconId,
+                BindingKeyLabel = BindingKeyLabel,
+                BindingPressCount = BindingPressCount,
             };
         }
     }

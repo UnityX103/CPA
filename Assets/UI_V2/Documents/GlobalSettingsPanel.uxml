@@ -5,12 +5,18 @@
     <ui:Style src="../Styles/Variables.uss"/>
     <ui:Style src="../Styles/GlobalSettingsPanel.uss"/>
     <ui:Style src="../Styles/Components/InputDropdown.uss"/>
+    <ui:Style src="../Styles/Components/ToggleSwitch.uss"/>
+    <ui:Style src="../Styles/Components/BindingKeyRow.uss"/>
     <ui:Template name="InputSlider" src="Components/InputSlider.uxml"/>
     <ui:Template name="SettingsApplyRow" src="Components/SettingsApplyRow.uxml"/>
+    <ui:Template name="BindingKeyRow" src="Components/BindingKeyRow.uxml"/>
 
     <ui:VisualElement name="gsp-root" class="gsp-root">
-        <!-- Pencil: gspApply — SettingsApplyRow 模板，按钮 name=apply-btn -->
-        <ui:Instance template="SettingsApplyRow" class="gsp-apply-row">
+        <!-- Pencil: gspApply — SettingsApplyRow 模板。
+             默认带 comp-settings-apply-row hidden modifier（整行 display:none）；
+             Controller.RefreshApplyVisibility 在 pending != committed 时移除该类。
+             用 row 级类而非 button 级，是因为 AttributeOverrides 不能改 element 的 class。 -->
+        <ui:Instance template="SettingsApplyRow" class="gsp-apply-row comp-settings-apply-row--hidden">
             <AttributeOverrides element-name="apply-btn" name="apply-btn" class="comp-btn-primary apply-btn" />
         </ui:Instance>
 
@@ -20,7 +26,9 @@
             <ui:Instance name="gsp-scale-row" template="InputSlider" class="gsp-scale-row" />
         </ui:VisualElement>
 
-        <!-- Pencil: gspDisplay — 目标显示器卡片 -->
+        <!-- Pencil: gspDisplay — 目标显示器卡片
+             注意：gsp-display-menu 已被移到 gsp-root 末尾（见 popup layer），
+             因为它需要 z 序高于其后兄弟（binding-card）。原位仅留 trigger 本身。 -->
         <ui:VisualElement class="gsp-display-card">
             <ui:Label text="目标显示器" class="gsp-display-label" />
             <ui:VisualElement class="gsp-display-dropdown-wrap">
@@ -29,8 +37,29 @@
                     <ui:Label name="gsp-display-dropdown-value" class="comp-input-dropdown__value" text="" />
                     <ui:Label class="comp-input-dropdown__chevron gsp-display-chevron" text="▾" picking-mode="Ignore" />
                 </ui:VisualElement>
-                <ui:VisualElement name="gsp-display-menu" class="comp-input-dropdown-menu gsp-display-menu comp-input-dropdown-menu--hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!-- Pencil: gspBindingKey — 按键计数卡片
+             多绑定列表：每个 row = listener + 同步按钮 + 删除按钮；
+             控制器渲染 List 内 BindingKeyRow 实例，并在末尾追加 [+ 添加按键] 按钮。 -->
+        <ui:VisualElement class="gsp-binding-card">
+            <ui:VisualElement class="gsp-binding-header">
+                <ui:Label text="按键计数" class="gsp-binding-label" />
+                <ui:Toggle name="gsp-binding-toggle" class="comp-toggle-switch gsp-binding-toggle" value="true" />
+            </ui:VisualElement>
+            <ui:Label text="添加按键监听绑定；启用某一项后弹出独立的输入计数面板；最多 1 个标记为同步到远端。" class="gsp-binding-desc" />
+            <ui:VisualElement name="gsp-binding-list" class="gsp-binding-list"/>
+            <ui:Button name="gsp-binding-add-btn" class="gsp-binding-add" focusable="true">
+                <ui:VisualElement class="gsp-binding-add-icon" picking-mode="Ignore"/>
+                <ui:Label class="gsp-binding-add-text" text="添加按键" picking-mode="Ignore"/>
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ┌─ Popup layer ─────────────────────────────────────────┐
+             gsp-display-menu 必须在所有 sibling card 之后（DOM 顺序 = z 序）才不会
+             被 gsp-binding-card 等不透明卡片覆盖。控制器在 GeometryChanged 时
+             按 trigger.worldBound 写入 left/top/width，菜单内容仍由 InputDropdownBinding 维护。 -->
+        <ui:VisualElement name="gsp-display-menu" class="comp-input-dropdown-menu gsp-display-menu comp-input-dropdown-menu--hidden" />
     </ui:VisualElement>
 </ui:UXML>

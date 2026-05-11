@@ -1,0 +1,111 @@
+/*
+ * InputCounterPanel.uss
+ * Pencil 设计稿: InputCounterPanel (ZmuFh)
+ *
+ * 简化版 PlayerCard：宽 180，自适应高度。
+ * 顶部 head：KeyCounterPill (左) + pin 按钮 (右)
+ * 中间 divider 1px
+ * 底部 footer：app 图标 + 当前应用名
+ */
+
+/* ── 根容器 180 wide cornerRadius:20 padding:14 ──────────── */
+.icp-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 128px;
+    padding: 14px;
+    border-radius: 20px;
+    background-color: rgba(255, 253, 251, 0.95);
+    border-width: 1px;
+    border-color: rgb(239, 220, 205);
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* 隐藏：未启用按键计数时由 Controller 切此 class */
+.icp-hidden {
+    display: none;
+}
+
+/* ── head 行：pill-list (左, 列向) + pin (右, top) ─────────── */
+.icp-head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* ── pill-list：N 个 KeyCounterPill 纵向堆叠 ───────────────── */
+/* Unity UI Toolkit 不用 gap，用 .icp-pill-list--stacked 在每个非首 pill 上加 margin-top */
+.icp-pill-list {
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 1;
+}
+
+.icp-pill-list > .icp-key-counter--stacked {
+    margin-top: 8px;
+}
+
+/* ── icp-pin-btn 22x22 cornerRadius:11 ──── */
+.icp-pin-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: rgb(233, 213, 195);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icp-pin-btn-icon {
+    width: 14px;
+    height: 14px;
+    background-image: url("project://database/Assets/UI_V2/Icons/pin.png");
+    -unity-background-image-tint-color: rgb(122, 95, 77);
+}
+
+.icp-pin-btn--unpinned .icp-pin-btn-icon {
+    background-image: url("project://database/Assets/UI_V2/Icons/pin-off.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
+}
+
+/* ── divider 1px #F3E3D3 ─────────────────────────────────── */
+.icp-divider {
+    height: 1px;
+    width: 100%;
+    background-color: rgb(243, 227, 211);
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* ── footer 行：app 图标 + 应用名 ──────────────────────────── */
+.icp-footer {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.icp-app-icon {
+    width: 13px;
+    height: 13px;
+    background-image: url("project://database/Assets/UI_V2/Icons/app-window.png");
+    -unity-background-image-tint-color: rgb(181, 164, 154);
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.icp-app-text {
+    font-size: 11px;
+    -unity-font-style: normal;
+    color: rgb(162, 139, 121);
+    -unity-text-align: middle-left;
+    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

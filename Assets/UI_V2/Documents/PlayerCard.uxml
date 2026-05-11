@@ -3,6 +3,8 @@
          xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
          editor-extension-mode="False">
     <ui:Style src="../Styles/PlayerCard.uss"/>
+    <ui:Style src="../Styles/Components/KeyCounterPill.uss"/>
+    <ui:Template name="KeyCounterPill" src="Components/KeyCounterPill.uxml"/>
 
     <!-- drqFB: PlayerCard 153×94  cornerRadius:20  padding:14  gap:12 vertical -->
     <ui:VisualElement class="pc-root">
@@ -26,11 +28,8 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement class="pc-time-row">
-
-                    <ui:VisualElement class="pc-rounds-pill">
-                        <ui:Label name="pc-rounds" class="pc-rounds" text="3/4 轮"/>
-                    </ui:VisualElement>
-
+                    <!-- Pencil h31Sl: KeyCounterPill 复用组件，Controller 查询内部 name 仍命中 -->
+                    <ui:Instance template="KeyCounterPill" name="pc-key-counter-pill" class="pc-key-counter-pill"/>
                 </ui:VisualElement>
 
             </ui:VisualElement>

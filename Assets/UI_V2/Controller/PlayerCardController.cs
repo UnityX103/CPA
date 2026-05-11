@@ -40,13 +40,19 @@ namespace APP.Pomodoro.Controller
         // 安全系数：避免测量值与实际渲染舍入带来的溢出
         private const float NameSafetyFactor = 0.95f;
 
+        private const string PillHiddenClass = "pc-key-counter-pill--hidden";
+
         private readonly VisualElement _root;
         private Label _nameLabel;
         private Label _phaseLabel;
         private Label _timeLabel;
-        private Label _roundsLabel;
+        // _roundsLabel 已移除：新设计的 keyCounterPill 不再展示 rounds（替换为按键计数）
         private Label _appLabel;
         private VisualElement _appIcon;
+        private VisualElement _keyCounterPill;
+        private VisualElement _keyCounterPillBadge;
+        private Label _keyCounterPillKey;
+        private Label _keyCounterPillCount;
         private IPlayerCard _card;
         private VisualElement _pinBtn;
         private readonly List<IUnRegister> _unRegisters = new List<IUnRegister>();
@@ -90,10 +96,14 @@ namespace APP.Pomodoro.Controller
             _nameLabel = _root.Q<Label>("pc-name");
             _phaseLabel = _root.Q<Label>("pc-phase");
             _timeLabel = _root.Q<Label>("pc-time");
-            _roundsLabel = _root.Q<Label>("pc-rounds");
             _appLabel = _root.Q<Label>("pc-app");
             _appIcon = _root.Q<VisualElement>("pc-active-app-icon");
             _pinBtn = _root.Q<VisualElement>("pc-pin-btn");
+            _keyCounterPill = _root.Q<VisualElement>("pc-key-counter-pill");
+            // KeyCounterPill 内部 Label 命名固定，Q 限定在 pill 子树里避免和未来其他 pill 同名冲突
+            _keyCounterPillBadge = _keyCounterPill?.Q<VisualElement>("key-counter-pill-badge");
+            _keyCounterPillKey   = _keyCounterPill?.Q<Label>("key-counter-pill-key");
+            _keyCounterPillCount = _keyCounterPill?.Q<Label>("key-counter-pill-count");
 
             // 玩家名容器布局变化时重新自适应字号（卡片改宽 / 时间区文本变更挤压 nameCol 等）
             if (_nameLabel != null)
@@ -132,8 +142,7 @@ namespace APP.Pomodoro.Controller
             if (_timeLabel != null)
                 _timeLabel.text = PlayerCardView.FormatTime(data.RemainingSeconds);
 
-            if (_roundsLabel != null)
-                _roundsLabel.text = $"{data.CurrentRound}/{data.TotalRounds} 轮";
+            ApplyBindingKey(data.BindingKeyLabel, data.BindingPressCount);
 
             if (_appLabel != null)
                 _appLabel.text = string.IsNullOrEmpty(data.ActiveAppName) ? "—" : data.ActiveAppName;
@@ -141,6 +150,23 @@ namespace APP.Pomodoro.Controller
             ApplyAppIcon(data.ActiveAppBundleId);
 
             ApplyPhaseClass(data.Phase, data.IsRunning);
+        }
+
+        /// <summary>
+        /// 远端 KeyCounterPill 渲染：
+        ///   - keyLabel 为空 / 未提供 → 整 pill 加 .pc-key-counter-pill--hidden（USS display:none）
+        ///   - 否则写文本，移除隐藏类
+        /// 本地 InputCounterPanel 的 pill 由 InputCounterPanelController 独立驱动，不走这里。
+        /// </summary>
+        private void ApplyBindingKey(string keyLabel, int pressCount)
+        {
+            if (_keyCounterPill == null) return;
+            bool hasBinding = !string.IsNullOrEmpty(keyLabel);
+            _keyCounterPill.EnableInClassList(PillHiddenClass, !hasBinding);
+            if (!hasBinding) return;
+            if (_keyCounterPillKey != null)   _keyCounterPillKey.text   = keyLabel;
+            if (_keyCounterPillCount != null) _keyCounterPillCount.text = pressCount.ToString();
+            PlayerCardView.ApplyKeyBadgeMouseClass(_keyCounterPillBadge, keyLabel);
         }
 
         private void ApplyAppIcon(string bundleId)
@@ -156,9 +182,17 @@ namespace APP.Pomodoro.Controller
 
             // tex 为空时用 Null 清掉 inline，回落到 USS 默认 app-window 图标；
             // 用 None 会显式置空，覆盖 USS 默认导致图标消失
-            _appIcon.style.backgroundImage = tex != null
-                ? new StyleBackground(tex)
-                : new StyleBackground(StyleKeyword.Null);
+            if (tex != null)
+            {
+                _appIcon.style.backgroundImage = new StyleBackground(tex);
+                // USS 的灰褐色 tint 会把真实彩色 App 图标染脏，强制 white 让原色透出
+                _appIcon.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
+            }
+            else
+            {
+                _appIcon.style.backgroundImage = new StyleBackground(StyleKeyword.Null);
+                _appIcon.style.unityBackgroundImageTintColor = new StyleColor(StyleKeyword.Null);
+            }
         }
 
         /// <summary>

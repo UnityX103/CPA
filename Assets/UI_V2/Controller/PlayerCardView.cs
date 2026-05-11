@@ -29,7 +29,7 @@ namespace APP.Pomodoro.Controller
         private readonly Label _nameLabel;
         private readonly Label _phaseLabel;
         private readonly Label _timeLabel;
-        private readonly Label _roundsLabel;
+        // _roundsLabel 已移除：新设计 keyCounterPill 改成按键计数
         private readonly Label _appLabel;
 
         // 防止 AutoFit 内部修改 fontSize 触发 GeometryChangedEvent 再次进入导致递归
@@ -60,7 +60,6 @@ namespace APP.Pomodoro.Controller
             _nameLabel = Root.Q<Label>("pc-name");
             _phaseLabel = Root.Q<Label>("pc-phase");
             _timeLabel = Root.Q<Label>("pc-time");
-            _roundsLabel = Root.Q<Label>("pc-rounds");
             _appLabel = Root.Q<Label>("pc-app");
 
             // 玩家名容器布局变化时重新自适应字号（例如卡片被改宽）
@@ -98,10 +97,8 @@ namespace APP.Pomodoro.Controller
                 _timeLabel.text = FormatTime(data.RemainingSeconds);
             }
 
-            if (_roundsLabel != null)
-            {
-                _roundsLabel.text = $"{data.CurrentRound}/{data.TotalRounds}";
-            }
+            // keyCounterPill 是独立 KeyCounterPill 组件实例，count 由 IBindingKeyModel.PressCount 驱动；
+            // 远端玩家的 PressCount 还没接 RemotePlayerData 同步，保持 UXML 默认值。
 
             if (_appLabel != null)
             {
@@ -138,6 +135,29 @@ namespace APP.Pomodoro.Controller
                 default:
                     return "待机";
             }
+        }
+
+        // KeyCounterPill 鼠标按键修饰类：USS 命中 mouse-* 时切到 mouse-*.png 背景图、隐藏文字 Label
+        private const string BadgeMouseBaseClass   = "comp-key-counter-pill__badge--mouse";
+        private const string BadgeMouseLeftClass   = "comp-key-counter-pill__badge--mouse-left";
+        private const string BadgeMouseRightClass  = "comp-key-counter-pill__badge--mouse-right";
+        private const string BadgeMouseMiddleClass = "comp-key-counter-pill__badge--mouse-middle";
+
+        /// <summary>
+        /// 根据 keyLabel 切换 KeyCounterPill 的 keyBadge 修饰类。
+        /// "鼠标左键/右键/中键" 命中对应的 mouse-* 类，由 USS 切换到背景图模式 + 隐藏内部文字 Label；
+        /// 其他情况清除所有 mouse-* 类，回退到文字模式。
+        /// </summary>
+        public static void ApplyKeyBadgeMouseClass(VisualElement badge, string keyLabel)
+        {
+            if (badge == null) return;
+            bool isLeft   = keyLabel == "鼠标左键";
+            bool isRight  = keyLabel == "鼠标右键";
+            bool isMiddle = keyLabel == "鼠标中键";
+            badge.EnableInClassList(BadgeMouseLeftClass,   isLeft);
+            badge.EnableInClassList(BadgeMouseRightClass,  isRight);
+            badge.EnableInClassList(BadgeMouseMiddleClass, isMiddle);
+            badge.EnableInClassList(BadgeMouseBaseClass,   isLeft || isRight || isMiddle);
         }
 
         /// <summary>根据阶段切换 USS 类名。</summary>

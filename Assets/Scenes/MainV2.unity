@@ -195,6 +195,8 @@ MonoBehaviour:
   _uwc: {fileID: 0}
   _pomodoroPanelView: {fileID: 183578049}
   _playerCardTemplate: {fileID: 9197481963319205126, guid: 29186224ae6024713aab7af6b8291689, type: 3}
+  _inputCounterPanelTemplate: {fileID: 9197481963319205126, guid: 3bef6c0d60aef443e8c11f9c21b58759, type: 3}
+  _keyCounterPillTemplate: {fileID: 9197481963319205126, guid: 3026556564196445fa8ae8af75d6eecd, type: 3}
 --- !u!82 &183578048
 AudioSource:
   m_ObjectHideFlags: 0
@@ -730,6 +732,7 @@ MonoBehaviour:
   _onlineSettingsTemplate: {fileID: 9197481963319205126, guid: 4e2bd0c7d4bd44058946dd9382af2eb4, type: 3}
   _petSettingsTemplate: {fileID: 9197481963319205126, guid: 1e1a7736c8a844fe792584d349b31913, type: 3}
   _globalSettingsTemplate: {fileID: 9197481963319205126, guid: c3883881bae94b5d99690b8c44cb8355, type: 3}
+  _bindingKeyRowTemplate: {fileID: 9197481963319205126, guid: 01a61e67e02994f9abb85ae03501cb1f, type: 3}
   _confirmDialogTemplate: {fileID: 9197481963319205126, guid: c4de2ebd607034437822380d34c3ef24, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

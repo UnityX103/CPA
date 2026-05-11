@@ -4,6 +4,7 @@ using APP.Pomodoro.Model;
 using APP.Pomodoro.System;
 using APP.SessionMemory.Model;
 using APP.Settings.Model;
+using APP.Settings.System;
 using APP.Utility;
 using QFramework;
 
@@ -17,6 +18,7 @@ namespace APP.Pomodoro
             RegisterUtility<IStorageUtility>(new PlayerPrefsStorageUtility());
 
             RegisterModel<ISettingsModel>(new SettingsModel());
+            RegisterModel<IBindingKeyModel>(new BindingKeyModel());
             RegisterModel<IPomodoroModel>(new PomodoroModel());
             RegisterModel<IRoomModel>(new RoomModel());
             RegisterModel<ISessionMemoryModel>(new SessionMemoryModel());
@@ -33,6 +35,7 @@ namespace APP.Pomodoro
             RegisterSystem<IIconCacheSystem>(new IconCacheSystem());
             RegisterSystem<INetworkSystem>(new NetworkSystem());
             RegisterSystem<IStateSyncSystem>(new StateSyncSystem());
+            RegisterSystem<IBindingKeyCounterSystem>(new BindingKeyCounterSystem());
         }
     }
 }

@@ -4,5 +4,7 @@
          editor-extension-mode="False">
   <ui:Style src="../../Styles/Variables.uss"/>
   <ui:Style src="../../Styles/Components/ButtonClose.uss"/>
-  <ui:Button name="root" class="comp-btn-close" text="✕"/>
+  <ui:Button name="root" class="comp-btn-close">
+    <ui:VisualElement class="comp-btn-close__icon" picking-mode="Ignore"/>
+  </ui:Button>
 </ui:UXML>

@@ -180,10 +180,14 @@ namespace APP.Network.System
                     }
 
                     IRoomModel room = this.GetModel<IRoomModel>();
+                    // IsInRoom 保留"用户意图层"的语义不动（OnlineSettingsPanelController 等 UI 控制器靠它驱动），
+                    // Status 才是"服务端确认态"——这里 socket 刚连上但 room_joined ack 没回，所以 Status=Connected。
+                    // StateSyncSystem.Tick / ForceSyncNow 的守卫除了看 IsInRoom 还看 Status==InRoom，
+                    // 确保 ack 前不会把 player_state_update 发出去被服务端丢弃。
                     room.SetConnectionFlags(true, room.IsInRoom.Value);
-                    room.SetStatus(room.IsInRoom.Value ? ConnectionStatus.InRoom : ConnectionStatus.Connected);
+                    room.SetStatus(ConnectionStatus.Connected);
                     room.SetLocalPlayerName(playerName);
-                    this.SendEvent(new E_ConnectionStateChanged(room.Status.Value));
+                    this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.Connected));
                 });
 
                 await FlushPendingMessagesAsync(session.Token);
@@ -412,6 +416,30 @@ namespace APP.Network.System
         private void HandleRoomJoined(InboundMessage inbound)
         {
             IRoomModel room = this.GetModel<IRoomModel>();
+
+            // 同房间 + 同 playerId 的 ack 当作"已有 snapshot 的保留路径"——可能是：
+            //   (a) 重连后服务端把我们仍当作在房间里、回的 rejoin ack（Status=Connected，IsInRoom=true）
+            //   (b) 服务端因网络抖动重发 room_joined（Status=InRoom，IsInRoom=true）
+            // 这两种都不能清空已有 RemotePlayers/PlayerCard——否则 room_snapshot 迟到时会出现远端卡片闪没。
+            // 但要确保把 Status 切到 InRoom 并发 E_ConnectionStateChanged(InRoom)，让 StateSyncSystem
+            // 在重连恢复后通过 ForceSyncNow 补一次 player_state_update。
+            bool sameRoomAndPlayer =
+                room.IsInRoom.Value
+                && string.Equals(room.RoomCode.Value, inbound.roomCode)
+                && string.Equals(room.LocalPlayerId.Value, inbound.playerId);
+            if (sameRoomAndPlayer)
+            {
+                bool statusWasNotInRoom = room.Status.Value != ConnectionStatus.InRoom;
+                room.SetStatus(ConnectionStatus.InRoom);
+                if (statusWasNotInRoom)
+                {
+                    // 只在状态真的从非 InRoom 转回 InRoom（重连恢复）时发事件，
+                    // 避免在已经 InRoom 时重复触发 StateSync.ForceSyncNow 绕过节流。
+                    this.SendEvent(new E_ConnectionStateChanged(ConnectionStatus.InRoom));
+                }
+                return;
+            }
+
             room.SetRoomCode(inbound.roomCode);
             room.SetLocalPlayerId(inbound.playerId);
             room.SetConnectionFlags(true, true);
@@ -605,6 +633,7 @@ namespace APP.Network.System
         {
             PomodoroStateDto pomodoro = state?.pomodoro;
             ActiveAppDto activeApp = state?.activeApp;
+            BindingKeyDto bindingKey = state?.bindingKey;
 
             return new RemotePlayerData
             {
@@ -620,6 +649,8 @@ namespace APP.Network.System
                 ActiveAppName = activeApp?.name,
                 ActiveAppBundleId = activeApp?.bundleId,
                 ActiveAppIconId = activeApp?.iconId,
+                BindingKeyLabel = bindingKey?.keyLabel,
+                BindingPressCount = bindingKey?.pressCount ?? 0,
             };
         }
 

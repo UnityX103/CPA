@@ -24,6 +24,9 @@ namespace APP.Pomodoro.Controller
         [SerializeField] private VisualTreeAsset _petSettingsTemplate;
         [SerializeField] private VisualTreeAsset _globalSettingsTemplate;
 
+        [Header("GSP 按键计数行模板（BindingKeyRow.uxml）")]
+        [SerializeField] private VisualTreeAsset _bindingKeyRowTemplate;
+
         [Header("通用确认对话框模板（用于未保存更改 + 缩放倒计时）")]
         [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("_unsavedChangesDialogTemplate")]
         private VisualTreeAsset _confirmDialogTemplate;
@@ -68,7 +71,8 @@ namespace APP.Pomodoro.Controller
                 _petSettingsTemplate,
                 _globalSettingsTemplate,
                 _confirmDialogTemplate,
-                gameObject);
+                gameObject,
+                _bindingKeyRowTemplate);
 
             this.RegisterEvent<E_OpenUnifiedSettings>(_ => OpenPanel())
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
