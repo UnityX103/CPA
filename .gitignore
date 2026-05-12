@@ -116,3 +116,13 @@ node_modules/
 
 # Server 子仓库（独立管理于 github.com/UnityX103/CPA-Server）
 Server/
+
+# HybridCLR 自动生成的本地 il2cpp + git clone（约 37MB，重装会自动重建）
+/HybridCLRData/
+
+# Unity 编辑器崩溃 dump
+mono_crash.*.json
+
+# Addressables 构建产物（远端包，由 Tools/AAServer 托管）
+/ServerData/
+/[Aa]ssets/AddressableAssetsData/Settings.asset_*.bin*
