@@ -12,17 +12,27 @@ public static class MacOSBuildPostProcessor
         if (buildTarget != BuildTarget.StandaloneOSX)
             return;
 
+        // HybridCLR 的 StripAOTDllCommand 会跑一次临时 BuildPipeline 输出到
+        // HybridCLRData/StrippedAOTDllsTempProj/，这种构建没有 .app Bundle 结构，
+        // 同样会触发 [PostProcessBuild]，要主动跳过避免 DirectoryNotFoundException。
+        string contentsPath = Path.Combine(pathToBuiltProject, "Contents");
+        bool isAppBundle = pathToBuiltProject.EndsWith(".app") && Directory.Exists(contentsPath);
+        if (!isAppBundle)
+        {
+            Debug.Log($"[MacOSBuildPostProcessor] 跳过非 .app Bundle 构建（HybridCLR AOT 剥离等临时产物）: {pathToBuiltProject}");
+            return;
+        }
+
         Debug.Log("[MacOSBuildPostProcessor] 开始配置 macOS 权限...");
 
         string appName = Path.GetFileNameWithoutExtension(pathToBuiltProject);
-        string contentsPath = Path.Combine(pathToBuiltProject, "Contents");
-        
+
         // 1. 修改 Info.plist
         ConfigureInfoPlist(contentsPath);
-        
+
         // 2. 配置 Entitlements
         ConfigureEntitlements(pathToBuiltProject, appName);
-        
+
         Debug.Log("[MacOSBuildPostProcessor] ✓ macOS 权限配置完成");
     }
     

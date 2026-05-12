@@ -65,12 +65,6 @@ namespace APP.Pomodoro.View
         // 不为 null 时记录视频播放前的 model.TargetMonitorIndex.Value，Hide 时还原。
         private int? _monitorIndexBeforeVideo;
 
-        // 视频播放期间强制关闭"基于 alpha 的点击穿透"，避免视频画面下方的桌面被穿透点中。
-        // Hide 时把 isHitTestEnabled / isClickThrough 双双对称还原；null 表示没动。
-        private UniWindowController _uwc;
-        private bool? _hitTestEnabledBeforeVideo;
-        private bool? _clickThroughBeforeVideo;
-
         // 记录每个 UI 根的隐藏前状态。优先用 UIDocument.rootVisualElement.style.display
         // 切换显隐——这样 GameObject 始终激活，UIDocument 不会重建 visual tree，
         // QFramework Controller 在 panel 上注册的 BindableProperty / 事件回调不会失效。
@@ -190,7 +184,6 @@ namespace APP.Pomodoro.View
 
             Hide();
             HideUIRoots();
-            DisableClickThroughForVideo();
             SwitchToForegroundMonitorIfNeeded();
 
             int width = Mathf.Max(2, Screen.width);
@@ -354,7 +347,6 @@ namespace APP.Pomodoro.View
             }
 
             RestoreMonitorIfMoved();
-            RestoreClickThroughAfterVideo();
             RestoreUIRoots();
             ClearStaleInputFocus();
 
@@ -362,50 +354,6 @@ namespace APP.Pomodoro.View
             // RefreshVisibility 依赖 IsAppFocused/AnyPinned 等 BindableProperty 变化触发；
             // 若这些值在视频前后没变化，display=default 之后面板仍会挂着 pp-hidden。
             this.SendEvent(new E_VideoOverlayClosed());
-        }
-
-        /// <summary>
-        /// 视频播放期间禁用 UniWindowController 的点击穿透：
-        /// 整个 RawImage 铺满屏幕、画面像素也包含半透明区域，若继续按 Opacity 自动判定，
-        /// 透明像素会被穿透到桌面，导致用户无法点击 Skip 关闭视频。直接禁掉自动判定并把
-        /// isClickThrough 强制为 false，Hide 时再恢复原值（默认 true，恢复 alpha 自动判定）。
-        /// </summary>
-        private void DisableClickThroughForVideo()
-        {
-            if (_uwc == null)
-            {
-                _uwc = FindAnyObjectByType<UniWindowController>();
-            }
-
-            if (_uwc == null)
-            {
-                Debug.Log("[VideoCompletionOverlay] DisableClickThrough：未找到 UniWindowController，跳过");
-                return;
-            }
-
-            _hitTestEnabledBeforeVideo = _uwc.isHitTestEnabled;
-            _clickThroughBeforeVideo = _uwc.isClickThrough;
-            _uwc.isHitTestEnabled = false;
-            _uwc.isClickThrough = false;
-            Debug.Log(
-                $"[VideoCompletionOverlay] DisableClickThrough：isHitTestEnabled {_hitTestEnabledBeforeVideo} -> false，isClickThrough {_clickThroughBeforeVideo} -> false");
-        }
-
-        private void RestoreClickThroughAfterVideo()
-        {
-            // 两个 nullable 标志在 Disable 入口同时被写、在这里同时被清，所以以 isHitTestEnabled 那条为闸门即可。
-            if (!_hitTestEnabledBeforeVideo.HasValue) return;
-
-            bool restoreHitTest = _hitTestEnabledBeforeVideo.Value;
-            bool restoreClickThrough = _clickThroughBeforeVideo ?? false;
-            _hitTestEnabledBeforeVideo = null;
-            _clickThroughBeforeVideo = null;
-
-            if (_uwc == null) return;
-            _uwc.isHitTestEnabled = restoreHitTest;
-            _uwc.isClickThrough = restoreClickThrough;
-            Debug.Log(
-                $"[VideoCompletionOverlay] RestoreClickThrough：isHitTestEnabled→{restoreHitTest}，isClickThrough→{restoreClickThrough}");
         }
 
         /// <summary>

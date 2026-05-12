@@ -1,3 +1,8 @@
+# Unity Cloud (UOS) CDN 凭据：本地落盘但永不入库
+cdn/.uas-credentials.env
+cdn/.uas-credentials*.env
+cdn/.uas-state.json
+
 # Unity
 /[Ll]ibrary/
 /[Tt]emp/

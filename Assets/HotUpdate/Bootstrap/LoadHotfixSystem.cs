@@ -32,7 +32,10 @@ namespace App.Bootstrap
         public const string HotfixEntryTypeName = "App.Hotfix.HotfixEntry";
         public const string HotfixEntryMethodName = "Start";
 
-        public const string HotfixDllAddress = "App.Hotfix.dll";
+        // Preprocessor 把整个 Assets/HotUpdateGen/Hotfix 目录作为文件夹 entry 加进 AA "Hotfix" 组，
+        // address="Hotfix"。AA 文件夹 entry 的 sub-asset 寻址格式是 "{folderAddress}/{relativePath}"，
+        // .bytes 后缀保留在地址里，因此 hotfix dll 的实际可寻址 key 就是 "Hotfix/App.Hotfix.dll.bytes"。
+        public const string HotfixDllAddress = "Hotfix/App.Hotfix.dll.bytes";
         public const string AotMetadataLabel = "aotmeta";
 
         /// <summary>
@@ -151,6 +154,7 @@ namespace App.Bootstrap
             catch (Exception ex)
             {
                 onFatal?.Invoke(ex);
+                yield break;
             }
         }
     }

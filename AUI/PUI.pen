@@ -4022,7 +4022,8 @@
               "width": "fill_container",
               "content": "添加按键监听绑定；启用某一项后弹出独立的输入计数面板；最多 1 个标记为同步到远端。",
               "fontFamily": "MaokenAssortedSans",
-              "fontSize": 11
+              "fontSize": 11,
+              "fontWeight": "normal"
             },
             {
               "type": "frame",
@@ -4343,7 +4344,8 @@
               "fill": "#9CA3AF",
               "content": "点击重新绑定",
               "fontFamily": "MaokenAssortedSans",
-              "fontSize": 11
+              "fontSize": 11,
+              "fontWeight": "normal"
             }
           ]
         },
