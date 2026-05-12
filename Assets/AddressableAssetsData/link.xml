@@ -1,0 +1,89 @@
+<linker>
+  <assembly fullname="APP.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="APP.Network.NetworkDispatcherBehaviour" preserve="all" />
+    <type fullname="APP.Pomodoro.Config.PomodoroConfig" preserve="all" />
+    <type fullname="APP.Pomodoro.View.VideoCompletionOverlay" preserve="all" />
+  </assembly>
+  <assembly fullname="APP.UI_V2, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="APP.Pomodoro.Controller.DeskWindowController" preserve="all" />
+    <type fullname="APP.Pomodoro.Controller.PanelScaleApplier" preserve="all" />
+    <type fullname="APP.Pomodoro.Controller.PlayerCardController" preserve="all" />
+    <type fullname="APP.Pomodoro.Controller.PomodoroPanelView" preserve="all" />
+    <type fullname="APP.Pomodoro.Controller.UnifiedSettingsPanelDriver" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AudioListener" preserve="all" />
+    <type fullname="UnityEngine.AudioSource" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Camera" preserve="all" />
+    <type fullname="UnityEngine.Cubemap" preserve="all" />
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.Light" preserve="all" />
+    <type fullname="UnityEngine.LightmapSettings" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.RenderSettings" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.TextAsset" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextCoreTextEngineModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.TextCore.Text.FontAsset" preserve="all" />
+    <type fullname="UnityEngine.TextCore.Text.Character" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Text.FontAssetCreationEditorSettings" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Text.FontFeatureTable" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Text.FontWeightPair" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Text.UnicodeLineBreakingRules" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Font" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.UIElements.PanelSettings" preserve="all" />
+    <type fullname="UnityEngine.UIElements.PanelTextSettings" preserve="all" />
+    <type fullname="UnityEngine.UIElements.StyleSheet" preserve="all" />
+    <type fullname="UnityEngine.UIElements.ThemeStyleSheet" preserve="all" />
+    <type fullname="UnityEngine.UIElements.UIDocument" preserve="all" />
+    <type fullname="UnityEngine.UIElements.VisualTreeAsset" preserve="all" />
+    <type fullname="UnityEngine.UIElements.Button/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.DropdownField/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.DynamicAtlasSettings" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.IntegerField/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.Label/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.ScrollView/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.Slider/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleComplexSelector" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleProperty" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleRule" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleSelector" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleSelectorPart" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleSheet/ImportStruct" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleSheets.Dimension" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleSheets.ScalableImage" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.StyleValueHandle" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.TemplateAsset" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.TemplateContainer/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.TextField/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.Toggle/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.VisualElement/UxmlSerializedData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.VisualElementAsset" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UIElements.VisualTreeAsset/UsingEntry" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextCoreFontEngineModule">
+    <type fullname="UnityEngine.TextCore.FaceInfo" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Glyph" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphMetrics" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphRect" preserve="nothing" serialized="true" />
+  </assembly>
+</linker>

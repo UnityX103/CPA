@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using App.Editor.HotUpdate;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
@@ -47,6 +48,38 @@ public static class BuildScript
         DoWindowsBuild();
     }
 
+    /// <summary>
+    /// 一键热更新：跑 HybridCLR 增量编译 → 拷 App.Hotfix.dll 进 Addressables 资源夹 →
+    /// AA 远端构建到 ServerData/AA/[Target]/ → 调 cdn/uos/publish.sh 上传到 UOS CDN。
+    /// 取当前 Build Settings 的 ActiveBuildTarget，仅支持 StandaloneOSX / StandaloneWindows64。
+    /// 不重生 AOT meta；首次或修改了 AOT 泛型实例化需要走 Build, Run and Verify macOS App 全量 Rebuild。
+    /// </summary>
+    [MenuItem("Build/热更新")]
+    public static void HotUpdate()
+    {
+        BuildTarget active = EditorUserBuildSettings.activeBuildTarget;
+        if (active != BuildTarget.StandaloneOSX
+            && active != BuildTarget.StandaloneWindows64
+            && active != BuildTarget.StandaloneWindows)
+        {
+            Debug.LogError(
+                $"[BuildScript] ✗ 热更新仅支持 StandaloneOSX / StandaloneWindows64，当前 ActiveBuildTarget={active}。" +
+                "请先在 Build Settings 切换 target。");
+            return;
+        }
+
+        try
+        {
+            Debug.Log($"[BuildScript] ▶ 开始热更新：target={active}");
+            HotUpdateBuildPreprocessor.RunHotfixOnlyForTarget(active, source: "Build/热更新");
+            Debug.Log($"[BuildScript] ✓ 热更新完成。产物：ServerData/AA/{active}/，已触发 CDN 上传（看上方日志）。");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[BuildScript] ✗ 热更新失败：{ex.Message}\n{ex}");
+        }
+    }
+
     // ─── 核心构建逻辑 ────────────────────────────────────────────
 
     private static void DoBuild(bool runAfter = true)
@@ -73,7 +106,18 @@ public static class BuildScript
             options = BuildOptions.None,
         };
 
-        BuildReport report = BuildPipeline.BuildPlayer(options);
+        if (!RunHotUpdatePrebuild(BuildTarget.StandaloneOSX, "BuildScript:DoBuild")) return;
+
+        BuildReport report;
+        HotUpdateBuildPreprocessor.AlreadyPrebuilt = true;
+        try
+        {
+            report = BuildPipeline.BuildPlayer(options);
+        }
+        finally
+        {
+            HotUpdateBuildPreprocessor.AlreadyPrebuilt = false;
+        }
         BuildSummary summary = report.summary;
 
         if (summary.result != BuildResult.Succeeded)
@@ -91,6 +135,27 @@ public static class BuildScript
         if (runAfter)
         {
             RunAndCaptureLogs(BuildPath);
+        }
+    }
+
+    /// <summary>
+    /// 在 BuildPipeline.BuildPlayer 之前预跑 HybridCLR + Addressables 热更新生成链。
+    /// Unity 6 禁止嵌套 BuildPlayer：HybridCLR StripAOTDllCommand 内部要做一次 BuildPlayer 来 IL2CPP strip
+    /// AOT DLL，必须在外层 BuildPlayer 之外执行才合法。返回 false 表示预跑失败，调用方应放弃后续 BuildPlayer。
+    /// </summary>
+    private static bool RunHotUpdatePrebuild(BuildTarget target, string source)
+    {
+        try
+        {
+            Debug.Log($"[BuildScript] ▶ HotUpdate 预跑（{source}，target={target}）...");
+            HotUpdateBuildPreprocessor.RunFullForTarget(target, source);
+            Debug.Log("[BuildScript] ✓ HotUpdate 预跑完成");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[BuildScript] ✗ HotUpdate 预跑失败：{ex.Message}\n{ex}");
+            return false;
         }
     }
 
@@ -137,7 +202,18 @@ public static class BuildScript
             options = BuildOptions.None,
         };
 
-        BuildReport report = BuildPipeline.BuildPlayer(options);
+        if (!RunHotUpdatePrebuild(BuildTarget.StandaloneWindows64, "BuildScript:DoWindowsBuild")) return;
+
+        BuildReport report;
+        HotUpdateBuildPreprocessor.AlreadyPrebuilt = true;
+        try
+        {
+            report = BuildPipeline.BuildPlayer(options);
+        }
+        finally
+        {
+            HotUpdateBuildPreprocessor.AlreadyPrebuilt = false;
+        }
         BuildSummary summary = report.summary;
 
         if (summary.result != BuildResult.Succeeded)
@@ -184,7 +260,18 @@ public static class BuildScript
             options = devOptions,
         };
 
-        BuildReport report = BuildPipeline.BuildPlayer(options);
+        if (!RunHotUpdatePrebuild(BuildTarget.StandaloneOSX, "BuildScript:DoDevelopmentProfilerBuild")) return;
+
+        BuildReport report;
+        HotUpdateBuildPreprocessor.AlreadyPrebuilt = true;
+        try
+        {
+            report = BuildPipeline.BuildPlayer(options);
+        }
+        finally
+        {
+            HotUpdateBuildPreprocessor.AlreadyPrebuilt = false;
+        }
         BuildSummary summary = report.summary;
 
         if (summary.result != BuildResult.Succeeded)

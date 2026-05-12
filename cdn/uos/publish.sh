@@ -101,11 +101,25 @@ case "$MODE" in
 esac
 
 if [[ "$MODE" == "full" ]]; then
-    # ── phase 1: sync ──
-    if [[ "${PURGE_REMOTE:-0}" == "1" ]]; then
-        "$SCRIPT_DIR/sync.sh" "$BUILD_DIR" "$REMOTE_PREFIX" --purge
-    else
-        "$SCRIPT_DIR/sync.sh" "$BUILD_DIR" "$REMOTE_PREFIX"
+    # ── phase 1: sync（带退避重试，抗代理/弱网）──
+    SYNC_MAX_ATTEMPTS="${SYNC_MAX_ATTEMPTS:-6}"
+    SYNC_OK=0
+    for attempt in $(seq 1 "$SYNC_MAX_ATTEMPTS"); do
+        if [[ "${PURGE_REMOTE:-0}" == "1" ]]; then
+            "$SCRIPT_DIR/sync.sh" "$BUILD_DIR" "$REMOTE_PREFIX" --purge && SYNC_OK=1 && break
+        else
+            "$SCRIPT_DIR/sync.sh" "$BUILD_DIR" "$REMOTE_PREFIX" && SYNC_OK=1 && break
+        fi
+        if (( attempt < SYNC_MAX_ATTEMPTS )); then
+            backoff=$(( attempt * 5 ))
+            log "sync attempt #$attempt 失败，${backoff}s 后重试（多见于代理/弱网导致大 bundle TLS 断流）..."
+            sleep "$backoff"
+        fi
+    done
+    if [[ $SYNC_OK -ne 1 ]]; then
+        err "sync 重试 $SYNC_MAX_ATTEMPTS 次仍失败。"
+        err "若 DNS 解析到 198.18.x.x，说明代理/VPN 在拦 wcsapi.com，给该域加 direct 规则后重跑"
+        exit 1
     fi
     state_write "" "synced"
 
@@ -133,7 +147,12 @@ if [[ "${SKIP_PROBE:-0}" == "1" ]]; then
     exit 0
 fi
 
-mapfile -t TARGETS < <(collect_probe_targets)
+# bash 3.2 没有 mapfile，用 while-read 把多行读进数组
+TARGETS=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && TARGETS+=("$line")
+done < <(collect_probe_targets)
+
 if [[ ${#TARGETS[@]} -eq 0 ]]; then
     err "没找到任何 catalog/bundle 用作校验对象"
     exit 1

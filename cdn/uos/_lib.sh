@@ -63,11 +63,17 @@ err() { printf '[uos][err] %s\n' "$*" >&2; }
 # FORCE_LOGIN=1 时先 auth logout 再 login，强制把 keychain 缓存换成当前 .env 的身份。
 #   shared machine / CI / 多 bucket 切换场景务必置 1，避免拿旧缓存发到错地方。
 uas_login_if_needed() {
+    # 同一发布流水线内（publish.sh → sync.sh / release.sh / set_badge.sh），
+    # 一旦登录过就标记并 export，子脚本继承后直接跳过重登
+    if [[ "${UAS_AUTH_DONE:-0}" == "1" ]]; then
+        return 0
+    fi
     if [[ "${FORCE_LOGIN:-0}" == "1" ]]; then
         log "FORCE_LOGIN=1 → 先 auth logout 清缓存"
         "$UAS_BIN" auth logout >/dev/null 2>&1 || true
     elif "$UAS_BIN" auth info >/dev/null 2>&1; then
         log "auth: 已有凭据缓存（如换过 .env 请 FORCE_LOGIN=1 重跑）"
+        export UAS_AUTH_DONE=1
         return 0
     fi
     log "auth login ..."
@@ -84,6 +90,9 @@ uas_login_if_needed() {
 EOF
         return 1
     fi
+    export UAS_AUTH_DONE=1
+    # 不让 FORCE_LOGIN 把子脚本拖回 logout/login 路径
+    export FORCE_LOGIN=0
 }
 
 # 比对一份本地文件与远端 release_by_badge URL 的 sha256，相同退 0。
@@ -93,7 +102,8 @@ verify_one_file() {
     local url="$2"
     local tmp="/tmp/uos_verify.$$.$RANDOM"
     local http
-    http="$(curl -sS -o "$tmp" -w '%{http_code}' "$url" || true)"
+    # -L 必须：UOS CDN 把 a.unity.cn 上的 release_by_badge URL 307 重定向到 a2.unity3dcloud.cn 拿字节
+    http="$(curl -sSL -o "$tmp" -w '%{http_code}' "$url" || true)"
     if [[ "$http" != "200" ]]; then
         err "  http=$http  $url"
         rm -f "$tmp"

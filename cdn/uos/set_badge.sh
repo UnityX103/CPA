@@ -17,9 +17,17 @@ fi
 
 uas_login_if_needed
 
+# `latest` 是 UOS 保留 badge，自动跟最新 release，不允许手动 add/remove
+if [[ "$BADGE_NAME" == "latest" ]]; then
+    log "badge=latest 是 UOS 保留名（创建 release 时自动指向最新一条），跳过手动绑定"
+    exit 0
+fi
+
 log "tag release '$RELEASE_ID' with badge '$BADGE_NAME'"
-if ! uas badges add "$BADGE_NAME" "$RELEASE_ID" "${COMMON_BUCKET[@]}" --interactive=false 2>/dev/null; then
-    log "badge add 失败，尝试 badges update（badge 已存在）"
-    uas badges update "$BADGE_NAME" "$RELEASE_ID" "${COMMON_BUCKET[@]}" --interactive=false
+# CLI 没有 badges update：badge 已存在时 badges add 会失败，需要先 remove 再 add
+if ! uas badges add "$BADGE_NAME" "$RELEASE_ID" "${COMMON_BUCKET[@]}" --interactive=false; then
+    log "badge add 失败（多半是 badge 已存在），先 remove 再 add"
+    uas badges remove "$BADGE_NAME" "${COMMON_BUCKET[@]}" --interactive=false || true
+    uas badges add "$BADGE_NAME" "$RELEASE_ID" "${COMMON_BUCKET[@]}" --interactive=false
 fi
 log "badge set"

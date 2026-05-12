@@ -30,5 +30,6 @@ if [[ "$PURGE" == "--purge" ]]; then
 fi
 
 log "syncing '$LOCAL_DIR' -> bucket://$REMOTE_PREFIX"
-uas entries sync "$LOCAL_DIR" "$REMOTE_PREFIX" "${COMMON_BUCKET[@]}" --interactive=false "${EXTRA[@]}"
+# bash 3.2 + set -u 下空数组 "${EXTRA[@]}" 会报 unbound variable，用 ${arr[@]+...} 守卫
+uas entries sync "$LOCAL_DIR" "$REMOTE_PREFIX" "${COMMON_BUCKET[@]}" --interactive=false ${EXTRA[@]+"${EXTRA[@]}"}
 log "sync done"

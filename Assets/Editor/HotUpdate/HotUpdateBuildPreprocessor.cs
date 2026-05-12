@@ -35,6 +35,14 @@ namespace App.Editor.HotUpdate
         private const string HotfixGenDir = HotUpdateGenDir + "/Hotfix";
         private const string AotMetaGenDir = HotUpdateGenDir + "/AOTMeta";
 
+        /// <summary>
+        /// 由 BuildScript 在 BuildPlayer 之前先跑 RunFullForTarget 时置 true，让 OnPreprocessBuild 跳过同样的工作。
+        /// Unity 6 不允许嵌套 BuildPlayer：HybridCLR StripAOTDllCommand 必须在外层 BuildPlayer 之外执行，否则
+        /// StripAOTDllCommand 内部的 BuildPipeline.BuildPlayer 调用会抛 "Cannot start a new build because there
+        /// is already a build in progress"。BuildScript 用 try/finally 包住 BuildPlayer，保证这个标志总能复位。
+        /// </summary>
+        public static bool AlreadyPrebuilt { get; set; }
+
         // 需要补 AOT 泛型元数据的常见 AOT 程序集白名单。HybridCLR 的 AOTGenericReference
         // 会扫描热更新代码用了哪些泛型实例化，再回头要求这些 AOT DLL 提供 metadata。
         // 优先读 HybridCLRSettings.Instance.patchAOTAssemblies；为空时用下面的兜底列表。
@@ -59,19 +67,31 @@ namespace App.Editor.HotUpdate
 
         public void OnPreprocessBuild(BuildReport report)
         {
-            // HybridCLR.StripAOTDllCommand.GenerateStripedAOTDlls 内部会嵌套调一次 BuildPipeline.BuildPlayer
-            // 去做 IL2CPP strip，临时把 EditorUserBuildSettings.buildScriptsOnly 置 true。Unity 会把这次内嵌
-            // build 也广播给所有 IPreprocessBuildWithReport——如果我们在这个嵌套上下文里再调 GenerateAll，会
-            // 触发第三层 BuildPlayer，撞 "Cannot start a new build because there is already a build in progress"
-            // 并把外层 build 整体拉黑。这里以 buildScriptsOnly 为闸门：嵌套 strip build 直接跳过，让 HybridCLR
-            // 自己内部那一轮顺利完成；外层"正经"BuildPlayer 才走我们的完整生成链。
+            // Unity 6 已禁掉嵌套 BuildPlayer，所以 HybridCLR 的 GenerateAll/StripAOTDllCommand 必须在外层
+            // BuildPlayer 之外预跑——由 BuildScript 在 BuildPipeline.BuildPlayer 之前手动调 RunFullForTarget，
+            // 完成后置 AlreadyPrebuilt=true。这里识别到该标志直接跳过，避免重复跑还撞 nested-BuildPlayer。
+            if (AlreadyPrebuilt)
+            {
+                Debug.Log("[HotUpdate Build] OnPreprocessBuild：检测到 AlreadyPrebuilt=true（BuildScript 已在 BuildPlayer 之前预跑），跳过。");
+                return;
+            }
+
+            // HybridCLR.StripAOTDllCommand.GenerateStripedAOTDlls 临时把 EditorUserBuildSettings.buildScriptsOnly
+            // 置 true 跑一次内嵌 BuildPlayer——这是 Unity 5/2019 ~ 2022 的老路径，保留兼容。Unity 6 下不会
+            // 走到这里（外层 BuildPlayer 直接被拦），属于幂等保险。
             if (EditorUserBuildSettings.buildScriptsOnly)
             {
                 Debug.Log("[HotUpdate Build] OnPreprocessBuild：检测到 buildScriptsOnly=true（HybridCLR strip 内嵌 build），跳过。");
                 return;
             }
 
-            RunFullForTarget(report.summary.platform, source: "BuildPlayer preprocess");
+            // 兜底：直接 BuildPipeline.BuildPlayer 而不经过 BuildScript（例如 Cloud Build、Build Settings 对话框
+            // 的"Build"按钮）。这条路径在 Unity 6 会因 nested-BuildPlayer 失败，是已知限制——推荐入口仍是
+            // BuildScript.BuildRunAndVerifyMacOS / Build/热更新 菜单。
+            Debug.LogWarning(
+                "[HotUpdate Build] OnPreprocessBuild：检测到走的不是 BuildScript 预跑路径，将在 BuildPlayer 内调 GenerateAll。" +
+                "Unity 6 下会撞 nested-BuildPlayer 错误；请改用 Build/Build, Run and Verify macOS App 菜单或先手动调 RunFullForTarget。");
+            RunFullForTarget(report.summary.platform, source: "BuildPlayer preprocess (legacy fallback)");
         }
 
         /// <summary>
@@ -289,19 +309,19 @@ namespace App.Editor.HotUpdate
         }
 
         /// <summary>
-        /// AA 包打完后，调 cdn/upload-aa.sh 把 ServerData/AA/&lt;Target&gt;/ 同步到 UOS CDN，
-        /// 创建 release 并把 badge=latest 指向新 release。
+        /// AA 包打完后，调 cdn/uos/publish.sh 把 ServerData/AA/&lt;Target&gt;/ 同步到 UOS CDN，
+        /// 创建 release（latest badge 是 UOS 保留名，自动指向最新 release，无需手动绑定）。
         /// 凭据走 cdn/.uas-credentials.env，不入 Player；本步骤只在 Editor 内跑。
         /// 脚本失败会向 Console 写错误但不抛 BuildFailedException——AA 包本身仍然落在 ServerData/，
-        /// 用户可以人工跑 cdn/upload-aa.sh 复盘失败原因，不影响主链路。
+        /// 用户可以人工跑 cdn/uos/publish.sh 复盘失败原因，不影响主链路。
         /// </summary>
         private static void UploadToCdn(BuildTarget target, string source)
         {
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-            string script = Path.Combine(projectRoot, "cdn", "upload-aa.sh");
+            string script = Path.Combine(projectRoot, "cdn", "uos", "publish.sh");
             if (!File.Exists(script))
             {
-                Debug.LogWarning($"[HotUpdate Build][{source}] cdn/upload-aa.sh 不存在，跳过 CDN 上传：{script}");
+                Debug.LogWarning($"[HotUpdate Build][{source}] cdn/uos/publish.sh 不存在，跳过 CDN 上传：{script}");
                 return;
             }
 
