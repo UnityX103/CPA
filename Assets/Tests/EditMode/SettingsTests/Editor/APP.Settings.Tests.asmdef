@@ -3,7 +3,8 @@
     "rootNamespace": "APP.Settings.Tests",
     "references": [
         "APP.Runtime",
-        "APP.UI_V2"
+        "APP.UI_V2",
+        "NZ.AppMonitor.Runtime"
     ],
     "includePlatforms": [
         "Editor"

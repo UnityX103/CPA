@@ -232,6 +232,11 @@ namespace APP.Pomodoro.Controller
 
             this.RegisterEvent<E_PomodoroCycleCompleted>(OnCycleCompletedEvent)
                 .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+            // 视频覆盖层 Hide 后强制重算 hidden：视频期间 IsAppFocused/AnyPinned 等
+            // BindableProperty 可能没有变化，导致 display=default 之后 _ppRoot 仍挂 pp-hidden。
+            this.RegisterEvent<E_VideoOverlayClosed>(_ => RefreshVisibility())
+                .UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         // ─── Model 变化回调 ──────────────────────────────────────

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using APP.Pomodoro.Event;
 using APP.Pomodoro.Model;
+using APP.Settings.Model;
 using QFramework;
 
 namespace APP.Pomodoro.System
@@ -17,6 +18,7 @@ namespace APP.Pomodoro.System
         {
             IPomodoroModel pomodoro = this.GetModel<IPomodoroModel>();
             IPlayerCardModel cards = this.GetModel<IPlayerCardModel>();
+            IBindingKeyModel binding = this.GetModel<IBindingKeyModel>();
 
             // 1) 订阅番茄钟 IsPinned
             pomodoro.IsPinned.Register(_ => Recalculate());
@@ -30,6 +32,11 @@ namespace APP.Pomodoro.System
             {
                 SubscribeCard(card);
             }
+
+            // 3.5) 订阅按键计数面板的 PanelPinned（与番茄面板同走 AnyPinned 链路）。
+            //      EntriesRevision 触发 Recalculate 让"binding 删空 → 面板被销毁"的瞬间也能让 AnyPinned 降回 false。
+            binding.PanelPinned.Register(_ => Recalculate());
+            binding.EntriesRevision.Register(_ => Recalculate());
 
             // 4) 写初值
             Recalculate();
@@ -77,8 +84,13 @@ namespace APP.Pomodoro.System
         {
             IPomodoroModel pomodoro = this.GetModel<IPomodoroModel>();
             IPlayerCardModel cards = this.GetModel<IPlayerCardModel>();
+            IBindingKeyModel binding = this.GetModel<IBindingKeyModel>();
 
-            bool any = pomodoro.IsPinned.Value;
+            // PanelPinned 只在 InputCounterPanel 实际存在时计入 AnyPinned（面板存在性由 binding.Entries.Count 决定）。
+            // 否则用户删掉所有 binding 让面板销毁后，PanelPinned 仍持久化为 true，窗口会一直置顶且番茄面板按
+            // AnyPinned 进入失焦隐藏，用户却没有 UI 入口去关闭它。
+            bool panelPinnedActive = binding.PanelPinned.Value && binding.Entries.Count > 0;
+            bool any = pomodoro.IsPinned.Value || panelPinnedActive;
             if (!any)
             {
                 for (int i = 0; i < cards.Cards.Count; i++)

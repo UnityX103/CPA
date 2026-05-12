@@ -18,6 +18,10 @@ namespace APP.Settings.Model
         /// <summary>全局按键计数功能开关。持久化。</summary>
         BindableProperty<bool> Enabled { get; }
 
+        /// <summary>InputCounterPanel 的置顶标志。持久化。
+        /// true 时该面板纳入 WindowVisibilityCoordinatorSystem.AnyPinned，驱动窗口置顶。</summary>
+        BindableProperty<bool> PanelPinned { get; }
+
         /// <summary>所有绑定条目（只读快照）。修改请用方法 API。</summary>
         IReadOnlyList<BindingKeyEntry> Entries { get; }
 

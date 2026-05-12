@@ -16,14 +16,23 @@ namespace APP.Settings.Model
         public const int    DefaultBoundKeyCode  = MouseLeft;
         public const string DefaultBoundKeyLabel = "鼠标左键";
         public const bool   DefaultEnabled       = false;
+        // 默认 false：与 PomodoroModel.IsPinned 默认值保持一致。
+        // 若默认 true，会让 WindowVisibilityCoordinatorSystem.AnyPinned 启动即 true，
+        // 视频结束等失焦场景下番茄面板被 RefreshVisibility 判定 hidden（hidden = !thisPinned && !focused && anyPinned），
+        // 用户需要重新点 Unity 窗口才能让面板显示，体感"UI 很久才回来"。
+        public const bool   DefaultPanelPinned   = false;
 
         // ─── PlayerPrefs key ─────────────────────────────────
         private const string EnabledKey      = "BindingKey.Enabled";
         private const string EntriesJsonKey  = "BindingKey.EntriesJson";
         private const string SyncedKeyIdKey  = "BindingKey.SyncedKeyId";
+        // v2 后缀：v1 默认值为 true 导致 AnyPinned 永久为真，番茄面板在视频结束失焦时被判 hidden，
+        // 用户体感"UI 很久才回来"。v2 默认值改为 false 并使用新 key，让此前测试中已持久化的 true 失效。
+        private const string PanelPinnedKey  = "BindingKey.PanelPinned.v2";
 
         // ─── 状态 ─────────────────────────────────────────────
         public BindableProperty<bool>   Enabled         { get; } = new BindableProperty<bool>(DefaultEnabled);
+        public BindableProperty<bool>   PanelPinned     { get; } = new BindableProperty<bool>(DefaultPanelPinned);
         public BindableProperty<int>    EntriesRevision { get; } = new BindableProperty<int>(0);
         public BindableProperty<string> SyncedKeyId     { get; } = new BindableProperty<string>(string.Empty);
         public BindableProperty<string> ListeningKeyId  { get; } = new BindableProperty<string>(string.Empty);
@@ -37,6 +46,7 @@ namespace APP.Settings.Model
 
             Enabled.SetValueWithoutEvent(storage.LoadInt(EnabledKey, DefaultEnabled ? 1 : 0) != 0);
             SyncedKeyId.SetValueWithoutEvent(storage.LoadString(SyncedKeyIdKey, string.Empty));
+            PanelPinned.SetValueWithoutEvent(storage.LoadInt(PanelPinnedKey, DefaultPanelPinned ? 1 : 0) != 0);
 
             string json = storage.LoadString(EntriesJsonKey, string.Empty);
             if (!string.IsNullOrEmpty(json))
@@ -55,6 +65,7 @@ namespace APP.Settings.Model
             // 持久化
             Enabled.Register(v => storage.SaveInt(EnabledKey, v ? 1 : 0));
             SyncedKeyId.Register(v => storage.SaveString(SyncedKeyIdKey, v ?? string.Empty));
+            PanelPinned.Register(v => storage.SaveInt(PanelPinnedKey, v ? 1 : 0));
             // Entries 由 mutator 在每次修改后调用 PersistEntries
         }
 

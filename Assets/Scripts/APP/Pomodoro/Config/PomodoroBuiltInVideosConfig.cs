@@ -64,8 +64,14 @@ namespace APP.Pomodoro.Config
         }
 
         /// <summary>
-        /// 取指定下标 entry 的运行时视频路径。优先 StreamingAssets/Path；
-        /// 越界或路径为空时返回空串。
+        /// 取指定下标 entry 的运行时视频路径。
+        /// 解析顺序：
+        ///   1) <see cref="Entry.Path"/> 非空 → 拼 <c>Application.streamingAssetsPath</c>（推荐，build 后可用）；
+        ///   2) Editor 下若 <see cref="Entry.Clip"/> 有引用 → 通过 AssetDatabase 反推该 VideoClip
+        ///      在工程内的磁盘路径，转成绝对路径。与自定义视频走同一条 file:// 绝对路径链路，
+        ///      便于开发期未配置 StreamingAssets 也能直接播。注意：build 后 AssetDatabase 不可用，
+        ///      所以发版前仍须把视频放到 StreamingAssets 并填 Path。
+        ///   3) 都不可用 → 返回空串。
         /// </summary>
         public string ResolveRuntimePath(int index)
         {
@@ -75,12 +81,34 @@ namespace APP.Pomodoro.Config
             }
 
             Entry entry = _entries[index];
-            if (entry == null || string.IsNullOrWhiteSpace(entry.Path))
+            if (entry == null)
             {
                 return string.Empty;
             }
 
-            return Path.Combine(Application.streamingAssetsPath, entry.Path);
+            if (!string.IsNullOrWhiteSpace(entry.Path))
+            {
+                return Path.Combine(Application.streamingAssetsPath, entry.Path);
+            }
+
+#if UNITY_EDITOR
+            if (entry.Clip != null)
+            {
+                string assetPath = UnityEditor.AssetDatabase.GetAssetPath(entry.Clip);
+                if (!string.IsNullOrEmpty(assetPath))
+                {
+                    // assetPath 形如 "Assets/Resources/ms1.webm"；Application.dataPath 指向 .../CPA/Assets，
+                    // 父目录即工程根，拼上 assetPath 得到磁盘绝对路径。
+                    string projectRoot = Path.GetDirectoryName(Application.dataPath);
+                    if (!string.IsNullOrEmpty(projectRoot))
+                    {
+                        return Path.Combine(projectRoot, assetPath);
+                    }
+                }
+            }
+#endif
+
+            return string.Empty;
         }
     }
 }

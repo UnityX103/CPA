@@ -58,6 +58,10 @@ namespace APP.Editor
             public int TotalRounds = 4;
             public bool IsRunning;
             public bool AutoTick;
+            // 远端按键同步：BindingKeyLabel 空 → PlayerCardController 隐藏整个 KeyCounterPill；
+            // 不空 → 显示 [keyLabel / pressCount]，等价于真实远端发了 bindingKey 字段
+            public string BindingKeyLabel = "";
+            public int BindingPressCount;
         }
 
         private enum RealPlayerStatus { Connecting, Joining, Joined, Closed, Error }
@@ -693,6 +697,39 @@ namespace APP.Editor
             p.AutoTick = EditorGUILayout.ToggleLeft("自动倒计时", p.AutoTick, GUILayout.Width(90));
             EditorGUILayout.EndHorizontal();
 
+            // ── 远端按键同步 ──
+            // BindingKeyLabel 留空时 PlayerCard 上的 KeyCounterPill 整体隐藏；填入"Space" / "鼠标左键"
+            // 等会立刻把 pill 推显，PressCount 也跟着写到 .key-counter-pill-count Label
+            EditorGUILayout.BeginHorizontal();
+            string newKeyLabel = EditorGUILayout.TextField("按键名", p.BindingKeyLabel ?? "");
+            int newPressCount = EditorGUILayout.IntField("按下次数", p.BindingPressCount, GUILayout.Width(110));
+            if (newKeyLabel != p.BindingKeyLabel || newPressCount != p.BindingPressCount)
+            {
+                p.BindingKeyLabel = newKeyLabel;
+                p.BindingPressCount = Mathf.Max(0, newPressCount);
+                SendStateUpdate(p);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+1", GUILayout.Width(40)))
+            {
+                p.BindingPressCount++;
+                SendStateUpdate(p);
+            }
+            if (GUILayout.Button("+10", GUILayout.Width(40)))
+            {
+                p.BindingPressCount += 10;
+                SendStateUpdate(p);
+            }
+            if (GUILayout.Button("清空按键", GUILayout.Width(90)))
+            {
+                p.BindingKeyLabel = "";
+                p.BindingPressCount = 0;
+                SendStateUpdate(p);
+            }
+            EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.EndVertical();
         }
 
@@ -778,6 +815,8 @@ namespace APP.Editor
                 CurrentRound = p.CurrentRound,
                 TotalRounds = p.TotalRounds,
                 IsRunning = p.IsRunning,
+                BindingKeyLabel = p.BindingKeyLabel ?? string.Empty,
+                BindingPressCount = p.BindingPressCount,
             };
         }
 

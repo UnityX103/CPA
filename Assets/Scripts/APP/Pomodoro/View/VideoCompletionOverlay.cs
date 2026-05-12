@@ -9,6 +9,7 @@ using APP.Pomodoro.System;
 using Kirurobo;
 using QFramework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
@@ -39,10 +40,10 @@ namespace APP.Pomodoro.View
     /// 视频固定静音（VideoAudioOutputMode.None + controlledAudioTrackCount = 0）。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class VideoCompletionOverlay : MonoBehaviour, IController
+    public sealed class VideoCompletionOverlay : MonoBehaviour, IController, ICanSendEvent
     {
-        [Header("播放期间需要隐藏的 UI 根节点（番茄钟主面板 / 设置面板等）")]
-        [SerializeField] private GameObject[] _uiRootsToHide;
+        [Header("播放期间需要隐藏的 UI 根节点（番茄钟主面板 / 设置面板等）")] [SerializeField]
+        private GameObject[] _uiRootsToHide;
 
         // 预建的覆盖层，整个组件生命周期都在
         private Canvas _canvas;
@@ -63,6 +64,12 @@ namespace APP.Pomodoro.View
         // 临时显示器切换状态（仅在视频播放期间生效）。null 表示没动；
         // 不为 null 时记录视频播放前的 model.TargetMonitorIndex.Value，Hide 时还原。
         private int? _monitorIndexBeforeVideo;
+
+        // 视频播放期间强制关闭"基于 alpha 的点击穿透"，避免视频画面下方的桌面被穿透点中。
+        // Hide 时把 isHitTestEnabled / isClickThrough 双双对称还原；null 表示没动。
+        private UniWindowController _uwc;
+        private bool? _hitTestEnabledBeforeVideo;
+        private bool? _clickThroughBeforeVideo;
 
         // 记录每个 UI 根的隐藏前状态。优先用 UIDocument.rootVisualElement.style.display
         // 切换显隐——这样 GameObject 始终激活，UIDocument 不会重建 visual tree，
@@ -158,7 +165,8 @@ namespace APP.Pomodoro.View
 
         private void OnRequest(E_RequestPlayCompletionVideo evt)
         {
-            Debug.Log($"[VideoCompletionOverlay] 收到 E_RequestPlayCompletionVideo，VideoPath='{evt.VideoPath ?? "<null>"}'");
+            Debug.Log(
+                $"[VideoCompletionOverlay] 收到 E_RequestPlayCompletionVideo，VideoPath='{evt.VideoPath ?? "<null>"}'");
             try
             {
                 Play(evt.VideoPath);
@@ -172,7 +180,8 @@ namespace APP.Pomodoro.View
 
         private void Play(string path)
         {
-            Debug.Log($"[VideoCompletionOverlay] Play 进入，path='{path ?? "<null>"}'，FileExists={(string.IsNullOrWhiteSpace(path) ? "n/a" : File.Exists(path).ToString())}");
+            Debug.Log(
+                $"[VideoCompletionOverlay] Play 进入，path='{path ?? "<null>"}'，FileExists={(string.IsNullOrWhiteSpace(path) ? "n/a" : File.Exists(path).ToString())}");
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
                 Debug.LogWarning($"[VideoCompletionOverlay] 无效视频路径: {path}");
@@ -181,6 +190,7 @@ namespace APP.Pomodoro.View
 
             Hide();
             HideUIRoots();
+            DisableClickThroughForVideo();
             SwitchToForegroundMonitorIfNeeded();
 
             int width = Mathf.Max(2, Screen.width);
@@ -207,6 +217,10 @@ namespace APP.Pomodoro.View
             _playCoroutine = StartCoroutine(PrepareAndShowCoroutine());
         }
 
+        // VideoPlayer.Prepare 在编码异常 / 源码损坏的极端情况下可能既不 prepareCompleted 也不 errorReceived；
+        // 不加超时会让 UI 永久保持 HideUIRoots + click-through 关闭，用户只能强杀进程。
+        private const float PrepareTimeoutSeconds = 5f;
+
         private IEnumerator PrepareAndShowCoroutine()
         {
             VideoPlayer player = _player;
@@ -222,12 +236,26 @@ namespace APP.Pomodoro.View
             player.Prepare();
 
             // 等 Prepare 完成（VideoPlayer 已经把首帧解码就绪到内部缓冲）
+            float deadline = Time.realtimeSinceStartup + PrepareTimeoutSeconds;
             while (!prepared)
             {
                 if (_player == null || _player != player)
                 {
+                    player.prepareCompleted -= onPrepared;
                     yield break;
                 }
+
+                if (Time.realtimeSinceStartup > deadline)
+                {
+                    Debug.LogWarning(
+                        $"[VideoCompletionOverlay] PrepareAndShowCoroutine：Prepare 超时（>{PrepareTimeoutSeconds:F1}s），自动 Hide 恢复 UI/click-through");
+                    player.prepareCompleted -= onPrepared;
+                    // 在 Hide() 进 StopCoroutine 自己之前把句柄抹掉，避免对正在执行的协程做无意义停止。
+                    _playCoroutine = null;
+                    Hide();
+                    yield break;
+                }
+
                 yield return null;
             }
 
@@ -242,11 +270,13 @@ namespace APP.Pomodoro.View
                 int target = Mathf.Max(1, Mathf.RoundToInt(videoFps));
                 Application.targetFrameRate = target;
                 _frameRateOverridden = true;
-                Debug.Log($"[VideoCompletionOverlay] PrepareAndShowCoroutine：targetFrameRate {_originalTargetFrameRate} -> {target}（视频源 {videoFps:F2} fps）");
+                Debug.Log(
+                    $"[VideoCompletionOverlay] PrepareAndShowCoroutine：targetFrameRate {_originalTargetFrameRate} -> {target}（视频源 {videoFps:F2} fps）");
             }
             else
             {
-                Debug.LogWarning($"[VideoCompletionOverlay] PrepareAndShowCoroutine：未取到视频帧率（player.frameRate={videoFps}），跳过帧率切换");
+                Debug.LogWarning(
+                    $"[VideoCompletionOverlay] PrepareAndShowCoroutine：未取到视频帧率（player.frameRate={videoFps}），跳过帧率切换");
             }
 
             Debug.Log("[VideoCompletionOverlay] PrepareAndShowCoroutine：Prepare 完成，调 Play()");
@@ -324,7 +354,95 @@ namespace APP.Pomodoro.View
             }
 
             RestoreMonitorIfMoved();
+            RestoreClickThroughAfterVideo();
             RestoreUIRoots();
+            ClearStaleInputFocus();
+
+            // 广播给 PanelView 强制重算 hidden：视频期间窗口可能失焦，PanelView 的
+            // RefreshVisibility 依赖 IsAppFocused/AnyPinned 等 BindableProperty 变化触发；
+            // 若这些值在视频前后没变化，display=default 之后面板仍会挂着 pp-hidden。
+            this.SendEvent(new E_VideoOverlayClosed());
+        }
+
+        /// <summary>
+        /// 视频播放期间禁用 UniWindowController 的点击穿透：
+        /// 整个 RawImage 铺满屏幕、画面像素也包含半透明区域，若继续按 Opacity 自动判定，
+        /// 透明像素会被穿透到桌面，导致用户无法点击 Skip 关闭视频。直接禁掉自动判定并把
+        /// isClickThrough 强制为 false，Hide 时再恢复原值（默认 true，恢复 alpha 自动判定）。
+        /// </summary>
+        private void DisableClickThroughForVideo()
+        {
+            if (_uwc == null)
+            {
+                _uwc = FindAnyObjectByType<UniWindowController>();
+            }
+
+            if (_uwc == null)
+            {
+                Debug.Log("[VideoCompletionOverlay] DisableClickThrough：未找到 UniWindowController，跳过");
+                return;
+            }
+
+            _hitTestEnabledBeforeVideo = _uwc.isHitTestEnabled;
+            _clickThroughBeforeVideo = _uwc.isClickThrough;
+            _uwc.isHitTestEnabled = false;
+            _uwc.isClickThrough = false;
+            Debug.Log(
+                $"[VideoCompletionOverlay] DisableClickThrough：isHitTestEnabled {_hitTestEnabledBeforeVideo} -> false，isClickThrough {_clickThroughBeforeVideo} -> false");
+        }
+
+        private void RestoreClickThroughAfterVideo()
+        {
+            // 两个 nullable 标志在 Disable 入口同时被写、在这里同时被清，所以以 isHitTestEnabled 那条为闸门即可。
+            if (!_hitTestEnabledBeforeVideo.HasValue) return;
+
+            bool restoreHitTest = _hitTestEnabledBeforeVideo.Value;
+            bool restoreClickThrough = _clickThroughBeforeVideo ?? false;
+            _hitTestEnabledBeforeVideo = null;
+            _clickThroughBeforeVideo = null;
+
+            if (_uwc == null) return;
+            _uwc.isHitTestEnabled = restoreHitTest;
+            _uwc.isClickThrough = restoreClickThrough;
+            Debug.Log(
+                $"[VideoCompletionOverlay] RestoreClickThrough：isHitTestEnabled→{restoreHitTest}，isClickThrough→{restoreClickThrough}");
+        }
+
+        /// <summary>
+        /// 视频播放期间用户点击的目标可能是覆盖层 UGUI Skip Button 或被 display=None 的 UIDocument 焦点元素，
+        /// Hide/RestoreUIRoots 之后这些焦点持有者已经不接受输入，但 EventSystem.currentSelectedGameObject
+        /// 和 UI Toolkit 各 panel 的 focusController.focusedElement 仍可能停在旧引用上，造成下一次用户点击
+        /// 番茄钟设置面板的 TextField 时键盘事件被错误路由。这里显式清空两侧的"残留焦点"，让下一次点击
+        /// 进入干净的新焦点获取流程。
+        /// </summary>
+        private void ClearStaleInputFocus()
+        {
+            EventSystem es = EventSystem.current;
+            if (es != null && es.currentSelectedGameObject != null)
+            {
+                Debug.Log(
+                    $"[VideoCompletionOverlay] ClearStaleInputFocus：清掉 EventSystem.selected={es.currentSelectedGameObject.name}");
+                es.SetSelectedGameObject(null);
+            }
+
+            UIDocument[] docs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            for (int i = 0; i < docs.Length; i++)
+            {
+                UIDocument doc = docs[i];
+                if (doc == null) continue;
+                VisualElement root = doc.rootVisualElement;
+                if (root == null || root.panel == null) continue;
+                FocusController fc = root.focusController;
+                if (fc == null) continue;
+                Focusable focused = fc.focusedElement;
+                if (focused == null) continue;
+                Debug.Log(
+                    $"[VideoCompletionOverlay] ClearStaleInputFocus：Blur '{doc.name}' 上的 focusedElement={focused.GetType().Name}");
+                if (focused is VisualElement ve)
+                {
+                    ve.Blur();
+                }
+            }
         }
 
         private void SwitchToForegroundMonitorIfNeeded()
@@ -339,7 +457,8 @@ namespace APP.Pomodoro.View
             int monitorCount = UniWindowController.GetMonitorCount();
             if (targetIndex >= monitorCount)
             {
-                Debug.LogWarning($"[VideoCompletionOverlay] SwitchToForegroundMonitor：原生返回 index={targetIndex} 越界 (UniWindow monitorCount={monitorCount})，跳过切屏");
+                Debug.LogWarning(
+                    $"[VideoCompletionOverlay] SwitchToForegroundMonitor：原生返回 index={targetIndex} 越界 (UniWindow monitorCount={monitorCount})，跳过切屏");
                 return;
             }
 
@@ -356,7 +475,8 @@ namespace APP.Pomodoro.View
             // 期间不能污染用户的持久化偏好。
             winSys.PreviewMoveToMonitor(targetIndex);
             _monitorIndexBeforeVideo = currentIndex;
-            Debug.Log($"[VideoCompletionOverlay] SwitchToForegroundMonitor：临时从 monitor={currentIndex} 切到前台 monitor={targetIndex}");
+            Debug.Log(
+                $"[VideoCompletionOverlay] SwitchToForegroundMonitor：临时从 monitor={currentIndex} 切到前台 monitor={targetIndex}");
         }
 
         private void RestoreMonitorIfMoved()
@@ -411,7 +531,8 @@ namespace APP.Pomodoro.View
                     };
                     element.style.display = DisplayStyle.None;
                     _hiddenRootStates.Add(state);
-                    Debug.Log($"[VideoCompletionOverlay] HideUIRoots：'{root.name}' 走 UIDocument display=None（原 display={state.OriginalDisplay.value}）");
+                    Debug.Log(
+                        $"[VideoCompletionOverlay] HideUIRoots：'{root.name}' 走 UIDocument display=None（原 display={state.OriginalDisplay.value}）");
                 }
                 else
                 {
@@ -423,7 +544,8 @@ namespace APP.Pomodoro.View
                     };
                     root.SetActive(false);
                     _hiddenRootStates.Add(state);
-                    Debug.Log($"[VideoCompletionOverlay] HideUIRoots：'{root.name}' 无 UIDocument，回退 SetActive(false)（原 active={state.OriginalActive}）");
+                    Debug.Log(
+                        $"[VideoCompletionOverlay] HideUIRoots：'{root.name}' 无 UIDocument，回退 SetActive(false)（原 active={state.OriginalActive}）");
                 }
             }
         }
@@ -445,12 +567,14 @@ namespace APP.Pomodoro.View
                 if (state.Element != null)
                 {
                     state.Element.style.display = state.OriginalDisplay;
-                    Debug.Log($"[VideoCompletionOverlay] RestoreUIRoots：恢复 '{state.Root.name}' display={state.OriginalDisplay.value}");
+                    Debug.Log(
+                        $"[VideoCompletionOverlay] RestoreUIRoots：恢复 '{state.Root.name}' display={state.OriginalDisplay.value}");
                 }
                 else
                 {
                     state.Root.SetActive(state.OriginalActive);
-                    Debug.Log($"[VideoCompletionOverlay] RestoreUIRoots：恢复 '{state.Root.name}' active={state.OriginalActive}");
+                    Debug.Log(
+                        $"[VideoCompletionOverlay] RestoreUIRoots：恢复 '{state.Root.name}' active={state.OriginalActive}");
                 }
             }
 

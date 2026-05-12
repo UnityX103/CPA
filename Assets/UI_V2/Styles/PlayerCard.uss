@@ -36,31 +36,49 @@
 /* ── D3ZIc: pc-content-stack vertical gap:12 ──────────────
    设计稿中间层：drqFB > D3ZIc > [head, divider, footer, pin]
    无 padding：pin 按钮 absolute 坐标 (110,50) 基于此容器计算
-   flex-grow:1 + width:100% 让它完全填满 pc-root 的 content-area
+   ⚠ 不要用 flex-grow:1：那会把 stack 高度钉死在 pc-root content-area
+   (66px = 94 - 14*2)，Yoga 会强行 shrink head/nameCol 把 name+badge 压扁。
+   Pencil D3ZIc 是 fit_content 高度 ≈72px（snapshot 显示），溢出 6px 由
+   pc-root 的 overflow:hidden 裁切，行为一致。
    ─────────────────────────────────────────────────────── */
 .pc-content-stack {
     flex-direction: column;
-    flex-grow: 1;
     width: 100%;
+    flex-shrink: 0;
 }
 
 /* ── tyyE3: head row align-center fill ─────────────────── */
 /* gap: 10 → pc-time-row margin-left:10px                   */
+/* min-height:38 + flex-shrink:0 → Pencil 中 head=34，Unity Label
+   会比 Pencil 文字稍高（14→16），保留 38 才能完整放下 name+gap+badge。
+   不指定 min-height，Yoga 会把 head 压成 pill 高度(~22)，name 看不到。 */
 .pc-head {
     flex-direction: row;
     align-items: center;
     width: 100%;
+    min-height: 38px;
+    flex-shrink: 0;
+}
+
+/* nameCol 在 head 内必须能拿到完整高度才能纵向堆 name+badge；
+   显式 height + flex-shrink:0 防止 head 横向不足时把 nameCol 挤成 0 宽，
+   min-width:0 让 flex 默认 min-content 不撑爆，超出仍由 name/badge 自身溢出展示 */
+.pc-name-col {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 0;
+    height: 38px;
+    min-width: 0;
 }
 
 /* ── MHhxc: nameCol vertical fill gap:4 ─────────────────── */
 /* gap: 4 → pc-name margin-bottom:4px                        */
-.pc-name-col {
-    flex-direction: column;
-    flex-grow: 1;
-    flex-shrink: 1;
-}
+/* 旧位置：见下方 .pc-head 块后面合并定义 */
 
 /* ── 1JKIJ: name 56×14  fontSize:14 bold #5B4636 ────────── */
+/* Pencil 中 name 56 > nameCol 47 = partially clipped，但 Pencil 渲染器
+   默认 overflow visible，所以 4 个中文字完整显示。Unity 这里也允许溢出，
+   交由 pc-root overflow:hidden 兜底（不会越过卡片边界）。 */
 .pc-name {
     font-size: 14px;
     -unity-font-style: bold;
@@ -68,25 +86,26 @@
     -unity-text-align: upper-left;
     -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
     margin-bottom: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* ── jtlhD: phaseBadge 57×16  cornerRadius:999 → 16/2=8px ── */
 /* padding: [3,8] → top/bottom:3px, left/right:8px            */
 /* gap: 5 → dot margin-right:5px                              */
+/* flex-shrink:0 + 移除 overflow:hidden → 与 Pencil 一致允许溢出 nameCol，
+   "● 专注中" 完整可见，超出卡片部分由 pc-root overflow:hidden 兜底 */
 .pc-phase-badge {
     flex-direction: row;
     align-items: center;
     align-self: flex-start;
+    flex-shrink: 0;
     padding-top: 3px;
     padding-bottom: 3px;
     padding-left: 8px;
     padding-right: 8px;
     border-radius: 8px;
     background-color: rgb(209, 95, 61);
-    overflow: hidden;
 }
 
 /* ── bI6eO: dot 6×6 ellipse white  cornerRadius:6/2=3px ── */
@@ -118,69 +137,22 @@
     margin-left: 10px;
 }
 
-/* ── sNd3p: keyCounterPill cornerRadius:999 → ~22/2=12px ─────
-   padding: [4,8] → top/bottom:4px, left/right:8px
-   gap: 5 → keyBadge margin-right:5px
-   stroke: #EFDCCD 1px
-   设计语义：白色 keyBadge（按键名）+ 计数 (#A28B79 11/700)
-   ──────────────────────────────────────────────────────────── */
+/* ── pc-key-counter-pill: TemplateContainer 包装类 ──────────
+   组件内部视觉由 KeyCounterPill.uss 的 .comp-key-counter-pill 负责。
+   这里只保留 wrapper 行为：fit-content（不占用整个 head 行宽度）+ 隐藏控制。
+   ⚠ 不要再放 background/padding/border：那些是 .comp-key-counter-pill 的样式，
+   重复加会让外层 TemplateContainer 渲染出一个空的二层 pill，并把 .pc-name-col 挤成 0 宽 → 名字+badge 文字不显示
+   显式 grow=0 + basis=auto + align-self=flex-start 三件套，确保 TemplateContainer 不会被 flex 算法分配额外空间也不沿交叉轴拉伸 */
 .pc-key-counter-pill {
-    flex-direction: row;
-    align-items: center;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-    border-radius: 12px;
-    background-color: rgb(255, 243, 234);
-    border-width: 1px;
-    border-color: rgb(239, 220, 205);
+    flex-grow: 0;
     flex-shrink: 0;
-    overflow: hidden;
+    flex-basis: auto;
+    align-self: flex-start;
 }
 
 /* 远端没标记同步按键时整 pill 隐藏，让 PlayerCardController 通过 toggle 这个 class 控制可见 */
 .pc-key-counter-pill--hidden {
     display: none;
-}
-
-/* ── k7z58: keyBadge cornerRadius:3 padding[1,4] white #EFDCCD ── */
-.pc-key-badge {
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 4px;
-    padding-right: 4px;
-    border-radius: 3px;
-    background-color: rgb(255, 255, 255);
-    border-width: 1px;
-    border-color: rgb(239, 220, 205);
-    margin-right: 5px;
-    flex-shrink: 0;
-}
-
-/* ── tvUJz: keyLabel "Space" Maoken 9/700 #5B4636 ───────── */
-.pc-key-label {
-    font-size: 9px;
-    -unity-font-style: bold;
-    color: rgb(91, 70, 54);
-    -unity-text-align: middle-center;
-    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
-    white-space: nowrap;
-}
-
-/* ── w8eEg: keyCount "47" Maoken 11/700 #A28B79 ──────────
-   保留 .pc-rounds 别名（PlayerCardView 通过 Q<Label>("pc-rounds") 写入）
-   两个选择器同款样式，二选一会被命中 */
-.pc-key-count,
-.pc-rounds {
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: rgb(162, 139, 121);
-    -unity-text-align: middle-center;
-    -unity-font-definition: url("project://database/Assets/UI_V2/Font/MaokenAssortedSans SDF.asset");
 }
 
 /* ── cnbrI: divider 1px #F3E3D3 ──────────────────────────── */
@@ -196,11 +168,13 @@
 /* ── cwbeK: footer row align-center fill ─────────────────── */
 /* divider 结束 y:61，gap:12 → margin-top:12px                */
 /* gap: 6 → footIcon margin-right:6px                         */
+/* flex-shrink:0 → 同 .pc-head，防止 footer 被 yoga 压扁 */
 .pc-footer {
     flex-direction: row;
     align-items: center;
     width: 100%;
     margin-top: 12px;
+    flex-shrink: 0;
 }
 
 /* ── KN0dX: footIcon 13×13  lucide app-window  #B5A49A ──── */

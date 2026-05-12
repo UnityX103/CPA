@@ -1,5 +1,8 @@
 using APP.Network.System;
 using APP.Pomodoro;
+using APP.Pomodoro.Model;
+using APP.Pomodoro.System;
+using APP.Settings.Command;
 using APP.Settings.Model;
 using QFramework;
 using UnityEngine;
@@ -14,13 +17,15 @@ namespace APP.Pomodoro.Controller
     ///   新 id → 克隆 KeyCounterPill 模板插入；丢失 id → 移除；已有 id → 仅刷新 KeyLabel / PressCount。
     /// 面板自身的生命周期（entries.Count==0 时整面板销毁）由 DeskWindowController 负责，
     /// 本控制器不订阅 EntriesRevision——由 DeskWindow 在 RebuildInputCounterPanels 中调用 SyncPillsFromEntries。
-    /// pin 按钮目前只切视觉态；app 信息走 IActiveAppSystem.Changed。
+    /// pin 按钮发送 Cmd_SetInputCounterPanelPinned，订阅 IBindingKeyModel.PanelPinned 双向同步视觉态，
+    /// 该值经 WindowVisibilityCoordinatorSystem.AnyPinned 聚合驱动窗口置顶；app 信息走 IActiveAppSystem.Changed。
     /// </summary>
     public sealed class InputCounterPanelController : IController
     {
         IArchitecture IBelongToArchitecture.GetArchitecture() => GameApp.Interface;
 
         private const string UnpinnedClass     = "icp-pin-btn--unpinned";
+        private const string HiddenClass       = "icp-hidden";
         private const string PillStackedClass  = "icp-key-counter--stacked";
         private const string PillBaseClass     = "icp-key-counter";
 
@@ -34,13 +39,19 @@ namespace APP.Pomodoro.Controller
         // 真到 Changed handler 就一定有事要做。少一份字段，省一份签名碰撞静默 stale 的风险。
         private VisualTreeAsset _pillTemplate;
         private IActiveAppSystem _activeApp;
-        private bool _pinned = true;
+        private IBindingKeyModel _bindingModel;
+        private IGameModel _gameModel;
+        private IWindowVisibilityCoordinatorSystem _visibilityCoord;
+
+        // Bindable 订阅句柄统一收口：Dispose 时一次性取消，避免面板重建后残留旧订阅。
+        private readonly global::System.Collections.Generic.List<IUnRegister> _unRegisters =
+            new global::System.Collections.Generic.List<IUnRegister>();
 
         // entryId → pill 元素；pill 内部有 key-counter-pill-key / -count Label
         private readonly global::System.Collections.Generic.Dictionary<string, VisualElement> _pillsById =
             new global::System.Collections.Generic.Dictionary<string, VisualElement>();
 
-        public bool IsPinnedForTest => _pinned;
+        public bool IsPinnedForTest => _bindingModel != null && _bindingModel.PanelPinned.Value;
         public int PillCountForTest => _pillsById.Count;
         public VisualElement GetPillForTest(string entryId) =>
             _pillsById.TryGetValue(entryId ?? string.Empty, out var pill) ? pill : null;
@@ -59,6 +70,9 @@ namespace APP.Pomodoro.Controller
             _appIcon      = root.Q<VisualElement>("icp-app-icon");
 
             _activeApp = this.GetSystem<IActiveAppSystem>();
+            _bindingModel = this.GetModel<IBindingKeyModel>();
+            _gameModel = this.GetModel<IGameModel>();
+            _visibilityCoord = this.GetSystem<IWindowVisibilityCoordinatorSystem>();
 
             // 清空 UXML 自带的占位 pill；后续 SyncPillsFromEntries 重建。
             _pillList?.Clear();
@@ -74,8 +88,24 @@ namespace APP.Pomodoro.Controller
                 _pinBtn.RegisterCallback<PointerUpEvent>(evt =>
                 {
                     evt.StopPropagation();
-                    SetPinned(!_pinned);
+                    if (_bindingModel == null) return;
+                    this.SendCommand(new Cmd_SetInputCounterPanelPinned(!_bindingModel.PanelPinned.Value));
                 });
+            }
+
+            // 订阅 Model.PanelPinned 同步 pin 按钮视觉，并联动 RefreshVisibility。
+            // 与 PomodoroPanelView / PlayerCardController 同套规则：失焦 + 其它面板置顶 + 本面板未置顶 → 隐藏。
+            if (_bindingModel != null)
+            {
+                _unRegisters.Add(_bindingModel.PanelPinned.RegisterWithInitValue(OnPanelPinnedChanged));
+            }
+            if (_visibilityCoord != null)
+            {
+                _unRegisters.Add(_visibilityCoord.AnyPinned.RegisterWithInitValue(_ => RefreshVisibility()));
+            }
+            if (_gameModel != null)
+            {
+                _unRegisters.Add(_gameModel.IsAppFocused.RegisterWithInitValue(_ => RefreshVisibility()));
             }
         }
 
@@ -86,6 +116,14 @@ namespace APP.Pomodoro.Controller
         {
             if (_activeApp != null) _activeApp.Changed -= SyncFromActiveApp;
             _activeApp = null;
+            for (int i = 0; i < _unRegisters.Count; i++)
+            {
+                _unRegisters[i]?.UnRegister();
+            }
+            _unRegisters.Clear();
+            _bindingModel = null;
+            _gameModel = null;
+            _visibilityCoord = null;
             DestroyAppIconTexture();
             _appIcon = null;
             _pillsById.Clear();
@@ -95,7 +133,11 @@ namespace APP.Pomodoro.Controller
             _appLabel = null;
         }
 
-        internal void TogglePinForTest() => SetPinned(!_pinned);
+        internal void TogglePinForTest()
+        {
+            if (_bindingModel == null) return;
+            this.SendCommand(new Cmd_SetInputCounterPanelPinned(!_bindingModel.PanelPinned.Value));
+        }
         internal void OverrideActiveAppForTest(string name) =>
             SyncFromActiveApp(new ActiveAppSnapshot(name, string.Empty, null));
 
@@ -238,10 +280,33 @@ namespace APP.Pomodoro.Controller
             else Object.DestroyImmediate(tex);
         }
 
-        private void SetPinned(bool pinned)
+        private void OnPanelPinnedChanged(bool pinned)
         {
-            _pinned = pinned;
+            ApplyPinnedClass(pinned);
+            RefreshVisibility();
+        }
+
+        private void ApplyPinnedClass(bool pinned)
+        {
             _pinBtn?.EnableInClassList(UnpinnedClass, !pinned);
+        }
+
+        /// <summary>
+        /// 与 PomodoroPanelView / PlayerCardController 同套 S2 隐藏规则：
+        /// 失焦(IsAppFocused=false) + 全局有面板置顶(AnyPinned=true) + 本面板未置顶(PanelPinned=false) → display:none。
+        /// 任一条件不满足则恢复显示。
+        /// </summary>
+        internal void RefreshVisibility()
+        {
+            if (_root == null || _bindingModel == null || _gameModel == null || _visibilityCoord == null)
+            {
+                return;
+            }
+            bool focused = _gameModel.IsAppFocused.Value;
+            bool anyPinned = _visibilityCoord.AnyPinned.Value;
+            bool thisPinned = _bindingModel.PanelPinned.Value;
+            bool hidden = !thisPinned && !focused && anyPinned;
+            _root.EnableInClassList(HiddenClass, hidden);
         }
     }
 }

@@ -63,4 +63,12 @@ namespace APP.Pomodoro.Event
             VideoPath = videoPath;
         }
     }
+
+    /// <summary>
+    /// 视频覆盖层 Hide 完成后广播（自然结束 / 用户点击关闭 / 错误回退都会发）。
+    /// 用于让面板视图层（PomodoroPanelView 等）在视频结束的瞬间主动重算 hidden class，
+    /// 防止"视频期间窗口失焦 + AnyPinned 真值"组合让面板继续挂着 pp-hidden、
+    /// 直到下次 IsAppFocused/AnyPinned 自然变化才恢复——用户体感为"UI 很久才回来"。
+    /// </summary>
+    public readonly struct E_VideoOverlayClosed { }
 }

@@ -19,7 +19,9 @@
       "Bash(git remote *)",
       "mcp__context7__resolve-library-id",
       "mcp__plugin_oh-my-claudecode_t__state_write",
-      "mcp__unity-mcp__Unity_Grep"
+      "mcp__unity-mcp__Unity_Grep",
+      "Skill(codex:adversarial-review)",
+      "mcp__unity-mcp__Unity_GetConsoleLogs"
     ],
     "deny": [
       "Bash(rm *)",

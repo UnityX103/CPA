@@ -165,8 +165,26 @@ namespace APP.Pomodoro.Controller
             _keyCounterPill.EnableInClassList(PillHiddenClass, !hasBinding);
             if (!hasBinding) return;
             if (_keyCounterPillKey != null)   _keyCounterPillKey.text   = keyLabel;
-            if (_keyCounterPillCount != null) _keyCounterPillCount.text = pressCount.ToString();
+            if (_keyCounterPillCount != null)
+            {
+                _keyCounterPillCount.text = FormatPressCount(pressCount);
+                // 实际计数在 tooltip 里保留：UI Toolkit Editor 模式悬停可见，
+                // Runtime 触屏拿不到但至少有可访问性回路（screen reader / UI debugger）。
+                _keyCounterPillCount.tooltip = pressCount.ToString();
+            }
             PlayerCardView.ApplyKeyBadgeMouseClass(_keyCounterPillBadge, keyLabel);
+        }
+
+        // 卡片宽 153，KeyCounterPill 在 head 右侧的可用宽度（"远端玩家"中文名 + 10px gap + pill）
+        // 只能容下 2 位数字字符。3 位起 count Label 会把整个 pill 撑出卡片右边界，被 pc-root overflow:hidden 裁掉
+        // （codex review B 点；早期尝试过 "99+" 但 3 字符同样溢出）。
+        // 保守做法：>=100 视觉收敛到 "99"，配合 tooltip 保留真实数值；语义上视为"99 或更多"。
+        private const int PressCountDisplayCap = 99;
+        private static string FormatPressCount(int pressCount)
+        {
+            if (pressCount < 0) return "0";
+            if (pressCount >= PressCountDisplayCap) return PressCountDisplayCap.ToString();
+            return pressCount.ToString();
         }
 
         private void ApplyAppIcon(string bundleId)
